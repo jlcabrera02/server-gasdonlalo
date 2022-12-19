@@ -1,14 +1,15 @@
-import incumplimientoM from "../models/incumplimiento.model";
+import bombaM from "../models/bomba.model";
 import mayusxPalabra from "./formatearText.controller";
 
 const controller = {};
 
 controller.find = async (req, res) => {
   try {
-    let response = await incumplimientoM.find();
+    let response = await bombaM.find();
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ success: false });
   }
 };
@@ -16,7 +17,7 @@ controller.find = async (req, res) => {
 controller.findOne = async (req, res) => {
   try {
     const { id } = req.params;
-    let response = await incumplimientoM.findOne(id);
+    let response = await bombaM.findOne(id);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -26,12 +27,14 @@ controller.findOne = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
-    const { incumplimiento, departamento } = req.body;
+    const { numBomba, bomba, estacionServicio } = req.body;
+
     const cuerpo = {
-      incumplimiento: mayusxPalabra(incumplimiento),
-      iddepartamento: Number(departamento),
+      num_bomba: numBomba,
+      bomba,
+      idestacion_servicio: Number(estacionServicio),
     };
-    let response = await incumplimientoM.insert(cuerpo);
+    let response = await bombaM.insert(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -43,13 +46,15 @@ controller.insert = async (req, res) => {
 controller.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { incumplimiento, departamento } = req.body;
+    const { numBomba, bomba, estacionServicio } = req.body;
+
     const cuerpo = {
-      incumplimiento: mayusxPalabra(incumplimiento),
-      iddepartamento: Number(departamento),
+      num_bomba: numBomba,
+      bomba,
+      idestacion_servicio: Number(estacionServicio),
     };
     const data = [cuerpo, id];
-    let response = await incumplimientoM.update(data);
+    let response = await bombaM.update(data);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -61,7 +66,7 @@ controller.update = async (req, res) => {
 controller.delete = async (req, res) => {
   try {
     const { id } = req.params;
-    let response = await incumplimientoM.delete(id);
+    let response = await bombaM.delete(id);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {

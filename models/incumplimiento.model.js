@@ -1,14 +1,17 @@
 import connection from "./connection";
+import resErr from "../respuestas/error.respuestas";
+const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
 model.find = () =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT incumplimiento.*, departamento.departamento FROM departamento, incumplimiento WHERE incumplimiento.departamento = departamento.iddepartamento";
+      "SELECT incumplimiento.*, departamento.departamento FROM departamento, incumplimiento WHERE incumplimiento.iddepartamento = departamento.iddepartamento";
 
     connection.query(sql, (err, res) => {
-      if (err) return reject(err);
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
     });
   });
@@ -19,7 +22,8 @@ model.findOne = (id) =>
       "SELECT incumplimiento.*, departamento.departamento FROM departamento, incumplimiento WHERE incumplimiento.departamento = departamento.iddepartamento AND idincumplimiento = ?";
 
     connection.query(sql, id, (err, res) => {
-      if (err) return reject(err);
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
     });
   });
@@ -29,7 +33,8 @@ model.insert = (data) =>
     let sql = "INSERT INTO incumplimiento SET ?";
 
     connection.query(sql, data, (err, res) => {
-      if (err) return reject(err);
+      if (err) return reject(errorDB());
+      if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });
@@ -39,7 +44,8 @@ model.update = (data) =>
     let sql = "UPDATE incumplimiento SET ? WHERE idincumplimiento = ?";
 
     connection.query(sql, data, (err, res) => {
-      if (err) return reject(err);
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });
@@ -49,7 +55,8 @@ model.delete = (id) =>
     let sql = "DELETE FROM incumplimiento WHERE idincumplimiento = ?";
 
     connection.query(sql, id, (err, res) => {
-      if (err) return reject(err);
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });

@@ -9,6 +9,16 @@ const connection = mysql2.createConnection({
   password: process.env.PASSWORD_DB,
   database: process.env.DATABASE,
   port: process.env.PORT_DB,
+  multipleStatements: true,
+  typeCast: function (field, next) {
+    if (field.type === "BIT" && field.length === 1) {
+      let bytes = field.buffer();
+      if (!bytes) return false;
+      return bytes[0] === 1;
+    } else {
+      return next();
+    }
+  },
 });
 
 //funcion que me ayuda a abrir la conexion, ejecutar una callback y cerrar la conexion a la base de datos;

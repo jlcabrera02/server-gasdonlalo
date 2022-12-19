@@ -1,0 +1,12 @@
+import router from "express-promise-router";
+import checklistBomba from "../controllers/checklistBomba.controller";
+
+const route = router();
+
+route.get("/:year/:month", checklistBomba.find);
+// route.get("/:id", checklistBomba.findOne);
+route.post("/", checklistBomba.insert);
+route.put("/:id", checklistBomba.update);
+route.delete("/:id", checklistBomba.delete);
+
+export default route;

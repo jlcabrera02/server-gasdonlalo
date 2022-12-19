@@ -1,4 +1,6 @@
 import connection from "./connection";
+import resErr from "../respuestas/error.respuestas";
+const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
@@ -7,7 +9,8 @@ model.find = () =>
     let sql = "SELECT * FROM departamento";
 
     connection.query(sql, (err, res) => {
-      if (err) return reject(err);
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
     });
   });
@@ -17,7 +20,8 @@ model.insert = (data) =>
     let sql = "INSERT INTO departamento VALUES (null, ?)";
 
     connection.query(sql, data, (err, res) => {
-      if (err) return reject(err);
+      if (err) return reject(errorDB());
+      if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });
@@ -28,7 +32,8 @@ model.update = (data) =>
       "UPDATE departamento SET departamento = ? WHERE iddepartamento = ?";
 
     connection.query(sql, data, (err, res) => {
-      if (err) return reject(err);
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });
@@ -38,7 +43,8 @@ model.delete = (id) =>
     let sql = "DELETE FROM departamento WHERE iddepartamento = ?";
 
     connection.query(sql, id, (err, res) => {
-      if (err) return reject(err);
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });

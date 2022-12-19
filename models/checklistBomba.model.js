@@ -4,11 +4,30 @@ const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
-model.find = () =>
+model.find = (fecha) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM estacion_servicio";
+    let sql = `SELECT 
+    em.idempleado,
+    CONCAT(em.nombre, " ", em.apellido_paterno, " ", em.apellido_materno) AS nombre_completo,
+    ch.isla_limpia,
+    ch.aceites_completos,
+    ch.fecha as fecha_db
+FROM
+    (SELECT 
+        *
+    FROM
+        empleado
+    WHERE
+        status = 1 AND iddepartamento = 1) AS em
+        LEFT OUTER JOIN
+    (SELECT 
+        *
+    FROM
+        checklist_bomba
+    WHERE
+        fecha = ?) AS ch ON ch.idempleado_entrante = em.idempleado`;
 
-    connection.query(sql, (err, res) => {
+    connection.query(sql, fecha, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -17,7 +36,7 @@ model.find = () =>
 
 model.findOne = (id) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM monto_faltante";
+    let sql = "SELECT * from checklist_bomba WHERE idchecklist_bomba = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -28,7 +47,7 @@ model.findOne = (id) =>
 
 model.insert = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "INSERT INTO estacion_servicio SET ?";
+    let sql = "INSERT INTO checklist_bomba SET ?";
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -39,7 +58,7 @@ model.insert = (data) =>
 
 model.update = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "UPDATE estacion_servicio SET ? WHERE idestacion_servicio = ?";
+    let sql = "UPDATE checklist_bomba SET ? WHERE idchecklist_bomba = ?";
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -50,7 +69,7 @@ model.update = (data) =>
 
 model.delete = (id) =>
   new Promise((resolve, reject) => {
-    let sql = "DELETE FROM estacion_servicio WHERE idestacion_servicio = ?";
+    let sql = "DELETE FROM checklist_bomba WHERE idchecklist_bomba = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());

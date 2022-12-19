@@ -7,6 +7,7 @@ route.get("/", empleado.find);
 route.get("/:id", empleado.findOne);
 route.post("/", empleado.insert);
 route.put("/:id", empleado.update);
-route.delete("/:id", empleado.delete);
+route.put("/alta/:id", empleado.update);
+route.delete("/baja/:id", empleado.delete);
 
 export default route;

@@ -5,11 +5,11 @@ const controller = {};
 
 controller.find = async (req, res) => {
   try {
-    let response = await empleadoM.find();
-    console.log(response);
+    const { departamento } = req.query;
+    let response = await empleadoM.find(departamento);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    res.status(400).json({ success: false });
+    res.status(err.code).json(err);
   }
 };
 
@@ -20,7 +20,7 @@ controller.findOne = async (req, res) => {
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    res.status(400).json({ success: false });
+    res.status(err.code).json(err);
   }
 };
 
@@ -32,15 +32,18 @@ controller.insert = async (req, res) => {
       nombre: mayusxPalabra(nombre),
       apellido_paterno: mayusxPalabra(apellidoPaterno),
       apellido_materno: mayusxPalabra(apellidoMaterno),
-      departamento: Number(departamento),
+      iddepartamento: Number(departamento),
     };
 
     let response = await empleadoM.insert(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
-    res.status(400).json({ success: false });
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
   }
 };
 
@@ -53,7 +56,7 @@ controller.update = async (req, res) => {
       nombre: mayusxPalabra(nombre),
       apellido_paterno: mayusxPalabra(apellidoPaterno),
       apellido_materno: mayusxPalabra(apellidoMaterno),
-      departamento: Number(departamento),
+      iddepartamento: Number(departamento),
     };
 
     const data = [cuerpo, id];
@@ -62,7 +65,7 @@ controller.update = async (req, res) => {
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
-    res.status(400).json({ success: false });
+    res.status(err.code).json(err);
   }
 };
 
@@ -74,7 +77,7 @@ controller.delete = async (req, res) => {
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
-    res.status(400).json({ success: false });
+    res.status(err.code).json(err);
   }
 };
 

@@ -6,7 +6,7 @@ const model = {};
 
 model.find = () =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM estacion_servicio";
+    let sql = "SELECT * from bomba";
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
@@ -17,7 +17,7 @@ model.find = () =>
 
 model.findOne = (id) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM monto_faltante";
+    let sql = "SELECT * from bomba WHERE idestacion_servicio = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -28,7 +28,7 @@ model.findOne = (id) =>
 
 model.insert = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "INSERT INTO estacion_servicio SET ?";
+    let sql = "INSERT INTO bomba SET ?";
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -39,7 +39,7 @@ model.insert = (data) =>
 
 model.update = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "UPDATE estacion_servicio SET ? WHERE idestacion_servicio = ?";
+    let sql = "UPDATE bomba SET ? WHERE idbomba = ?";
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -50,7 +50,7 @@ model.update = (data) =>
 
 model.delete = (id) =>
   new Promise((resolve, reject) => {
-    let sql = "DELETE FROM estacion_servicio WHERE idestacion_servicio = ?";
+    let sql = "DELETE FROM bomba WHERE idbomba = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());

@@ -1,13 +1,10 @@
-import montoFaltanteM from "../models/montoFaltante.model";
-import empleadoM from "../models/empleado.model";
-import resErr from "../respuestas/error.respuestas";
-const { errorMath } = resErr;
+import evaluacionUniformeM from "../models/evaluacionUniforme.model";
 
 const controller = {};
 
 controller.find = async (req, res) => {
   try {
-    let response = await montoFaltanteM.find();
+    let response = await evaluacionUniformeM.find();
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -19,11 +16,12 @@ controller.find = async (req, res) => {
   }
 };
 
-controller.findXSemana = async (req, res) => {
+controller.findPeriodoMensual = async (req, res) => {
   try {
     const { year, month } = req.params;
-    let fecha = `${year}-${month}-01`;
-    let response = await montoFaltanteM.findXSemana(fecha);
+    const fecha = `${year}-${month}-01`;
+    let response = await evaluacionUniformeM.findPeriodoMensual(fecha);
+    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -34,11 +32,13 @@ controller.findXSemana = async (req, res) => {
   }
 };
 
-controller.findCantidadXMes = async (req, res) => {
+controller.findPeriodoMensualEmpleado = async (req, res) => {
   try {
-    const { year, month } = req.params;
-    let fecha = `${year}-${month}-01`;
-    let response = await montoFaltanteM.findCantidadXMes(fecha);
+    const { year, month, id } = req.params;
+    const fecha = `${year}-${month}-01`;
+    const cuerpo = [id, fecha, fecha];
+    let response = await evaluacionUniformeM.findPeriodoMensualEmpleado(cuerpo);
+    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -49,14 +49,14 @@ controller.findCantidadXMes = async (req, res) => {
   }
 };
 
-controller.findXMesXEmpleado = async (req, res) => {
+controller.findPeriodoMensualEmpleados = async (req, res) => {
   try {
-    const { year, month } = req.params;
-    let fecha = `${year}-${month}-01`;
-    let response = await montoFaltanteM.findXMesXEmpleado(fecha);
+    const { year, month, id } = req.params;
+    const fecha = `${year}-${month}-01`;
+    let response = await evaluacionUniformeM.findPeriodoMensualEmpleados(fecha);
+    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -67,12 +67,12 @@ controller.findXMesXEmpleado = async (req, res) => {
 
 controller.findOne = async (req, res) => {
   try {
-    const { id } = req.params;
-    let response = await montoFaltanteM.findOne(id);
+    const { id, fecha } = req.params;
+    const cuerpo = [id, fecha];
+    let response = await evaluacionUniformeM.findOne(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -83,22 +83,18 @@ controller.findOne = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
-    const { cantidad, fecha, empleado } = req.body;
+    const { empleado, fecha, evaluaciones } = req.body;
     const cuerpo = {
-      cantidad: Number(cantidad),
+      empleado: Number(empleado),
       fecha,
-      idempleado: Number(empleado),
+      evaluaciones,
     };
-    let buscar = await empleadoM.findOne(empleado);
-    if (buscar[0].iddepartamento != 1)
-      throw errorMath(
-        "El empleado no pertenece al departamento de despachadores"
-      );
-    let response = await montoFaltanteM.insert(cuerpo);
+    let a = await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro
+    console.log(a);
+    let response = await evaluacionUniformeM.insert(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -109,15 +105,13 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { cantidad, fecha, empleado } = req.body;
-    const cuerpo = {
-      cantidad: Number(cantidad),
-      fecha,
-      idempleado: Number(empleado),
-    };
-    const data = [cuerpo, id];
-    let response = await montoFaltanteM.update(data);
+    const { empleado, evaluaciones } = req.body;
+    const cuerpo = evaluaciones.map((el) => [
+      el.cumple,
+      el.idEvaluacionUniforme,
+      empleado,
+    ]);
+    let response = await evaluacionUniformeM.update(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -131,8 +125,9 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
-    const { id } = req.params;
-    let response = await montoFaltanteM.delete(id);
+    const { empleado, fecha } = req.body;
+    const cuerpo = [empleado, fecha];
+    let response = await evaluacionUniformeM.delete(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
