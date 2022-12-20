@@ -1,4 +1,4 @@
-import pasosDM from "../models/pasosDespachar.model";
+import listaReM from "../models/listaRecursosDespachador.model";
 
 const controller = {};
 
@@ -6,7 +6,7 @@ controller.findEvaluacionesXempleado = async (req, res) => {
   try {
     const { year, month, quincena, id } = req.params;
     const fecha = `${year}-${month}-01`;
-    const pasos = await pasosDM.findCantidadEvaluacionesXempleado({
+    const pasos = await listaReM.findCantidadEvaluacionesXempleado({
       id: id,
       fecha: fecha,
       quincena: Number(quincena),
@@ -20,7 +20,7 @@ controller.findEvaluacionesXempleado = async (req, res) => {
     };
 
     for (let i = 0; i < pasos.length; i++) {
-      const data = await pasosDM.findEvaluacionXempleado([
+      const data = await listaReM.findEvaluacionXempleado([
         id,
         pasos[i].create_time,
       ]);
@@ -38,9 +38,9 @@ controller.findEvaluacionesXempleado = async (req, res) => {
   }
 };
 
-controller.findPasos = async (req, res) => {
+controller.findRecursos = async (req, res) => {
   try {
-    const response = await pasosDM.findPasos();
+    const response = await listaReM.findRecursos();
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
@@ -54,16 +54,16 @@ controller.findPasos = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
-    const { empleado, fecha, pasos } = req.body;
+    const { empleado, fecha, recursos } = req.body;
 
-    const cuerpo = pasos.map((el) => [
+    const cuerpo = recursos.map((el) => [
       fecha,
       empleado,
-      el.idPaso,
+      el.idRecurso,
+      3,
       el.evaluacion,
     ]);
-    //await pasosDM.verificar([cuerpo.fecha, cuerpo.idempleado]); //recoleccion efectivo
-    let response = await pasosDM.insert(cuerpo);
+    let response = await listaReM.insert(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -82,7 +82,7 @@ controller.update = async (req, res) => {
 
     const cuerpo = [evaluacion, idEvaluacion, empleado];
 
-    let response = await pasosDM.update(cuerpo);
+    let response = await listaReM.update(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -99,7 +99,7 @@ controller.delete = async (req, res) => {
     const { idEvaluacion, longitud, id } = req.params;
     const idSecond = Number(idEvaluacion) + Number(longitud);
 
-    let response = await pasosDM.delete([
+    let response = await listaReM.delete([
       Number(idEvaluacion),
       idSecond,
       Number(id),

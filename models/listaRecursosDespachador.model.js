@@ -49,10 +49,10 @@ WHERE pd.idpaso_despachar = evd.idpaso_despachar AND emp.idempleado = evd.idempl
     });
   });
 
-model.findPasos = (id) =>
+model.findRecursos = (id) =>
   new Promise((resolve, reject) => {
     //funcion validara si el empleado ya tiene recoleccion de efectivo de ese dia
-    let sql = "SELECT * FROM paso_despachar";
+    let sql = "SELECT * FROM recurso";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -65,7 +65,7 @@ model.verificar = (data) =>
   new Promise((resolve, reject) => {
     //funcion validara si el empleado ya tiene recoleccion de efectivo de ese dia
     let sql =
-      "SELECT * from recoleccion_efectivo WHERE fecha = ? AND idempleado = ?";
+      "SELECT * FROM recoleccion_efectivo WHERE fecha = ? AND idempleado = ?";
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -77,7 +77,7 @@ model.verificar = (data) =>
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =
-      "INSERT INTO evaluacion_despachar (fecha, idempleado, idpaso_despachar, evaluacion) VALUES ?";
+      "INSERT INTO recurso_despachador (fecha, idempleado, idrecurso, idrecurso_minimo, evaluacion) VALUES ?";
 
     connection.query(sql, [data], (err, res) => {
       console.log(err);

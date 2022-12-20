@@ -15,6 +15,8 @@ const connection = mysql2.createConnection({
       let bytes = field.buffer();
       if (!bytes) return false;
       return bytes[0] === 1;
+    } else if (field.type === "NEWDECIMAL") {
+      return Number(field.string());
     } else {
       return next();
     }

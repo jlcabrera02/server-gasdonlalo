@@ -7,6 +7,7 @@ import estacionServiceRouter from "./estacionService.router";
 import checklistBombaRouter from "./checklistBomba.router";
 import bombaRouter from "./bomba.router";
 import evaluacionUniformeRouter from "./evaluacionUniforme.router";
+import listaRecursosDespachadorRouter from "./listaRecursosDespachador.router";
 import recoleccionEfectivoRouter from "./recoleccionEfectivo.router";
 import pasosDespacharRouter from "./pasosDespachar.router";
 
@@ -22,5 +23,6 @@ route.use("/bomba", bombaRouter);
 route.use("/pasos-despachar", pasosDespacharRouter);
 route.use("/recoleccion-efectivo", recoleccionEfectivoRouter);
 route.use("/evaluacion-uniforme", evaluacionUniformeRouter);
+route.use("/lista-recurso-despachador", listaRecursosDespachadorRouter);
 
 export default route;

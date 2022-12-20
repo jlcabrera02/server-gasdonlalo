@@ -4,6 +4,7 @@ import evaluacionUniforme from "../controllers/evaluacionUniforme.controller";
 const route = router();
 
 route.get("/", evaluacionUniforme.find);
+route.get("/get-pasos", evaluacionUniforme.findPasosEvUniforme);
 route.get(
   "/periodo-mensual/:year/:month",
   evaluacionUniforme.findPeriodoMensual

@@ -16,30 +16,25 @@ model.find = () =>
     });
   });
 
-model.findXSemana = (fecha) =>
+//Me obtiene todo los empleados que han tenido un monto faltante del mes --Importante para la obtencion de los montos faltantes por semanas
+model.findEmpleadosXmes = (fecha) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT 
-    em.idempleado,
-    CONCAT(em.nombre, " ", em.apellido_paterno, " ", em.apellido_materno) AS nombre_completo,
-    SUM(mf.cantidad) AS total,
-    CASE
-    WHEN DAY(fecha) < 7 THEN 1
-    WHEN DAY(fecha) >= 7 AND DAY(fecha) <= 14 THEN 2
-    WHEN DAY(fecha) >= 15 AND DAY(fecha) <= 21 THEN 3
-    WHEN DAY(fecha) >= 22 AND DAY(fecha) <= 28 THEN 4
-    WHEN DAY(fecha) >= 29 AND DAY(fecha) <= 31 THEN 5
-    END AS semana
-FROM
-    monto_faltante AS mf,
-    empleado AS em
-WHERE
-    fecha BETWEEN ? AND LAST_DAY(?) AND
-    em.idempleado = mf.idempleado
-GROUP BY mf.idempleado, semana ORDER BY semana`;
+    let sql = `SELECT emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.iddepartamento FROM monto_faltante AS mf, empleado AS emp WHERE mf.idempleado = emp.idempleado AND mf.fecha BETWEEN ? AND LAST_DAY(?) GROUP BY emp.idempleado ORDER BY emp.idempleado`;
 
     connection.query(sql, [fecha, fecha], (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findXSemana = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT SUM(mf.cantidad) AS total FROM monto_faltante AS mf WHERE mf.idempleado = ? AND mf.fecha BETWEEN ? AND ? GROUP BY mf.idempleado`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return resolve(false); //Este false no se debe tocar porque es clave para la funcion
       if (res) return resolve(res);
     });
   });

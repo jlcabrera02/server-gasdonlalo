@@ -31,6 +31,17 @@ ORDER BY ev_un.fecha`;
     });
   });
 
+model.findPasosEvUniforme = () =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM cumplimiento_uniforme`;
+
+    connection.query(sql, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.findPeriodoMensual = (fecha) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT 

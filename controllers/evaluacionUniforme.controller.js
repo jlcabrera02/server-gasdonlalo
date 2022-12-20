@@ -16,6 +16,20 @@ controller.find = async (req, res) => {
   }
 };
 
+controller.findPasosEvUniforme = async (req, res) => {
+  try {
+    let response = await evaluacionUniformeM.findPasosEvUniforme();
+    console.log(response);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.findPeriodoMensual = async (req, res) => {
   try {
     const { year, month } = req.params;
