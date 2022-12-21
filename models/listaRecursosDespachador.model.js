@@ -6,43 +6,22 @@ const { errorDB, sinRegistro, sinCambios, datosExistentes } = resErr;
 const model = {};
 
 //Obtiene todas las evaluaciones del empleado por el periodo de tiempo que le asignemos
-model.findCantidadEvaluacionesXempleado = (data) =>
+model.findListRecursosXmes = (fecha) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT emp.idempleado,
-CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo,
-emp.status, evd.create_time, evd.fecha FROM evaluacion_despachar evd, empleado emp WHERE evd.idempleado = emp.idempleado AND 
-emp.idempleado = ? AND evd.fecha BETWEEN ? AND ? GROUP BY evd.create_time, evd.fecha`;
+    let sql = `SELECT CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, sum(evaluacion) AS total, pm.puntaje AS limite_minimo, MONTHNAME(?) AS mes, emp.idempleado FROM recurso_despachador rd, empleado emp, puntaje_minimo pm WHERE emp.idempleado = rd.idempleado AND rd.idrecurso_minimo = pm.idpuntaje_minimo AND rd.fecha BETWEEN ? AND LAST_DAY(?) GROUP BY emp.idempleado`;
 
-    let quincena = data.quincena;
-
-    if (quincena > 1) {
-      sql = mysql.format(sql, [
-        data.id,
-        mysql.raw(`DATE_ADD('${data.fecha}', INTERVAL 15 DAY)`),
-        mysql.raw(`LAST_DAY('${data.fecha}')`),
-      ]);
-    } else {
-      sql = mysql.format(sql, [
-        data.id,
-        data.fecha,
-        mysql.raw(`DATE_ADD('${data.fecha}', INTERVAL 14 DAY)`),
-      ]);
-    }
-
-    connection.query(sql, (err, res) => {
+    connection.query(sql, [fecha, fecha, fecha], (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
     });
   });
 
-model.findEvaluacionXempleado = (data) =>
+model.findListRecursosXmesXidEmpleado = (id, fecha) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT evd.idevaluacion_despachar, evd.fecha, evd.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, evd.evaluacion, pd.idpaso_despachar, pd.paso 
-FROM evaluacion_despachar evd, paso_despachar pd, empleado emp
-WHERE pd.idpaso_despachar = evd.idpaso_despachar AND emp.idempleado = evd.idempleado AND emp.idempleado = ? AND evd.create_time = ? ORDER BY evd.create_time`;
+    let sql = `SELECT rd.idrecurso_despachador, rd.fecha, emp.idempleado, rd.idrecurso, r.recurso, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, rd.evaluacion FROM recurso_despachador rd, empleado emp, puntaje_minimo pm, recurso r WHERE emp.idempleado = rd.idempleado AND rd.idrecurso_minimo = pm.idpuntaje_minimo AND r.idrecurso = rd.idrecurso AND emp.idempleado = ? AND rd.fecha BETWEEN ? AND LAST_DAY(?)`;
 
-    connection.query(sql, data, (err, res) => {
+    connection.query(sql, [id, fecha, fecha], (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -58,19 +37,6 @@ model.findRecursos = (id) =>
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
-    });
-  });
-
-model.verificar = (data) =>
-  new Promise((resolve, reject) => {
-    //funcion validara si el empleado ya tiene recoleccion de efectivo de ese dia
-    let sql =
-      "SELECT * FROM recoleccion_efectivo WHERE fecha = ? AND idempleado = ?";
-
-    connection.query(sql, data, (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return resolve(true);
-      if (res) return reject(datosExistentes());
     });
   });
 
@@ -90,7 +56,7 @@ model.insert = (data) =>
 model.update = (data) =>
   new Promise((resolve, reject) => {
     let sql =
-      "UPDATE evaluacion_despachar SET evaluacion = ? WHERE idevaluacion_despachar = ? AND idempleado = ?";
+      "UPDATE recurso_despachador SET evaluacion = ? WHERE idrecurso_despachador = ? AND idempleado = ?";
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());

@@ -30,6 +30,17 @@ model.findOne = (id) =>
     });
   });
 
+model.validarDepartamento = (id) =>
+  new Promise((resolve, reject) => {
+    let sql = "SELECT iddepartamento FROM empleado WHERE idempleado = ?";
+
+    connection.query(sql, id, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res[0].iddepartamento);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql = "INSERT INTO empleados SET ?";

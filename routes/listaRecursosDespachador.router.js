@@ -3,13 +3,14 @@ import listaRecursosDespachador from "../controllers/listaRecursosDespachador.co
 
 const route = router();
 
-// route.get(
-//   "/:year/:month/:quincena/:id",
-//   listaRecursosDespachador.findEvaluacionesXempleado
-// );
+route.get("/:year/:month", listaRecursosDespachador.findListRecursosXmes);
+route.get(
+  "/:year/:month/:id",
+  listaRecursosDespachador.findListRecursosXmesXidEmpleado
+);
 route.get("/get-recurso", listaRecursosDespachador.findRecursos);
 route.post("/", listaRecursosDespachador.insert);
-// route.put("/:idEvaluacion", listaRecursosDespachador.update);
+route.put("/:idRecurso", listaRecursosDespachador.update);
 // route.delete(
 //   "/eliminar/:idEvaluacion/:longitud/:id",
 //   listaRecursosDespachador.delete

@@ -10,6 +10,7 @@ import evaluacionUniformeRouter from "./evaluacionUniforme.router";
 import listaRecursosDespachadorRouter from "./listaRecursosDespachador.router";
 import recoleccionEfectivoRouter from "./recoleccionEfectivo.router";
 import pasosDespacharRouter from "./pasosDespachar.router";
+import salidaNoConformeRouter from "./salidaNoConforme.router";
 
 const route = Router();
 
@@ -24,5 +25,6 @@ route.use("/pasos-despachar", pasosDespacharRouter);
 route.use("/recoleccion-efectivo", recoleccionEfectivoRouter);
 route.use("/evaluacion-uniforme", evaluacionUniformeRouter);
 route.use("/lista-recurso-despachador", listaRecursosDespachadorRouter);
+route.use("/salida-no-conforme", salidaNoConformeRouter);
 
 export default route;

@@ -2,32 +2,28 @@ import listaReM from "../models/listaRecursosDespachador.model";
 
 const controller = {};
 
-controller.findEvaluacionesXempleado = async (req, res) => {
+controller.findListRecursosXmes = async (req, res) => {
   try {
-    const { year, month, quincena, id } = req.params;
-    const fecha = `${year}-${month}-01`;
-    const pasos = await listaReM.findCantidadEvaluacionesXempleado({
-      id: id,
-      fecha: fecha,
-      quincena: Number(quincena),
-    });
-
-    let acumular = {
-      idempleado: pasos[0].idempleado,
-      nombre_completo: pasos[0].nombre_completo,
-      status: pasos[0].status,
-      evaluaciones: [],
-    };
-
-    for (let i = 0; i < pasos.length; i++) {
-      const data = await listaReM.findEvaluacionXempleado([
-        id,
-        pasos[i].create_time,
-      ]);
-      acumular.evaluaciones.push(data);
+    const { year, month } = req.params;
+    let fecha = `${year}-${month}-01`;
+    const response = await listaReM.findListRecursosXmes(fecha);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
     }
+  }
+};
 
-    res.status(200).json({ success: true, response: acumular });
+controller.findListRecursosXmesXidEmpleado = async (req, res) => {
+  try {
+    const { year, month, id } = req.params;
+    let fecha = `${year}-${month}-01`;
+    const response = await listaReM.findListRecursosXmesXidEmpleado(id, fecha);
+    res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
     if (!err.code) {
@@ -77,12 +73,12 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
-    const { idEvaluacion } = req.params;
+    const { idRecurso } = req.params;
     const { evaluacion, empleado } = req.body;
 
-    const cuerpo = [evaluacion, idEvaluacion, empleado];
+    const cuerpo = [evaluacion, idRecurso, empleado];
 
-    let response = await listaReM.update(cuerpo);
+    const response = await listaReM.update(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
