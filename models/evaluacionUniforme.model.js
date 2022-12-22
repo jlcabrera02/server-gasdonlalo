@@ -183,7 +183,6 @@ WHERE
     TABLEB.idempleado = TABLED.idempleado`;
 
     connection.query(sql, [fecha, fecha, fecha, fecha], (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -240,7 +239,6 @@ model.validarNoDuplicadoXQuincena = (data) =>
         [data.empleado]
       );
     }
-    console.log(sql);
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return resolve(false);
@@ -263,7 +261,6 @@ model.insert = (data) =>
       2,
       el.cumple,
     ]);
-    console.log(iterar, "As");
 
     let sql = "INSERT INTO evaluacion_uniforme VALUES ?";
 

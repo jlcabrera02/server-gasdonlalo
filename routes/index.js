@@ -11,6 +11,7 @@ import listaRecursosDespachadorRouter from "./listaRecursosDespachador.router";
 import recoleccionEfectivoRouter from "./recoleccionEfectivo.router";
 import pasosDespacharRouter from "./pasosDespachar.router";
 import salidaNoConformeRouter from "./salidaNoConforme.router";
+import ordenTrabajoCalidad from "./ordenTrabajoCalidad.router";
 
 const route = Router();
 
@@ -26,5 +27,6 @@ route.use("/recoleccion-efectivo", recoleccionEfectivoRouter);
 route.use("/evaluacion-uniforme", evaluacionUniformeRouter);
 route.use("/lista-recurso-despachador", listaRecursosDespachadorRouter);
 route.use("/salida-no-conforme", salidaNoConformeRouter);
+route.use("/orden-trabajo-calidad", ordenTrabajoCalidad);
 
 export default route;
