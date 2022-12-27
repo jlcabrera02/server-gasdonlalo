@@ -42,6 +42,8 @@ controller.findXSemana = async (req, res) => {
           ]);
           semanas.push({
             semana: i + 1,
+            diaEmpiezo: firstFecha,
+            diaTermino: lasFecha,
             cantidad: !response ? 0 : response[0].total,
           });
         } else {
@@ -54,6 +56,8 @@ controller.findXSemana = async (req, res) => {
           ]);
           semanas.push({
             semana: i + 1,
+            diaEmpiezo: firstFecha,
+            diaTermino: lasFecha,
             cantidad: !response ? 0 : response[0].total,
           });
         }
@@ -107,9 +111,10 @@ controller.findCantidadXMes = async (req, res) => {
 
 controller.findXMesXEmpleado = async (req, res) => {
   try {
-    const { year, month } = req.params;
+    const { year, month, idEmpleado } = req.params;
+    let idempleado = idEmpleado || null;
     let fecha = `${year}-${month}-01`;
-    let response = await montoFaltanteM.findXMesXEmpleado(fecha);
+    let response = await montoFaltanteM.findXMesXEmpleado(fecha, idempleado);
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);

@@ -13,23 +13,24 @@ controller.find = async (req, res) => {
   }
 };
 
-controller.findOne = async (req, res) => {
+controller.findXIdepartamento = async (req, res) => {
   try {
-    const { id } = req.params;
-    let response = await incumplimientoM.findOne(id);
+    const { idDepartamento } = req.params;
+    console.log(idDepartamento);
+    let response = await incumplimientoM.findXIdepartamento(idDepartamento);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ success: false });
   }
 };
 
 controller.insert = async (req, res) => {
   try {
-    const { incumplimiento, departamento } = req.body;
+    const { incumplimiento } = req.body;
     const cuerpo = {
       incumplimiento: mayusxPalabra(incumplimiento),
-      iddepartamento: Number(departamento),
     };
     let response = await incumplimientoM.insert(cuerpo);
     console.log(response);
@@ -43,10 +44,9 @@ controller.insert = async (req, res) => {
 controller.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { incumplimiento, departamento } = req.body;
+    const { incumplimiento } = req.body;
     const cuerpo = {
       incumplimiento: mayusxPalabra(incumplimiento),
-      iddepartamento: Number(departamento),
     };
     const data = [cuerpo, id];
     let response = await incumplimientoM.update(data);

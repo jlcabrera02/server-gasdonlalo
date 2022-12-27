@@ -1,5 +1,6 @@
 import connection from "./connection";
 import resErr from "../respuestas/error.respuestas";
+import mysql from "mysql2";
 const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
@@ -65,21 +66,46 @@ model.findOne = (id) =>
     });
   });
 
-model.findXMesXEmpleado = (fecha) =>
+model.findXMesXEmpleado = (fecha, idEmpleado) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT
-    em.idempleado,
-	CONCAT(em.nombre, " ", em.apellido_paterno, " ", em.apellido_materno) AS nombre_completo,
-    SUM(mf.cantidad) AS total_mes_empleado
-FROM
-    monto_faltante AS mf,
-    empleado AS em
-WHERE
-    fecha BETWEEN ? AND LAST_DAY(?) AND
-    em.idempleado = mf.idempleado
-GROUP BY mf.idempleado`;
+    let sql;
+    if (idEmpleado) {
+      sql = mysql.format(
+        `SELECT
+      em.idempleado,
+      CONCAT(em.nombre, " ", em.apellido_paterno, " ", em.apellido_materno) AS nombre_completo,
+      em.iddepartamento, 
+      mf.fecha,
+      mf.cantidad
+      FROM
+      monto_faltante AS mf,
+      empleado AS em
+      WHERE
+      fecha BETWEEN ? AND LAST_DAY(?) AND
+      em.idempleado = mf.idempleado AND em.idempleado = ?`,
+        [fecha, fecha, idEmpleado]
+      );
+    } else {
+      sql = mysql.format(
+        `SELECT
+      em.idempleado,
+      em.nombre, 
+      em.apellido_paterno,
+      em.apellido_materno,
+      SUM(mf.cantidad) AS total_mes_empleado
+      FROM
+      monto_faltante AS mf,
+      empleado AS em
+      WHERE
+      fecha BETWEEN ? AND LAST_DAY(?) AND
+      em.idempleado = mf.idempleado
+      GROUP BY mf.idempleado ORDER BY em.nombre`,
+        [fecha, fecha]
+      );
+    }
 
-    connection.query(sql, [fecha, fecha], (err, res) => {
+    connection.query(sql, (err, res) => {
+      //console.log(res);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);

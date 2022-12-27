@@ -18,7 +18,7 @@ FROM
     FROM
         empleado
     WHERE
-        status = 1 AND iddepartamento = 1) AS em
+        estatus = 1 AND iddepartamento = 1) AS em
         LEFT OUTER JOIN
     (SELECT 
         *
@@ -50,6 +50,7 @@ model.insert = (data) =>
     let sql = "INSERT INTO checklist_bomba SET ?";
 
     connection.query(sql, data, (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

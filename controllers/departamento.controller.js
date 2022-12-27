@@ -5,9 +5,8 @@ const controller = {};
 
 controller.find = async (req, res) => {
   try {
-    let departamentos = await departamentoM.find();
-    console.log(departamentos);
-    res.status(200).json({ success: true });
+    let response = await departamentoM.find();
+    res.status(200).json({ success: true, response });
   } catch (err) {
     res.status(400).json({ success: false });
   }
@@ -16,8 +15,8 @@ controller.find = async (req, res) => {
 controller.insert = async (req, res) => {
   try {
     const departamento = mayusxPalabra(req.body.departamento);
-    let departamentos = await departamentoM.insert(departamento);
-    console.log(departamentos);
+    let response = await departamentoM.insert(departamento);
+    console.log(response);
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
@@ -30,8 +29,8 @@ controller.update = async (req, res) => {
     const { id } = req.params;
     const departamento = mayusxPalabra(req.body.departamento);
     const data = [departamento, id];
-    let departamentos = await departamentoM.update(data);
-    console.log(departamentos);
+    let response = await departamentoM.update(data);
+    console.log(response);
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
@@ -42,8 +41,8 @@ controller.update = async (req, res) => {
 controller.delete = async (req, res) => {
   try {
     const { id } = req.params;
-    let departamentos = await departamentoM.delete(id);
-    console.log(departamentos);
+    let response = await departamentoM.delete(id);
+    console.log(response);
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);

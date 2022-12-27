@@ -13,7 +13,7 @@ FROM
         emp.idempleado,
         CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo,
         emp.iddepartamento,
-        emp.status,
+        emp.estatus,
         rc.idrecoleccion_efectivo, rc.fecha, rc.cantidad
     FROM
         (SELECT 
@@ -21,7 +21,7 @@ FROM
     FROM
         empleado
     WHERE
-        status = 1 AND iddepartamento = 1) AS emp
+        estatus = 1 AND iddepartamento = 1) AS emp
     LEFT OUTER JOIN (SELECT 
         *
     FROM
@@ -42,7 +42,7 @@ model.findAllRegistersXMonth = (fecha) =>
         emp.idempleado,
         CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo,
         emp.iddepartamento,
-        emp.status,
+        emp.estatus,
         SUM(rc.cantidad) AS cantidad_mes
     FROM
         (SELECT 
@@ -50,7 +50,7 @@ model.findAllRegistersXMonth = (fecha) =>
     FROM
         empleado
     WHERE
-        status = 1 AND iddepartamento = 1) AS emp, (SELECT 
+        estatus = 1 AND iddepartamento = 1) AS emp, (SELECT 
         *
     FROM
         recoleccion_efectivo WHERE fecha BETWEEN ? AND LAST_DAY(?)) AS rc WHERE emp.idempleado = rc.idempleado GROUP BY idempleado`;
@@ -67,7 +67,7 @@ model.findAllRegistersXMonth = (fecha) =>
         emp.idempleado,
         CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo,
         emp.iddepartamento,
-        emp.status,
+        emp.estatus,
         SUM(rc.cantidad) AS cantidad_mes
     FROM
         (SELECT 
@@ -75,7 +75,7 @@ model.findAllRegistersXMonth = (fecha) =>
     FROM
         empleado
     WHERE
-        status = 1 AND iddepartamento = 1) AS emp, (SELECT 
+        estatus = 1 AND iddepartamento = 1) AS emp, (SELECT 
         *
     FROM
         recoleccion_efectivo WHERE fecha BETWEEN ? AND LAST_DAY(?)) AS rc WHERE emp.idempleado = rc.idempleado GROUP BY idempleado`;

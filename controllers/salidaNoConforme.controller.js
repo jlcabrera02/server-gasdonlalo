@@ -1,7 +1,6 @@
 import salidaNoCM from "../models/salidaNoConforme.model";
 import empleadoM from "../models/empleado.model";
 import resErr from "../respuestas/error.respuestas";
-import Decimal from "decimal.js-light";
 const { errorMath } = resErr;
 
 const controller = {};
@@ -26,10 +25,24 @@ controller.findSalidasNoConformesXMesXIddepartamento = async (req, res) => {
   try {
     const { year, month, iddepartamento } = req.params;
     let fecha = `${year}-${month}-01`;
-    const response = await salidaNoCM.findSalidasNoConformesXMes(
+    const response = await salidaNoCM.findSalidasNoConformesXMesXIddepartamento(
       fecha,
       iddepartamento
     );
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+controller.findOne = async (req, res) => {
+  try {
+    const { idSalida } = req.params;
+    const response = await salidaNoCM.findOne(idSalida);
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
@@ -51,7 +64,6 @@ controller.insert = async (req, res) => {
       idEmpleadoIncumple,
       idEmpleadoAutoriza,
       idIncumplimiento,
-      idDepartamento,
     } = req.body;
 
     const cuerpo = {
@@ -63,10 +75,6 @@ controller.insert = async (req, res) => {
       idempleado_autoriza: Number(idEmpleadoAutoriza),
       idincumplimiento: Number(idIncumplimiento),
     };
-
-    let departamento = await empleadoM.validarDepartamento(idEmpleadoIncumple);
-    if (departamento != idDepartamento)
-      throw errorMath("El empleado no pertenece al departamento");
 
     let response = await salidaNoCM.insert(cuerpo);
     console.log(response);

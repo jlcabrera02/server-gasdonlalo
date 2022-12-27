@@ -60,6 +60,25 @@ controller.findTotaOTXMantenimiento = async (req, res) => {
   }
 };
 
+controller.findTotaOTXDetalladaXArea = async (req, res) => {
+  try {
+    const { year, month, idEstacionServicio, idArea } = req.params;
+    const fecha = `${year}-${month}-01`;
+
+    const cuerpo = [idEstacionServicio, idArea, fecha];
+
+    const response = await ordenTrabajoCM.findTotaOTXDetalladaXArea(cuerpo);
+    console.log(response);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.insert = async (req, res) => {
   try {
     const {

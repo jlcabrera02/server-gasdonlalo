@@ -12,6 +12,7 @@ import recoleccionEfectivoRouter from "./recoleccionEfectivo.router";
 import pasosDespacharRouter from "./pasosDespachar.router";
 import salidaNoConformeRouter from "./salidaNoConforme.router";
 import ordenTrabajoCalidad from "./ordenTrabajoCalidad.router";
+import controlDocumentosRouter from "./controlDocumentos.router";
 
 const route = Router();
 
@@ -28,5 +29,6 @@ route.use("/evaluacion-uniforme", evaluacionUniformeRouter);
 route.use("/lista-recurso-despachador", listaRecursosDespachadorRouter);
 route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/orden-trabajo-calidad", ordenTrabajoCalidad);
+route.use("/control-documento", controlDocumentosRouter);
 
 export default route;

@@ -103,8 +103,7 @@ controller.insert = async (req, res) => {
       fecha,
       evaluaciones,
     };
-    let a = await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro
-    console.log(a);
+    await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro7
     let response = await evaluacionUniformeM.insert(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });

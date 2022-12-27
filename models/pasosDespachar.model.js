@@ -10,7 +10,7 @@ model.findCantidadEvaluacionesXempleado = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT emp.idempleado,
 CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo,
-emp.status, evd.create_time, evd.fecha FROM evaluacion_despachar evd, empleado emp WHERE evd.idempleado = emp.idempleado AND 
+emp.estatus, evd.create_time, evd.fecha FROM evaluacion_despachar evd, empleado emp WHERE evd.idempleado = emp.idempleado AND 
 emp.idempleado = ? AND evd.fecha BETWEEN ? AND ? GROUP BY evd.create_time, evd.fecha`;
 
     let quincena = data.quincena;

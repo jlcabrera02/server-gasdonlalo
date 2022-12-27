@@ -4,7 +4,7 @@ import incumplimiento from "../controllers/incumplimiento.controller";
 const route = router();
 
 route.get("/", incumplimiento.find);
-route.get("/:id", incumplimiento.findOne);
+route.get("/:idDepartamento", incumplimiento.findXIdepartamento);
 route.post("/", incumplimiento.insert);
 route.put("/:id", incumplimiento.update);
 route.delete("/:id", incumplimiento.delete);

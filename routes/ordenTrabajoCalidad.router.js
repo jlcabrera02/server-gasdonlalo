@@ -14,8 +14,13 @@ route.get(
 );
 
 route.get(
-  "/buscar-area/:year/:month/:idEstacionServicio/:idMantenimiento",
+  "/buscar-mantenimiento/:year/:month/:idEstacionServicio/:idMantenimiento",
   ordenTrabajoCalidad.findTotaOTXMantenimiento
+);
+
+route.get(
+  "/buscar-area/:year/:month/:idEstacionServicio/:idArea",
+  ordenTrabajoCalidad.findTotaOTXDetalladaXArea
 );
 
 // route.get("/:id", ordenTrabajoCalidad.findOne);

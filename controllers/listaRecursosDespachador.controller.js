@@ -57,7 +57,7 @@ controller.insert = async (req, res) => {
       empleado,
       el.idRecurso,
       3,
-      el.evaluacion,
+      Number(el.evaluacion),
     ]);
     let response = await listaReM.insert(cuerpo);
     console.log(response);

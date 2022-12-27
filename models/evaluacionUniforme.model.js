@@ -107,7 +107,7 @@ model.findPeriodoMensualEmpleados = (fecha) =>
     TABLEB.apellido_paterno,
     TABLEB.apellido_materno,
     TABLEB.iddepartamento,
-    TABLEB.status,
+    TABLEB.estatus,
     TABLEB.fecha AS quincena1,
     TABLED.fecha AS quincena2
 FROM
@@ -117,7 +117,7 @@ FROM
             em.apellido_paterno,
             em.apellido_materno,
             em.iddepartamento,
-            em.status,
+            em.estatus,
             ev_un.idevaluacion_uniforme,
             ev_un.fecha,
             ev_un.quincena
@@ -127,7 +127,7 @@ FROM
     FROM
         empleado
     WHERE
-        status = 1 AND iddepartamento = 1) AS em
+        estatus = 1 AND iddepartamento = 1) AS em
     LEFT OUTER JOIN (SELECT 
         *
     FROM
@@ -151,7 +151,7 @@ FROM
             em.apellido_paterno,
             em.apellido_materno,
             em.iddepartamento,
-            em.status,
+            em.estatus,
             ev_un.idevaluacion_uniforme,
             ev_un.fecha,
             ev_un.quincena
@@ -161,7 +161,7 @@ FROM
     FROM
         empleado
     WHERE
-        status = 1 AND iddepartamento = 1) AS em
+        estatus = 1 AND iddepartamento = 1) AS em
     LEFT OUTER JOIN (SELECT 
         *
     FROM
@@ -256,15 +256,17 @@ model.insert = (data) =>
     let iterar = data.evaluaciones.map((el) => [
       null,
       data.fecha,
-      data.empleado,
-      el.idCumplimiento,
+      Number(data.empleado),
+      Number(el.idCumplimiento),
       2,
-      el.cumple,
+      Number(el.cumple),
     ]);
 
     let sql = "INSERT INTO evaluacion_uniforme VALUES ?";
 
     connection.query(sql, [iterar], (err, res) => {
+      console.log(err);
+      console.log(sql);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
