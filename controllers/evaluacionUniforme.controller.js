@@ -1,5 +1,5 @@
 import evaluacionUniformeM from "../models/evaluacionUniforme.model";
-
+import generadorId from "../assets/generadorId";
 const controller = {};
 
 controller.find = async (req, res) => {
@@ -65,12 +65,44 @@ controller.findPeriodoMensualEmpleado = async (req, res) => {
 
 controller.findPeriodoMensualEmpleados = async (req, res) => {
   try {
-    const { year, month, id } = req.params;
+    const { year, month, idEmpleado } = req.params;
     const fecha = `${year}-${month}-01`;
-    let response = await evaluacionUniformeM.findPeriodoMensualEmpleados(fecha);
-    console.log(response);
+    const cuerpo = [fecha, idEmpleado];
+    const response = [];
+    let quin1 = await evaluacionUniformeM.findPeriodoMensualEmpleadosXquincena([
+      ...cuerpo,
+      1,
+    ]);
+    let quin2 = await evaluacionUniformeM.findPeriodoMensualEmpleadosXquincena([
+      ...cuerpo,
+      2,
+    ]);
+    if (quin1.length > 0) {
+      response.push({
+        fecha: quin1[0].fecha,
+        evaluaciones: quin1,
+      });
+    } else {
+      response.push({
+        fecha: null,
+        evaluaciones: [],
+      });
+    }
+    if (quin2.length > 0) {
+      response.push({
+        fecha: quin2[0].fecha,
+        evaluaciones: quin2,
+      });
+    } else {
+      response.push({
+        fecha: null,
+        evaluaciones: [],
+      });
+    }
+
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -98,18 +130,25 @@ controller.findOne = async (req, res) => {
 controller.insert = async (req, res) => {
   try {
     const { empleado, fecha, evaluaciones } = req.body;
-    const cuerpo = {
-      empleado: Number(empleado),
+    const idGenerico = generadorId();
+    const cuerpo = evaluaciones.map((el) => [
       fecha,
-      evaluaciones,
-    };
+      Number(empleado),
+      Number(el.idCumplimiento),
+      2,
+      Number(el.cumple),
+      idGenerico,
+    ]);
+    console.log(cuerpo);
     await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro7
     let response = await evaluacionUniformeM.insert(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
+      res
+        .status(400)
+        .json({ success: false, msg: "datos no enviados correctamente" });
     } else {
       res.status(err.code).json(err);
     }

@@ -6,8 +6,7 @@ const model = {};
 
 model.find = () =>
   new Promise((resolve, reject) => {
-    let sql =
-      "SELECT incumplimiento.*, departamento.departamento FROM departamento, incumplimiento WHERE incumplimiento.iddepartamento = departamento.iddepartamento";
+    let sql = "SELECT incumplimiento FROM incumplimiento";
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
@@ -18,8 +17,9 @@ model.find = () =>
 
 model.findXIdepartamento = (id) =>
   new Promise((resolve, reject) => {
-    let sql =
-      "SELECT incumplimiento.*, departamento.departamento FROM departamento, incumplimiento WHERE incumplimiento.iddepartamento = departamento.iddepartamento AND incumplimiento.iddepartamento = ?";
+    /* let sql =
+      "SELECT incumplimiento.*, departamento.departamento FROM departamento, incumplimiento WHERE incumplimiento.iddepartamento = departamento.iddepartamento AND incumplimiento.iddepartamento = ?"; */
+    let sql = "SELECT * FROM incumplimiento";
 
     connection.query(sql, id, (err, res) => {
       console.log(err);

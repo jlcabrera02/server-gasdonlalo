@@ -2,20 +2,31 @@ import recoleccionEM from "../models/recoleccionEfectivo.model";
 
 const controller = {};
 
-controller.findAllXMonth = async (req, res) => {
+controller.findEmpleadosXMonth = async (req, res) => {
   try {
     const { year, month } = req.params;
     const dias = new Date(year, month, 0).getDate();
+    const fecha = `${year}-${month}-01`;
     const almacenar = [];
 
-    for (let i = 1; i <= dias; i++) {
-      let fecha = `${year}-${month}-${i}`;
-      let response = await recoleccionEM.findAllXMonth(fecha);
-      response = response.map((el) => ({
-        ...el,
-        fechaGenerada: fecha,
-      }));
-      almacenar.push({ fecha, data: [...response] });
+    const empleados = await recoleccionEM.findEmpleadosXMonth(fecha);
+    for (let i = 0; i < empleados.length; i++) {
+      const alm = [];
+      for (let j = 1; j <= dias; j++) {
+        let fechaB = `${year}-${month}-${j}`;
+        let cuerpo = [fechaB, empleados[i].idempleado];
+        let response = await recoleccionEM.findEmpleadosXFecha(cuerpo);
+        alm.push({
+          total_cantidad: null,
+          fecha: null,
+          ...response,
+          fechaGenerada: fechaB,
+        });
+      }
+      almacenar.push({
+        empleado: empleados[i],
+        dataFecha: alm,
+      });
     }
 
     res.status(200).json({ success: true, response: almacenar });
@@ -90,7 +101,7 @@ controller.insert = async (req, res) => {
       idempleado: Number(empleado),
       cantidad,
     };
-    await recoleccionEM.verificar([cuerpo.fecha, cuerpo.idempleado]); //recoleccion efectivo
+    //await recoleccionEM.verificar([cuerpo.fecha, cuerpo.idempleado]); //recoleccion efectivo
     let response = await recoleccionEM.insert(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });

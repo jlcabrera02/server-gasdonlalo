@@ -8,7 +8,11 @@ controller.find = async (req, res) => {
     let response = await departamentoM.find();
     res.status(200).json({ success: true, response });
   } catch (err) {
-    res.status(400).json({ success: false });
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
   }
 };
 
@@ -19,8 +23,11 @@ controller.insert = async (req, res) => {
     console.log(response);
     res.status(200).json({ success: true });
   } catch (err) {
-    console.log(err);
-    res.status(400).json({ success: false });
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
   }
 };
 
@@ -33,8 +40,11 @@ controller.update = async (req, res) => {
     console.log(response);
     res.status(200).json({ success: true });
   } catch (err) {
-    console.log(err);
-    res.status(400).json({ success: false });
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
   }
 };
 
@@ -45,8 +55,11 @@ controller.delete = async (req, res) => {
     console.log(response);
     res.status(200).json({ success: true });
   } catch (err) {
-    console.log(err);
-    res.status(400).json({ success: false });
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
   }
 };
 

@@ -3,7 +3,7 @@ import recoleccionEfectivo from "../controllers/recoleccionEfectivo.controller";
 
 const route = router();
 
-route.get("/general/:year/:month", recoleccionEfectivo.findAllXMonth);
+route.get("/general/:year/:month", recoleccionEfectivo.findEmpleadosXMonth);
 route.get("/:year/:month", recoleccionEfectivo.findAllRegistersXMonth);
 route.get(
   "/empleado/:year/:month/:id",

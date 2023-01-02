@@ -4,35 +4,27 @@ const { errorDB, sinRegistro, sinCambios, datosExistentes } = resErr;
 
 const model = {};
 
-model.findAllXMonth = (fecha) =>
+model.findEmpleadosXMonth = (fecha) =>
+  //Extrae todo los empleados que han obtenido recoleccion en el mes
   new Promise((resolve, reject) => {
-    let sql = `SELECT 
-    *
-FROM
-    (SELECT 
-        emp.idempleado,
-        CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo,
-        emp.iddepartamento,
-        emp.estatus,
-        rc.idrecoleccion_efectivo, rc.fecha, rc.cantidad
-    FROM
-        (SELECT 
-        *
-    FROM
-        empleado
-    WHERE
-        estatus = 1 AND iddepartamento = 1) AS emp
-    LEFT OUTER JOIN (SELECT 
-        *
-    FROM
-        recoleccion_efectivo
-    WHERE
-        fecha = ?) AS rc ON emp.idempleado = rc.idempleado) AS TABLEA`;
+    let sql = `SELECT rc.idempleado, SUM(rc.cantidad) AS total_cantidad_mes, COUNT(rc.idempleado) AS total_de_recolecciones, emp.nombre, emp.apellido_paterno, emp.apellido_materno, CONCAT(nombre, " ", emp.apellido_paterno," ", emp.apellido_materno) AS nombre_completo FROM recoleccion_efectivo rc, empleado emp WHERE emp.idempleado = rc.idempleado AND rc.fecha BETWEEN ? AND LAST_DAY(?) GROUP BY emp.idempleado ORDER BY emp.nombre`;
 
-    connection.query(sql, fecha, (err, res) => {
+    connection.query(sql, [fecha, fecha], (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
+    });
+  });
+
+model.findEmpleadosXFecha = (data) =>
+  //Extrae todo un empleado por una fecha especifica
+  new Promise((resolve, reject) => {
+    let sql = `SELECT rc.idrecoleccion_efectivo, rc.fecha, SUM(rc.cantidad) AS total_cantidad FROM recoleccion_efectivo rc, empleado emp WHERE emp.idempleado = rc.idempleado AND rc.fecha = ? AND rc.idempleado = ? GROUP BY rc.idempleado`;
+    //[fecha, idempleado]
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
     });
   });
 

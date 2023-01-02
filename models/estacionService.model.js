@@ -15,6 +15,20 @@ model.find = () =>
     });
   });
 
+model.findTurnos = (id) =>
+  new Promise((resolve, reject) => {
+    let sql = "SELECT * FROM turno WHERE idestacion_servicio = ?";
+
+    connection.query(sql, id, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1)
+        return reject(
+          sinRegistro("No se encontraron turno para esta estación")
+        );
+      if (res) return resolve(res);
+    });
+  });
+
 model.findOne = (id) =>
   new Promise((resolve, reject) => {
     let sql = "SELECT * FROM monto_faltante";

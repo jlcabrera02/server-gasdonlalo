@@ -4,7 +4,7 @@ const respuesta = {};
 respuesta.errorMath = (msg, response) => {
   return {
     success: false,
-    code: 200,
+    code: 400,
     msg: msg || "El elemento no pertenece a la categoría",
     response,
   };
@@ -13,7 +13,7 @@ respuesta.errorMath = (msg, response) => {
 respuesta.datosExistentes = (msg = null, response) => {
   return {
     success: false,
-    code: 200,
+    code: 400,
     msg: msg || "Los datos ingresados ya existen",
     response,
   };
@@ -23,7 +23,7 @@ respuesta.errorDB = (response) => {
   return {
     success: false,
     code: 400,
-    msg: "Error en la conexion hacia la base de datos",
+    msg: "Error en la conexión no has enviados los datos completos",
     response,
   };
 };
@@ -31,7 +31,7 @@ respuesta.errorDB = (response) => {
 respuesta.sinRegistro = (response = []) => {
   return {
     success: false,
-    code: 202,
+    code: 400,
     msg: "No hay registros",
     response,
   };
@@ -40,7 +40,7 @@ respuesta.sinRegistro = (response = []) => {
 respuesta.sinCambios = (response) => {
   return {
     success: false,
-    code: 202,
+    code: 400,
     msg: "No se detecto ningún cambio",
     response,
   };
@@ -49,7 +49,7 @@ respuesta.sinCambios = (response) => {
 respuesta.sinEliminar = (response) => {
   return {
     success: false,
-    code: 202,
+    code: 400,
     msg: "No se elimino ningún registro",
     response,
   };

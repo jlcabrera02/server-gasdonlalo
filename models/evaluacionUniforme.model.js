@@ -5,6 +5,9 @@ const { errorDB, sinRegistro, sinCambios, datosExistentes } = resErr;
 
 const model = {};
 
+const tiempoLocal = (date) =>
+  new Date(new Date(date).getTime() + new Date().getTimezoneOffset() * 60000);
+
 model.find = () =>
   new Promise((resolve, reject) => {
     let sql = `SELECT 
@@ -99,94 +102,18 @@ ORDER BY fecha`;
     });
   });
 
-model.findPeriodoMensualEmpleados = (fecha) =>
+model.findPeriodoMensualEmpleadosXquincena = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT 
-    TABLEB.idempleado,
-    TABLEB.nombre,
-    TABLEB.apellido_paterno,
-    TABLEB.apellido_materno,
-    TABLEB.iddepartamento,
-    TABLEB.estatus,
-    TABLEB.fecha AS quincena1,
-    TABLED.fecha AS quincena2
-FROM
-    (SELECT 
-        em.idempleado,
-            em.nombre,
-            em.apellido_paterno,
-            em.apellido_materno,
-            em.iddepartamento,
-            em.estatus,
-            ev_un.idevaluacion_uniforme,
-            ev_un.fecha,
-            ev_un.quincena
-    FROM
-        (SELECT 
-        *
-    FROM
-        empleado
-    WHERE
-        estatus = 1 AND iddepartamento = 1) AS em
-    LEFT OUTER JOIN (SELECT 
-        *
-    FROM
-        (SELECT 
-        *,
-            SUM(cumple) AS total,
-            CASE
-                WHEN DAY(fecha) < 15 THEN 1
-                WHEN DAY(fecha) > 14 THEN 2
-            END AS quincena
-    FROM
-        evaluacion_uniforme
-    WHERE
-        fecha BETWEEN ? AND LAST_DAY(?)
-    GROUP BY fecha , idempleado) AS TABLEA
-    WHERE
-        quincena = 1) AS ev_un ON em.idempleado = ev_un.idempleado) AS TABLEB,
-    (SELECT 
-        em.idempleado,
-            em.nombre,
-            em.apellido_paterno,
-            em.apellido_materno,
-            em.iddepartamento,
-            em.estatus,
-            ev_un.idevaluacion_uniforme,
-            ev_un.fecha,
-            ev_un.quincena
-    FROM
-        (SELECT 
-        *
-    FROM
-        empleado
-    WHERE
-        estatus = 1 AND iddepartamento = 1) AS em
-    LEFT OUTER JOIN (SELECT 
-        *
-    FROM
-        (SELECT 
-        *,
-            SUM(cumple) AS total,
-            CASE
-                WHEN DAY(fecha) < 15 THEN 1
-                WHEN DAY(fecha) > 14 THEN 2
-            END AS quincena
-    FROM
-        evaluacion_uniforme
-    WHERE
-        fecha BETWEEN ? AND LAST_DAY(?)
-    GROUP BY fecha , idempleado) AS TABLEC
-    WHERE
-        quincena = 2) AS ev_un ON em.idempleado = ev_un.idempleado) AS TABLED
-WHERE
-    TABLEB.idempleado = TABLED.idempleado`;
+    let sql = `SELECT * FROM (SELECT ev.*, emp.nombre, emp.apellido_paterno, emp.apellido_materno, cu.cumplimiento, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM  evaluacion_uniforme ev, empleado emp, cumplimiento_uniforme cu WHERE ev.idempleado = emp.idempleado AND cu.idcumplimiento_uniforme = ev.idcumplimiento_uniforme AND fecha BETWEEN ? AND LAST_DAY(?) AND emp.date_baja IS NULL OR emp.date_baja > ?) AS evaluaciones WHERE idempleado = ? AND quincena = ? ORDER BY idcumplimiento_uniforme`;
 
-    connection.query(sql, [fecha, fecha, fecha, fecha], (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
-      if (res) return resolve(res);
-    });
+    connection.query(
+      sql,
+      [data[0], data[0], data[0], data[1], data[2]],
+      (err, res) => {
+        if (err) return reject(errorDB());
+        if (res) return resolve(res);
+      }
+    );
   });
 
 //De aqui busco un empleado con sus puntos obtenidos de una sola fecha
@@ -219,26 +146,28 @@ WHERE
 
 model.validarNoDuplicadoXQuincena = (data) =>
   new Promise((resolve, reject) => {
+    let quinceFechaMes = `${tiempoLocal(data.fecha).getFullYear()}-${
+      tiempoLocal(data.fecha).getMonth() + 1
+    }`;
     let sql;
-    if (new Date(data.fecha).getUTCDate() > 14) {
+    if (tiempoLocal(data.fecha).getUTCDate() > 15) {
+      quinceFechaMes += "-16";
       sql = mysql.format(
         "SELECT * FROM evaluacion_uniforme WHERE idempleado = ? AND fecha BETWEEN ? AND LAST_DAY(?)  GROUP BY fecha, idempleado",
-        [data.empleado, data.fecha, data.fecha]
+        [data.empleado, quinceFechaMes, data.fecha]
       );
     } else {
-      let primerFechaMes = `${new Date(data.fecha).getFullYear()}-${
-        new Date(data.fecha).getMonth() + 1
-      }-1`;
-
-      let quinceFechaMes = `${new Date(data.fecha).getFullYear()}-${
-        new Date(data.fecha).getMonth() + 1
-      }-15`;
+      quinceFechaMes += "-15";
+      let primerFechaMes = `${tiempoLocal(data.fecha).getFullYear()}-${
+        tiempoLocal(data.fecha).getMonth() + 1
+      }-01`;
 
       sql = mysql.format(
         `SELECT * FROM evaluacion_uniforme WHERE idempleado = ? AND fecha BETWEEN '${primerFechaMes}' AND '${quinceFechaMes}'  GROUP BY fecha, idempleado`,
         [data.empleado]
       );
     }
+
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return resolve(false);
@@ -253,20 +182,10 @@ model.validarNoDuplicadoXQuincena = (data) =>
 
 model.insert = (data) =>
   new Promise((resolve, reject) => {
-    let iterar = data.evaluaciones.map((el) => [
-      null,
-      data.fecha,
-      Number(data.empleado),
-      Number(el.idCumplimiento),
-      2,
-      Number(el.cumple),
-    ]);
+    let sql =
+      "INSERT INTO evaluacion_uniforme (fecha, idempleado, idcumplimiento_uniforme, idpuntaje_minimo, cumple, identificador) VALUES ?";
 
-    let sql = "INSERT INTO evaluacion_uniforme VALUES ?";
-
-    connection.query(sql, [iterar], (err, res) => {
-      console.log(err);
-      console.log(sql);
+    connection.query(sql, [data], (err, res) => {
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

@@ -10,13 +10,13 @@ route.get(
   evaluacionUniforme.findPeriodoMensual
 );
 route.get(
-  "/periodo-mensual/:year/:month/:id",
-  evaluacionUniforme.findPeriodoMensualEmpleado
-);
-route.get(
-  "/verificar-evaluaciones-mes/:year/:month",
+  "/periodo-mensual/:year/:month/:idEmpleado/",
   evaluacionUniforme.findPeriodoMensualEmpleados
 );
+// route.get(
+//   "/verificar-evaluaciones-mes/:year/:month",
+//   evaluacionUniforme.findPeriodoMensualEmpleadosXquincena
+// );
 route.get("/:id/:fecha", evaluacionUniforme.findOne);
 route.post("/", evaluacionUniforme.insert);
 route.put("/", evaluacionUniforme.update);

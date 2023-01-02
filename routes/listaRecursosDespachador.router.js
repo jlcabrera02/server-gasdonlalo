@@ -5,8 +5,16 @@ const route = router();
 
 route.get("/:year/:month", listaRecursosDespachador.findListRecursosXmes);
 route.get(
-  "/:year/:month/:id",
+  "/:year/:month/:idEmpleado",
   listaRecursosDespachador.findListRecursosXmesXidEmpleado
+);
+route.get(
+  "/quincena/:year/:month/:idEmpleado/:quincena",
+  listaRecursosDespachador.findListRecursosXmesXidEmpleadoXquincena
+);
+route.get(
+  "/empleados/:year/:month/:quincena",
+  listaRecursosDespachador.findAllXQuicena
 );
 route.get("/get-recurso", listaRecursosDespachador.findRecursos);
 route.post("/", listaRecursosDespachador.insert);

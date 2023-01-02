@@ -14,7 +14,6 @@ controller.find = async (req, res) => {
       response = response.map((el) => ({
         ...el,
         fechaGenerada: fecha,
-        cumple: el.isla_limpia && el.aceites_completos,
       }));
       almacenar.push({ fecha, data: [...response] });
     }
@@ -29,11 +28,11 @@ controller.find = async (req, res) => {
   }
 };
 
-controller.findOne = async (req, res) => {
+controller.totalChecks = async (req, res) => {
   try {
-    const { id } = req.params;
-    let response = await checklistBombaM.findOne(id);
-    console.log(response);
+    const { year, month } = req.params;
+    const fecha = `${year}-${month}-01`;
+    let response = await checklistBombaM.totalChecks(fecha);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -67,8 +66,14 @@ controller.insert = async (req, res) => {
       idpuntaje_minimo: 1,
     };
 
+    await checklistBombaM.validarExistencia([
+      fecha,
+      idempleadoEntrante,
+      idbomba,
+    ]); //valida si que no alla datos duplicados
+
     let response = await checklistBombaM.insert(cuerpo);
-    console.log(response);
+    console.log("Inserción de checklist");
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

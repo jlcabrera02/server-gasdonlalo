@@ -77,10 +77,9 @@ model.verificar = (data) =>
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =
-      "INSERT INTO evaluacion_despachar (fecha, idempleado, idpaso_despachar, evaluacion) VALUES ?";
+      "INSERT INTO evaluacion_despachar (fecha, idempleado, idpaso_despachar, evaluacion, identificador) VALUES ?";
 
     connection.query(sql, [data], (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
@@ -90,7 +89,7 @@ model.insert = (data) =>
 model.update = (data) =>
   new Promise((resolve, reject) => {
     let sql =
-      "UPDATE evaluacion_despachar SET evaluacion = ? WHERE idevaluacion_despachar = ? AND idempleado = ?";
+      "UPDATE evaluacion_despachar SET evaluacion = ? WHERE idevaluacion_despachar = ? AND identificador = ?";
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -101,9 +100,7 @@ model.update = (data) =>
 
 model.delete = (data) =>
   new Promise((resolve, reject) => {
-    let sql =
-      "DELETE FROM evaluacion_despachar WHERE idevaluacion_despachar >= ? AND idevaluacion_despachar < ? AND idempleado = ?";
-    console.log(data);
+    let sql = "DELETE FROM evaluacion_despachar WHERE identificador = ?";
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());

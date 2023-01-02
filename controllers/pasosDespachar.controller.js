@@ -1,3 +1,4 @@
+import generadorId from "../assets/generadorId";
 import pasosDM from "../models/pasosDespachar.model";
 
 const controller = {};
@@ -55,16 +56,31 @@ controller.findPasos = async (req, res) => {
 controller.insert = async (req, res) => {
   try {
     const { empleado, fecha, pasos } = req.body;
+    const idGenerico = generadorId();
 
-    const cuerpo = pasos.map((el) => [
+    let pasosGet = await pasosDM.findPasos();
+    let insertPasos = pasosGet.map((el) => ({
+      idPaso: el.idpaso_despachar,
+      evaluacion: 0,
+    }));
+
+    pasos.forEach((el) => {
+      let indexRemplazar = insertPasos.findIndex(
+        (pa) => pa.idPaso === el.idPaso
+      );
+      insertPasos[indexRemplazar] = el;
+    });
+
+    const cuerpo = insertPasos.map((el) => [
       fecha,
       empleado,
       el.idPaso,
       el.evaluacion,
+      idGenerico,
     ]);
+
     //await pasosDM.verificar([cuerpo.fecha, cuerpo.idempleado]); //recoleccion efectivo
     let response = await pasosDM.insert(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
