@@ -15,6 +15,19 @@ model.find = (fecha) =>
     });
   });
 
+model.findXidempleadoXfecha = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT ck.*, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_saliente FROM (SELECT ck.*, b.bomba, es.nombre AS estacion_servicio, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_entrante FROM checklist_bomba ck, empleado emp, bomba b, estacion_servicio es WHERE ck.idempleado_entrante = emp.idempleado AND ck.idbomba = b.idbomba AND b.idestacion_servicio = es.idestacion_servicio) ck, empleado emp WHERE emp.idempleado = ck.idempleado_saliente AND idempleado_entrante = ? AND fecha = ?`;
+
+    //data = ["fecha", idempleado]
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.totalChecks = (fecha) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT emp.*, SUM(ch.cumple) total_checklist FROM (SELECT *, CONCAT(nombre, " ", apellido_paterno, " ", apellido_materno) AS nombre_completo FROM empleado WHERE iddepartamento = 1 AND date_baja IS NULL OR date_baja > ?) emp  LEFT JOIN (SELECT *, CASE WHEN (COUNT(idempleado_entrante) * 2) =  SUM(isla_limpia + aceites_completos) THEN 1 ELSE 0 END AS cumple FROM checklist_bomba WHERE fecha BETWEEN ? AND LAST_DAY(?)  GROUP BY idempleado_entrante, fecha) ch  ON emp.idempleado = ch.idempleado_entrante GROUP BY emp.idempleado ORDER BY emp.nombre`;

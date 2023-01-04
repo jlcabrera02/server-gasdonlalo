@@ -30,9 +30,20 @@ model.findOne = (id) =>
     });
   });
 
+model.findEmpleadosXmesXiddepartamento = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT *, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo FROM empleado emp WHERE emp.iddepartamento = ? AND emp.date_baja IS NULL OR emp.date_baja > ? ORDER BY nombre_completo`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.findEmpleadosXmes = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT *, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo FROM empleado emp WHERE emp.iddepartamento = ? AND emp.date_baja IS NULL OR emp.date_baja > ?`;
+    let sql = `SELECT *, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo FROM empleado emp WHERE emp.date_baja IS NULL OR emp.date_baja > ? ORDER BY nombre_completo`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());

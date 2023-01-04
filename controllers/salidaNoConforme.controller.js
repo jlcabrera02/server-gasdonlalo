@@ -39,6 +39,91 @@ controller.findSalidasNoConformesXMesXIddepartamento = async (req, res) => {
     }
   }
 };
+
+controller.findSalidasXInconformidadXMesXiddepartemento = async (req, res) => {
+  try {
+    const { year, month, iddepartamento } = req.params;
+    let fecha = `${year}-${month}-01`;
+    const response =
+      await salidaNoCM.findSalidasXInconformidadXMesXiddepartemento([
+        fecha,
+        fecha,
+        iddepartamento,
+      ]);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findSalidasXSemana = async (req, res) => {
+  try {
+    const { year, month, idSalida } = req.params;
+    const fecha = `${year}-${month}-01`;
+    let diasDelMes = new Date(year, month, 0).getDate(); //Me obtiene el numero de dias del mes
+    let numSemana = diasDelMes / 7 > 4 ? 5 : 4; //Me obtiene cuantas semanas tiene el mes
+    let empleados = await empleadoM.findEmpleadosXmesXiddepartamento([
+      1,
+      fecha,
+    ]);
+    console.log(empleados);
+    let acumulador = [];
+    for (let i = 0; i < empleados.length; i++) {
+      let semanas = [];
+      let iterador = 1;
+      for (let j = 0; j < numSemana; j++) {
+        if (iterador + 6 > diasDelMes) {
+          let firstFecha = `${year}-${month}-${iterador}`;
+          let lasFecha = `${year}-${month}-${diasDelMes}`;
+          let response = await salidaNoCM.findSalidasXSemanaXidEmpleado([
+            empleados[i].idempleado,
+            firstFecha,
+            lasFecha,
+          ]);
+          semanas.push({
+            semana: j + 1,
+            diaEmpiezo: firstFecha,
+            diaTermino: lasFecha,
+            nombre_completo: empleados[i].nombre_completo,
+            total: response.length > 0 ? response[0].total : 0,
+          });
+        } else {
+          let firstFecha = `${year}-${month}-${iterador}`;
+          let lasFecha = `${year}-${month}-${iterador + 6}`;
+          let response = await salidaNoCM.findSalidasXSemanaXidEmpleado([
+            empleados[i].idempleado,
+            firstFecha,
+            lasFecha,
+          ]);
+          semanas.push({
+            semana: j + 1,
+            diaEmpiezo: firstFecha,
+            diaTermino: lasFecha,
+            nombre_completo: empleados[i].nombre_completo,
+            total: response.length > 0 ? response[0].total : 0,
+          });
+          console.log(response);
+        }
+        iterador = iterador + 7;
+      }
+      acumulador.push(semanas);
+    }
+    res.status(200).json({ success: true, response: acumulador });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.findOne = async (req, res) => {
   try {
     const { idSalida } = req.params;

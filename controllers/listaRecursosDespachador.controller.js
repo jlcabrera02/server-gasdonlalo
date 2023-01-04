@@ -69,6 +69,7 @@ controller.findListRecursosXmesXidEmpleado = async (req, res) => {
     }
   }
 };
+
 controller.findListRecursosXmesXidEmpleadoXquincena = async (req, res) => {
   try {
     const { year, month, idEmpleado, quincena } = req.params;
@@ -96,7 +97,11 @@ controller.findAllXQuicena = async (req, res) => {
     const fecha = `${year}-${month}-01`;
     const almacenar = [];
 
-    const empleados = await empleado.findEmpleadosXmes([1, fecha]);
+    const puntajeMinimo = await listaReM.findPuntajeMinimo(3);
+    const empleados = await empleado.findEmpleadosXmesXiddepartamento([
+      1,
+      fecha,
+    ]);
 
     for (let i = 0; i < empleados.length; i++) {
       const response = await listaReM.findAllXQuicena([
@@ -108,6 +113,7 @@ controller.findAllXQuicena = async (req, res) => {
       almacenar.push({
         idempleado: empleados[i].idempleado,
         nombre_completo: empleados[i].nombre_completo,
+        puntaje_minimo: puntajeMinimo.puntaje,
         recursos: response,
       });
     }

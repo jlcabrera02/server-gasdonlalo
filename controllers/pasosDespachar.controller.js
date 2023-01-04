@@ -20,15 +20,44 @@ controller.findEvaluacionesXempleado = async (req, res) => {
       evaluaciones: [],
     };
 
+    console.log(pasos);
+
     for (let i = 0; i < pasos.length; i++) {
       const data = await pasosDM.findEvaluacionXempleado([
         id,
-        pasos[i].create_time,
+        pasos[i].identificador,
       ]);
       acumular.evaluaciones.push(data);
     }
 
     res.status(200).json({ success: true, response: acumular });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findPasosXQuincenaXidempleado = async (req, res) => {
+  try {
+    const { year, month, idEmpleado } = req.params;
+    const fecha = `${year}-${month}-01`;
+    const cuerpo = [fecha, fecha, idEmpleado];
+    const quincena1 = await pasosDM.findPasosXQuincenaXidempleado([
+      ...cuerpo,
+      1,
+    ]);
+    const quincena2 = await pasosDM.findPasosXQuincenaXidempleado([
+      ...cuerpo,
+      2,
+    ]);
+    let response = { quincena1, quincena2 };
+
+    console.log(response);
+    res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
     if (!err.code) {

@@ -28,6 +28,25 @@ controller.find = async (req, res) => {
   }
 };
 
+controller.findXidempleadoXfecha = async (req, res) => {
+  try {
+    const { idEmpleado, fecha } = req.params;
+
+    const response = await checklistBombaM.findXidempleadoXfecha([
+      idEmpleado,
+      fecha,
+    ]);
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.totalChecks = async (req, res) => {
   try {
     const { year, month } = req.params;
@@ -76,6 +95,7 @@ controller.insert = async (req, res) => {
     console.log("Inserción de checklist");
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

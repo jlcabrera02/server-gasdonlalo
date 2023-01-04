@@ -37,6 +37,27 @@ model.findOne = (id) =>
     });
   });
 
+model.findSalidasXSemanaXidEmpleado = (id) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT COUNT(*) total, emp.nombre, emp.apellido_paterno, emp.apellido_materno, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) nombre_completo FROM salida_noconforme sn,empleado emp WHERE sn.idempleado = emp.idempleado AND sn.idempleado = ? AND sn.fecha BETWEEN ? AND ?`;
+
+    connection.query(sql, id, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findSalidasXInconformidadXMesXiddepartemento = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT inc.incumplimiento, COUNT(sn.idincumplimiento) AS total FROM salida_noconforme sn, incumplimiento inc, empleado emp WHERE sn.idincumplimiento = inc.idincumplimiento AND emp.idempleado = sn.idempleado AND sn.fecha BETWEEN ? AND LAST_DAY(?) AND emp.iddepartamento = ? GROUP BY sn.idincumplimiento ORDER BY inc.incumplimiento`;
+    //data = ["2023-12-01", "2023-12-01", 1]
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql = "INSERT INTO salida_noconforme SET ?";

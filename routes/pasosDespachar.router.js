@@ -4,6 +4,10 @@ import pasosDespachar from "../controllers/pasosDespachar.controller";
 const route = router();
 
 route.get(
+  "/quincenas/:year/:month/:idEmpleado",
+  pasosDespachar.findPasosXQuincenaXidempleado
+);
+route.get(
   "/:year/:month/:quincena/:id",
   pasosDespachar.findEvaluacionesXempleado
 );

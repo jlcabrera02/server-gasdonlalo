@@ -42,12 +42,23 @@ model.findListRecursosXmesXidEmpleadoXquincena = (data) =>
 
 model.findAllXQuicena = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT * FROM (SELECT * FROM recurso r, empleado emp) r LEFT JOIN (SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM recurso_despachador WHERE fecha BETWEEN ? AND LAST_DAY(?))  rd ON rd.idrecurso = r.idrecurso AND rd.idempleado = r.idempleado WHERE r.idempleado = ? AND quincena = ?`;
+    let sql = `SELECT * FROM (SELECT * FROM recurso r, empleado emp) r LEFT JOIN (SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM recurso_despachador WHERE fecha BETWEEN ? AND LAST_DAY(?)) rd ON rd.idrecurso = r.idrecurso AND rd.idempleado = r.idempleado WHERE r.idempleado = ? AND quincena = ?`;
     //["2023-01-01", "2023-01-01", idEmpleado, quincena]
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
-      if (res.length < 1) return resolve(sinRegistro());
       if (res) return resolve(res);
+    });
+  });
+
+model.findPuntajeMinimo = (id) =>
+  new Promise((resolve, reject) => {
+    //funcion validara si el empleado ya tiene recoleccion de efectivo de ese dia
+    let sql = "SELECT * FROM puntaje_minimo WHERE idpuntaje_minimo = ?";
+
+    connection.query(sql, id, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res[0]);
     });
   });
 

@@ -3,6 +3,11 @@ import salidaNoConforme from "../controllers/salidaNoConforme.controller";
 
 const route = router();
 
+route.get(
+  "/inconformidad/:year/:month/:iddepartamento",
+  salidaNoConforme.findSalidasXInconformidadXMesXiddepartemento
+);
+route.get("/semanas/:year/:month", salidaNoConforme.findSalidasXSemana);
 route.get("/:idSalida", salidaNoConforme.findOne);
 route.get("/:year/:month", salidaNoConforme.findSalidasNoConformesXMes);
 route.get(

@@ -3,9 +3,12 @@ import checklistBomba from "../controllers/checklistBomba.controller";
 
 const route = router();
 
+route.get(
+  "/findCheck/:idEmpleado/:fecha",
+  checklistBomba.findXidempleadoXfecha
+);
 route.get("/:year/:month", checklistBomba.find);
 route.get("/total/:year/:month", checklistBomba.totalChecks);
-// route.get("/:id", checklistBomba.findOne);
 route.post("/", checklistBomba.insert);
 route.put("/:id", checklistBomba.update);
 route.delete("/:id", checklistBomba.delete);

@@ -10,8 +10,7 @@ model.findCantidadEvaluacionesXempleado = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT emp.idempleado,
 CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo,
-emp.estatus, evd.create_time, evd.fecha FROM evaluacion_despachar evd, empleado emp WHERE evd.idempleado = emp.idempleado AND 
-emp.idempleado = ? AND evd.fecha BETWEEN ? AND ? GROUP BY evd.create_time, evd.fecha`;
+emp.estatus, evd.create_time, evd.fecha, evd.identificador FROM evaluacion_despachar evd, empleado emp WHERE evd.idempleado = emp.idempleado AND emp.idempleado = ? AND evd.fecha BETWEEN ? AND ? GROUP BY identificador`;
 
     let quincena = data.quincena;
 
@@ -40,6 +39,21 @@ model.findEvaluacionXempleado = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT evd.idevaluacion_despachar, evd.fecha, evd.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, evd.evaluacion, pd.idpaso_despachar, pd.paso 
 FROM evaluacion_despachar evd, paso_despachar pd, empleado emp
+WHERE pd.idpaso_despachar = evd.idpaso_despachar AND emp.idempleado = evd.idempleado AND emp.idempleado = ? AND evd.identificador = ? ORDER BY evd.fecha, evd.create_time`;
+
+    console.log(data);
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findEvaluacionXempleadoXQuincena = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT evd.idevaluacion_despachar, evd.fecha, evd.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, evd.evaluacion, pd.idpaso_despachar, pd.paso 
+FROM evaluacion_despachar evd, paso_despachar pd, empleado emp
 WHERE pd.idpaso_despachar = evd.idpaso_despachar AND emp.idempleado = evd.idempleado AND emp.idempleado = ? AND evd.create_time = ? ORDER BY evd.create_time`;
 
     connection.query(sql, data, (err, res) => {
@@ -57,6 +71,16 @@ model.findPasos = (id) =>
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findPasosXQuincenaXidempleado = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM (SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_despachar evd WHERE fecha BETWEEN ? AND LAST_DAY(?)) evd WHERE idempleado = ? AND quincena = ?`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
       if (res) return resolve(res);
     });
   });
