@@ -12,7 +12,10 @@ import recoleccionEfectivoRouter from "./recoleccionEfectivo.router";
 import pasosDespacharRouter from "./pasosDespachar.router";
 import salidaNoConformeRouter from "./salidaNoConforme.router";
 import ordenTrabajoCalidad from "./ordenTrabajoCalidad.router";
-import controlDocumentosRouter from "./controlDocumentos.router";
+// Recursos humanos importaciones
+import controlDocumentosRouter from "./rh.controlDocumentos.router";
+import solicitudEmpleo from "./rh.solicitudEmpleo.route";
+import capturaEntrada from "./rh.capturaEntradas.route";
 
 const route = Router();
 
@@ -29,6 +32,9 @@ route.use("/evaluacion-uniforme", evaluacionUniformeRouter);
 route.use("/lista-recurso-despachador", listaRecursosDespachadorRouter);
 route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/orden-trabajo-calidad", ordenTrabajoCalidad);
+/*Recursos humanos*/
 route.use("/control-documento", controlDocumentosRouter);
+route.use("/solicitudes", solicitudEmpleo);
+route.use("/entrada", capturaEntrada);
 
 export default route;

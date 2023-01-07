@@ -6,7 +6,7 @@ const model = {};
 
 model.find = () =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM estacion_servicio";
+    let sql = "SELECT * FROM solicitud_empleo";
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
@@ -15,23 +15,21 @@ model.find = () =>
     });
   });
 
-model.findTurnos = (id) =>
+model.findSolicitud = (id) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT * FROM turno_estacion te, estacion_servicio es, turno t WHERE te.idestacion_servicio = es.idestacion_servicio AND te.idturno = t.idturno AND es.idestacion_servicio = 1 ORDER BY t.idturno`;
+    let sql = "SELECT * FROM solicitud_empleo WHERE idsolicitud_empleo = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1)
-        return reject(
-          sinRegistro("No se encontraron turno para esta estación")
-        );
-      if (res) return resolve(res);
+        return reject(sinRegistro("No existe la solicitud de empleo"));
+      if (res) return resolve(res[0]);
     });
   });
 
-model.findOne = (id) =>
+model.findXEstatus = (id) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM monto_faltante";
+    let sql = "SELECT * FROM solicitud_empleo WHERE estatus = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -42,7 +40,8 @@ model.findOne = (id) =>
 
 model.insert = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "INSERT INTO estacion_servicio SET ?";
+    let sql =
+      "INSERT INTO solicitud_empleo SET `fecha_registro` = CURRENT_TIMESTAMP, ?";
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -53,20 +52,9 @@ model.insert = (data) =>
 
 model.update = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "UPDATE estacion_servicio SET ? WHERE idestacion_servicio = ?";
+    let sql = "UPDATE solicitud_empleo SET ? WHERE idsolicitud_empleo = ?";
 
     connection.query(sql, data, (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.affectedRows < 1) return reject(sinCambios());
-      if (res) return resolve(res);
-    });
-  });
-
-model.delete = (id) =>
-  new Promise((resolve, reject) => {
-    let sql = "DELETE FROM estacion_servicio WHERE idestacion_servicio = ?";
-
-    connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

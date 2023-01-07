@@ -7,9 +7,9 @@ const model = {};
 model.find = (query = null) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND estatus = 1 ORDER BY empleado.nombre";
+      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND estatus = !0 ORDER BY empleado.nombre";
     if (query)
-      sql = `SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND estatus = 1 AND departamento.iddepartamento = ${query} ORDER BY empleado.nombre`;
+      sql = `SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND estatus = !0 AND departamento.iddepartamento = ${query} ORDER BY empleado.nombre`;
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
@@ -65,10 +65,16 @@ model.validarDepartamento = (id) =>
 
 model.insert = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "INSERT INTO empleados SET ?";
+    let sql = "INSERT INTO empleado SET ?";
 
     connection.query(sql, data, (err, res) => {
-      if (err) return reject(errorDB());
+      console.log(err);
+      if (err) {
+        if (err.errno === 1062) {
+          return reject(errorDB("Ya existe un usuario con ese id"));
+        }
+        return reject(errorDB(err.code));
+      }
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
@@ -79,6 +85,7 @@ model.update = (data) =>
     let sql = "UPDATE empleado SET ? WHERE idempleado = ?";
 
     connection.query(sql, data, (err, res) => {
+      console.log(sql);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
@@ -87,7 +94,8 @@ model.update = (data) =>
 
 model.delete = (id) =>
   new Promise((resolve, reject) => {
-    let sql = "UPDATE empleado SET estatus = 0 WHERE idempleado = ?";
+    let sql =
+      "UPDATE empleado SET estatus = 0, date_baja = CURRENT_DATE WHERE idempleado = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());

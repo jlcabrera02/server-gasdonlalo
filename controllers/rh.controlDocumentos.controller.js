@@ -1,4 +1,4 @@
-import controlDocumentoM from "../models/controlDocumentos.model";
+import controlDocumentoM from "../models/rh.controlDocumentos.model";
 
 const controller = {};
 
@@ -55,7 +55,6 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
-    const { id } = req.params;
     const { idempleado, idcontrolDocumento } = req.body;
 
     const cuerpo = [idcontrolDocumento, idempleado];

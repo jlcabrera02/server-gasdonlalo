@@ -1,6 +1,15 @@
 const respuesta = {};
 //Error
 
+respuesta.peticionImposible = (msg, response) => {
+  return {
+    success: false,
+    code: 400,
+    msg: msg || "Es imposible hacer esta petición",
+    response,
+  };
+};
+
 respuesta.errorMath = (msg, response) => {
   return {
     success: false,
@@ -10,12 +19,12 @@ respuesta.errorMath = (msg, response) => {
   };
 };
 
-respuesta.datosExistentes = (msg = null, response) => {
+respuesta.datosExistentes = (msg = null, responseSQl) => {
   return {
     success: false,
     code: 400,
     msg: msg || "Los datos ingresados ya existen",
-    response,
+    responseSQl,
   };
 };
 
