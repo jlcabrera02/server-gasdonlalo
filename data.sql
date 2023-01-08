@@ -246,4 +246,4 @@ INSERT INTO tipo_falta VALUES
 (4, "Falta", "El empleado falto ese dia", 1),
 (5, "Retardo", "El empleado llego despues de su hora de entrada", 1),
 (6, "Capacitacion", "El empleado estuvo en capacitación", 0),
-(7, "Sin entrada", "El empleado olvido checar la entrada pero si entro a su hora", 0);
+(7, "No checo entrada", "El empleado por algun motivo no capturo la entrada pero si trabajo", 0);

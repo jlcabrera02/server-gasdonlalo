@@ -78,19 +78,34 @@ controller.semanasXmes = async (req, res) => {
       }
     }
 
-    for (let i = primerSabado; i < diasDelMes; i++) {
+    for (let i = primerSabado; i < diasDelMes - 2; i++) {
       let firstFecha = `${year}-${month}-${i}`;
-      if (i === 7) {
-        let tiempo = new Date(firstFecha).setDate(-1);
-        console.log({ firstFecha });
-        console.log(new Date(tiempo).toISOString());
+
+      if (primerSabado > 2 && i < primerSabado + 7) {
+        let tiempo = new Date(
+          new Date(firstFecha).setDate(new Date(firstFecha).getDate() - 7)
+        )
+          .toISOString()
+          .split("T")[0];
+
+        let tiempod = new Date(
+          new Date(tiempo).setDate(new Date(tiempo).getDate() + 6)
+        )
+          .toISOString()
+          .split("T")[0];
+
+        response.push({
+          semana: 1,
+          diaEmpiezo: tiempo,
+          diaTermino: tiempod,
+        });
       }
+
       let lastFecha = new Date(
         new Date(firstFecha).setDate(new Date(firstFecha).getDay() + i)
       )
         .toISOString()
         .split("T")[0];
-      console.log(lastFecha);
       let index = response.length;
       response.push({
         semana: index + 1,

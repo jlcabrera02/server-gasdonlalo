@@ -4,7 +4,7 @@ import resErr from "../respuestas/error.respuestas";
 
 const controller = {};
 
-const { peticionImposible } = resErr;
+const { peticionImposible, sinCambios } = resErr;
 
 controller.find = async (req, res) => {
   try {
@@ -49,6 +49,14 @@ controller.insert = async (req, res) => {
     } = req.body;
 
     const ns = Number(estatus);
+    if (ns === 3)
+      throw peticionImposible(
+        "No puedes despedir al empleado si no tiene datos existentes dentro de la empresa"
+      );
+    if (ns === 4)
+      throw peticionImposible(
+        "Para rechazar una solicitud primero debes añadirla"
+      );
 
     const cuerpo = {
       idempleado: idEmpleado || null,
@@ -60,13 +68,11 @@ controller.insert = async (req, res) => {
       fecha_nacimiento: fechaNacimiento,
       motivo,
     };
-
+    //Si la soliciitud es pendiente no nesesita de un id
     if (ns === 5) delete cuerpo.idempleado;
 
     if ((ns === 1 || ns === 2) && !idEmpleado)
       throw peticionImposible("Falta asignar un id");
-    if (!idEmpleado && (ns != 1 || ns != 2)) delete cuerpo.idempleado;
-    if (!motivo) delete cuerpo.motivo;
 
     if (ns === 1 || ns === 2) {
       const empData = {
@@ -77,14 +83,8 @@ controller.insert = async (req, res) => {
         iddepartamento: idDepartamento,
         estatus: ns,
       };
-      if (!idEmpleado) throw peticionImposible("Asigna un id al empleado");
-      console.log("Adssad");
       await empleadoM.insert(empData);
     }
-    if (ns === 3)
-      throw peticionImposible(
-        "No puedes despedir al empleado si no tiene datos existentes dentro de la empresa"
-      );
 
     let response = await seM.insert(cuerpo);
 
@@ -103,55 +103,57 @@ controller.update = async (req, res) => {
   try {
     const { idSolicitud } = req.params;
     const { estatus, idEmpleado, motivo } = req.body;
+    const ns = Number(estatus);
+
+    if (ns === 5) throw peticionImposible("No disponible");
 
     const solicitud = await seM.findSolicitud(idSolicitud);
     console.log({ solicitud });
 
-    if (estatus === 1 || estatus === 2) {
-      const empData = {
-        idempleado: solicitud.idempleado ? solicitud.idempleado : idEmpleado,
-        nombre: solicitud.nombre.toLocaleUpperCase(),
-        apellido_paterno: solicitud.apellido_paterno.toLocaleUpperCase(),
-        apellido_materno: solicitud.apellido_materno.toLocaleUpperCase(),
-        iddepartamento: solicitud.iddepartamento,
-        estatus,
-      };
-      if (solicitud.estatus === "Practica" && estatus === 1) {
-        await empleadoM.update([empData, solicitud.idempleado]);
-      } else {
-        await empleadoM.insert(empData);
-      }
-    } else if (estatus === 3) {
-      try {
-        await empleadoM.findOne(solicitud.idempleado);
-        const despedir = await empleadoM.delete(solicitud.idempleado);
-        console.log({ despedir });
-      } catch (err) {
-        throw peticionImposible(
-          "No puedes despedir si todavia no esta trabajando el empleado"
-        );
-      }
-    } else if (estatus === 4) {
-      if (solicitud.estatus != "Pendiente" && solicitud.estatus != "Pendiente")
-        throw peticionImposible(
-          "Solo puedes rechazar la solicitud cuando este pendiente o rechazandola en el momento"
-        );
+    const empData = {
+      idempleado: solicitud.idempleado ? solicitud.idempleado : idEmpleado,
+      nombre: solicitud.nombre.toLocaleUpperCase(),
+      apellido_paterno: solicitud.apellido_paterno.toLocaleUpperCase(),
+      apellido_materno: solicitud.apellido_materno.toLocaleUpperCase(),
+      iddepartamento: solicitud.iddepartamento,
+      estatus: ns,
+    };
+
+    let response;
+
+    if (solicitud.estatus === "Pendiente" && (ns === 1 || ns === 2)) {
+      await empleadoM.insert(empData);
+      response = await seM.update([
+        { estatus: ns, idEmpleado: idEmpleado, motivo: motivo || null },
+        idSolicitud,
+      ]);
+    }
+    if (solicitud.estatus === "Practica" && ns === 1) {
+      await empleadoM.update([empData, solicitud.idempleado]);
+      response = await seM.update([
+        { estatus: ns, motivo: motivo || null },
+        idSolicitud,
+      ]);
+    }
+    if (
+      (solicitud.estatus === "Contrato" || solicitud.estatus === "Practica") &&
+      ns === 3
+    ) {
+      await empleadoM.delete(solicitud.idempleado);
+      response = await seM.update([
+        { estatus: ns, motivo: motivo || null },
+        idSolicitud,
+      ]);
+    }
+    if (solicitud.estatus === "Pendiente" && ns === 4) {
+      response = await seM.update([
+        { estatus: ns, motivo: motivo || null },
+        idSolicitud,
+      ]);
     }
 
-    const cuerpo = [
-      {
-        ...solicitud,
-        idempleado: solicitud.idempleado ? solicitud.idempleado : idEmpleado,
-        estatus: Number(estatus),
-        motivo,
-      },
-      idSolicitud,
-    ];
-    //Lo elimino porque de todas las formas ya no se necesita el id
-    delete cuerpo.idsolicitud_empleo;
+    if (!response) throw sinCambios();
 
-    let response = await seM.update(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
