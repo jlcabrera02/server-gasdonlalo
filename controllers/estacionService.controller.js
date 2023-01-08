@@ -18,10 +18,9 @@ controller.findTurnos = async (req, res) => {
   }
 };
 
-controller.find = async (req, res) => {
+controller.findAllTurnos = async (req, res) => {
   try {
-    let response = await estacionServiceM.find();
-    console.log(response);
+    let response = await estacionServiceM.findAllTurnos();
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -32,10 +31,9 @@ controller.find = async (req, res) => {
   }
 };
 
-controller.findOne = async (req, res) => {
+controller.find = async (req, res) => {
   try {
-    const { id } = req.params;
-    let response = await estacionServiceM.findOne(id);
+    let response = await estacionServiceM.find();
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {

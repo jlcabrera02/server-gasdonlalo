@@ -31,7 +31,6 @@ model.validarDuplicados = (data) =>
     let sql = `SELECT ce.idcaptura_entrada FROM captura_entrada ce WHERE idempleado = ? AND fecha = ? AND idturno = ?`;
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.length < 1) return resolve(false);
       if (res)

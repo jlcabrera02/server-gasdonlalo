@@ -61,6 +61,8 @@ controller.insert = async (req, res) => {
       motivo,
     };
 
+    if (ns === 5) delete cuerpo.idempleado;
+
     if ((ns === 1 || ns === 2) && !idEmpleado)
       throw peticionImposible("Falta asignar un id");
     if (!idEmpleado && (ns != 1 || ns != 2)) delete cuerpo.idempleado;

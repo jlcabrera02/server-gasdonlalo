@@ -78,8 +78,13 @@ controller.semanasXmes = async (req, res) => {
       }
     }
 
-    for (let i = primerSabado; i <= diasDelMes; i++) {
+    for (let i = primerSabado; i < diasDelMes; i++) {
       let firstFecha = `${year}-${month}-${i}`;
+      if (i === 7) {
+        let tiempo = new Date(firstFecha).setDate(-1);
+        console.log({ firstFecha });
+        console.log(new Date(tiempo).toISOString());
+      }
       let lastFecha = new Date(
         new Date(firstFecha).setDate(new Date(firstFecha).getDay() + i)
       )
@@ -117,6 +122,10 @@ controller.insert = async (req, res) => {
       idturno: Number(idTurno),
       idtipo_falta: Number(idTipoFalta),
     };
+
+    if (!idTipoFalta) cuerpo.idtipo_falta = 1;
+
+    console.log(cuerpo);
 
     await ceM.validarDuplicados([cuerpo.idempleado, fecha, cuerpo.idturno]); // Validar existencia
 
