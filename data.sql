@@ -175,6 +175,7 @@ INSERT INTO puntaje_minimo VALUES
 (1,'checklist_bomba',24),
 (2,'evaluacion_uniforme',7),
 (3,'recurso_despachador',18);
+(4,'concurso_madrugador', 240);
 
 INSERT INTO recurso VALUES
 (1,'Libreta'),
@@ -240,10 +241,10 @@ INSERT INTO documento VALUES
 (11, "TARJETA BANCARIA");
 
 INSERT INTO tipo_falta VALUES
-(1, "Todo en orden", "El empleado establecio su entrada correctamente", 0),
-(2, "Falta justificable", "El empleado tiene justificada su falta", 0),
-(3, "Dia de descanso", "El empleado descanso", 0),
-(4, "Falta", "El empleado falto ese dia", 1),
-(5, "Retardo", "El empleado llego despues de su hora de entrada", 1),
-(6, "Capacitacion", "El empleado estuvo en capacitación", 0),
-(7, "No checo entrada", "El empleado por algun motivo no capturo la entrada pero si trabajo", 0);
+(1, "Todo en orden", "El empleado establecio su entrada correctamente", 0, "RGBA(56,255,136,1)"),
+(2, "Falta justificable", "El empleado tiene justificada su falta", 0, "RGBA(0,157,19,1)"),
+(3, "Dia de descanso", "El empleado descanso", 0, "RGBA(213,86,12,1)"),
+(4, "Falta", "El empleado falto ese dia", 1, "RGBA(253,234,0,1)"),
+(5, "Retardo", "El empleado llego despues de su hora de entrada", 1, "RGBA(253,234,0,1)"),
+(6, "Capacitacion", "El empleado estuvo en capacitación", 0, "RGBA(0,209,141,1)"),
+(7, "No checo entrada", "El empleado por algun motivo no capturo la entrada pero si trabajo", 1, "RGBA(209,0,39,1)");

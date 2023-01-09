@@ -16,17 +16,11 @@ export default {
   diff: (f, h) => new Date(`${f} ${h}`),
 
   transformMinute: (m) => {
-    console.log(m);
     let minutos = Math.abs(m / (1000 * 60));
     let segundo = Math.abs((m % (1000 * 60)) / 1000);
-    console.log(`${minutos} minutos y ${segundo} segundos`);
-    console.log(minutos % 1000);
+    minutos = minutos.toString().split() > 1 ? minutos : `0${minutos}`;
+    segundo = segundo.toString().split() > 1 ? segundo : `0${segundo}`;
 
     return `${Math.trunc(minutos)}:${segundo}`;
-
-    return new Intl.DateTimeFormat("en", {
-      minute: "2-digit",
-      second: "2-digit",
-    }).format(new Date(m));
   },
 };

@@ -17,7 +17,7 @@ model.findEntradasXidEmpleadoXMes = (id, fecha) =>
 
 model.findRetardosXsemanas = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT ce.*, t.hora_anticipo, t.turno, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM captura_entrada ce, turno t, empleado emp WHERE ce.idturno = t.idturno AND emp.idempleado = ce.idempleado AND ce.idempleado = ? AND ce.fecha BETWEEN ? AND ? ORDER BY ce.fecha`;
+    let sql = `SELECT ce.*, t.hora_anticipo, t.turno, emp.nombre, emp.apellido_paterno, emp.apellido_materno, tp.tipo, tp.color, tp.inconforme FROM captura_entrada ce, turno t, empleado emp, tipo_falta tp WHERE ce.idturno = t.idturno AND emp.idempleado = ce.idempleado AND ce.idtipo_falta = tp.idtipo_falta AND ce.idempleado = ? AND ce.fecha BETWEEN ? AND ? ORDER BY ce.fecha`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());

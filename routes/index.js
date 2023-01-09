@@ -16,6 +16,7 @@ import ordenTrabajoCalidad from "./ordenTrabajoCalidad.router";
 import controlDocumentosRouter from "./rh.controlDocumentos.router";
 import solicitudEmpleo from "./rh.solicitudEmpleo.route";
 import capturaEntrada from "./rh.capturaEntradas.route";
+import madrugador from "./rh.madrugador.route";
 
 const route = Router();
 
@@ -36,5 +37,6 @@ route.use("/orden-trabajo-calidad", ordenTrabajoCalidad);
 route.use("/control-documento", controlDocumentosRouter);
 route.use("/solicitudes", solicitudEmpleo);
 route.use("/entrada", capturaEntrada);
+route.use("/madrugador", madrugador);
 
 export default route;

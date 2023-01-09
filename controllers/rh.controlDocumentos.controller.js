@@ -59,7 +59,6 @@ controller.update = async (req, res) => {
 
     const cuerpo = [idcontrolDocumento, idempleado];
     let response = await controlDocumentoM.update(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

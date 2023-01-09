@@ -7,6 +7,5 @@ route.get("/", cd.findTotalDocumentos);
 route.get("/:idEmpleado", cd.findDocumentosXIdempleado);
 route.post("/", cd.insert);
 route.put("/", cd.update);
-// route.delete("/:id", control.delete);
 
 export default route;

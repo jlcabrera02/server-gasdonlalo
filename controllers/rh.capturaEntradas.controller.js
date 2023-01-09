@@ -38,7 +38,18 @@ controller.findRetardosXsemanas = async (req, res) => {
     const { dateStart, dateEnd } = req.body;
     const cuerpo = [Number(idEmpleado), dateStart, dateEnd];
 
-    const response = await ceM.findRetardosXsemanas(cuerpo);
+    let response = await ceM.findRetardosXsemanas(cuerpo);
+
+    response = response.map((el) => {
+      const minutosDiff =
+        diff(tiempoDB(el.fecha), el.hora_anticipo) -
+        diff(tiempoDB(el.fecha), el.hora_entrada);
+      return {
+        ...el,
+        minutosRetardos:
+          minutosDiff > 0 ? "00:00" : transformMinute(minutosDiff),
+      };
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
