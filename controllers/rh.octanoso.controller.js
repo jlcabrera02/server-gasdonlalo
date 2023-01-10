@@ -64,8 +64,8 @@ controller.findVentasL = async (req, res) => {
     const dias = new Date(year, month, 0).getDate();
     const fecha = `${year}-${month}-01`;
     const empleados = await empM.findEmpleadosXmesXiddepartamento([1, fecha]);
-    console.log(empleados);
     const response = [];
+
     for (let i = 0; i < empleados.length; i++) {
       let data = [];
       let idempleado = empleados[i].idempleado;
@@ -92,13 +92,12 @@ controller.findVentasL = async (req, res) => {
             salidaNC: totalSalidas.total_salidas,
           });
         }
-        response.push({ empleados: empleados[i], data });
       }
+      response.push({ empleados: empleados[i], data });
     }
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
