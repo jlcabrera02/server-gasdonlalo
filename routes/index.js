@@ -18,6 +18,7 @@ import solicitudEmpleo from "./rh.solicitudEmpleo.route";
 import capturaEntrada from "./rh.capturaEntradas.route";
 import madrugador from "./rh.madrugador.route";
 import octanoso from "./rh.octanoso.route";
+import aceitoso from "./rh.aceitoso.route";
 
 const route = Router();
 
@@ -40,5 +41,6 @@ route.use("/solicitudes", solicitudEmpleo);
 route.use("/entrada", capturaEntrada);
 route.use("/madrugador", madrugador);
 route.use("/octanoso", octanoso);
+route.use("/aceitoso", aceitoso);
 
 export default route;
