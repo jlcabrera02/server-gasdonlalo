@@ -55,9 +55,9 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
-    const { idempleado, idcontrolDocumento } = req.body;
+    const { idempleado, iddocumento } = req.body;
 
-    const cuerpo = [idcontrolDocumento, idempleado];
+    const cuerpo = [iddocumento, idempleado];
     let response = await controlDocumentoM.update(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {

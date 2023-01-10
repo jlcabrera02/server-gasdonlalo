@@ -17,6 +17,7 @@ import controlDocumentosRouter from "./rh.controlDocumentos.router";
 import solicitudEmpleo from "./rh.solicitudEmpleo.route";
 import capturaEntrada from "./rh.capturaEntradas.route";
 import madrugador from "./rh.madrugador.route";
+import octanoso from "./rh.octanoso.route";
 
 const route = Router();
 
@@ -38,5 +39,6 @@ route.use("/control-documento", controlDocumentosRouter);
 route.use("/solicitudes", solicitudEmpleo);
 route.use("/entrada", capturaEntrada);
 route.use("/madrugador", madrugador);
+route.use("/octanoso", octanoso);
 
 export default route;

@@ -174,7 +174,7 @@ INSERT INTO paso_despachar VALUES
 INSERT INTO puntaje_minimo VALUES
 (1,'checklist_bomba',24),
 (2,'evaluacion_uniforme',7),
-(3,'recurso_despachador',18);
+(3,'recurso_despachador',18),
 (4,'concurso_madrugador', 240);
 
 INSERT INTO recurso VALUES

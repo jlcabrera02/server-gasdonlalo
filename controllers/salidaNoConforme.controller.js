@@ -5,6 +5,22 @@ const { errorMath } = resErr;
 
 const controller = {};
 
+controller.findTotalSalidasXDiaXEmpleado = async (req, res) => {
+  try {
+    const { fecha, idEmpleado } = req.params;
+    const cuerpo = [idEmpleado, fecha];
+    const response = await salidaNoCM.findTotalSalidasXDiaXEmpleado(cuerpo);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.findSalidasNoConformesXMes = async (req, res) => {
   try {
     const { year, month } = req.params;

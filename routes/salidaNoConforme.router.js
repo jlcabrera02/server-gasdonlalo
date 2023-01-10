@@ -14,7 +14,7 @@ route.get(
   "/:year/:month/:iddepartamento",
   salidaNoConforme.findSalidasNoConformesXMesXIddepartamento
 );
-// route.get("/:id", salidaNoConforme.findOne);
+
 route.post("/", salidaNoConforme.insert);
 route.put("/:idSalidaNoConforme", salidaNoConforme.update);
 route.delete("/:idSalidaNoConforme", salidaNoConforme.delete);

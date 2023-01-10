@@ -4,6 +4,16 @@ const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
+model.findTotalSalidasXDiaXEmpleado = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT COUNT(*) total_salidas FROM salida_noconforme WHERE idempleado = ? AND fecha = ?`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.findSalidasNoConformesXMes = (fecha) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT sn.*, inc.incumplimiento, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_incumple FROM salida_noconforme sn, empleado emp, incumplimiento inc WHERE sn.idincumplimiento = inc.idincumplimiento AND emp.idempleado = sn.idempleado AND sn.fecha BETWEEN ? AND LAST_DAY(?) ORDER BY sn.fecha DESC`;
