@@ -5,7 +5,10 @@ const route = router();
 
 route.get("/areas", ordenTrabajoCalidad.findAllArea);
 
-route.get(
+route.get("/:year/:month", ordenTrabajoCalidad.findOTmes);
+route.get("/:year/:month/:idEs", ordenTrabajoCalidad.findOTmes);
+
+/* route.get(
   "/:year/:month/:idEstacionServicio",
   ordenTrabajoCalidad.findOrdenTrabajoCalidadXEstacion
 );
@@ -23,7 +26,7 @@ route.get(
 route.get(
   "/buscar-area/:year/:month/:idEstacionServicio/:idArea",
   ordenTrabajoCalidad.findTotaOTXDetalladaXArea
-);
+); */
 
 // route.get("/:id", ordenTrabajoCalidad.findOne);
 route.post("/", ordenTrabajoCalidad.insert);

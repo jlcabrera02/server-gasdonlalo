@@ -1,17 +1,8 @@
 import aceiM from "../models/rh.aceitoso.model";
 import empM from "../models/rh.empleado.model";
 import salidaNCM from "../models/s.salidaNoConforme.model";
+import formatTiempo from "../assets/formatTiempo";
 const controller = {};
-
-/* controller.feaa = async (req, res) => {
-  try {
-    const cuerpo = [1, "2023-01-01", "2023-01-01"];
-    let response = await aceiM.obtenerEmpleadosXRegistro(cuerpo);
-    console.log(response);
-  } catch (err) {
-    console.log(err);
-  }
-}; */
 
 controller.findVentasAXestacion = async (req, res) => {
   try {
@@ -116,15 +107,87 @@ controller.findVentasA = async (req, res) => {
   }
 };
 
+controller.findVentasAXestacionXIntervaloTiempo = async (req, res) => {
+  try {
+    const { fechaInicio, fechaFinal, idEstacionServicio } = req.body;
+    const diaI = formatTiempo.tiempoLocal(fechaInicio).getDate();
+    const milisegundos =
+      new Date(fechaFinal).getTime() - new Date(fechaInicio).getTime();
+    const dias = milisegundos / (1000 * 60 * 60 * 24);
+    const empleados = await aceiM.obtenerEmpleadosXRegistroXintervalo([
+      Number(idEstacionServicio),
+      fechaInicio,
+      fechaFinal,
+    ]);
+    const response = [];
+
+    for (let i = 0; i < empleados.length; i++) {
+      let dat = [];
+      let descalificado = false;
+      for (let j = diaI; j <= dias + diaI; j++) {
+        let fecha = new Date(
+          new Date(formatTiempo.tiempoLocal(fechaInicio)).setDate(j)
+        )
+          .toISOString()
+          .split("T")[0];
+        let cuerpo = [
+          empleados[i].idempleado,
+          Number(idEstacionServicio),
+          fecha,
+        ];
+        const data = await aceiM.findVentasAXestacion(cuerpo);
+        const salida = await salidaNCM.findTotalSalidasXDiaXEmpleado([
+          empleados[i].idempleado,
+          fecha,
+        ]);
+        if (data.length > 0) {
+          dat.push({ ...data[0], salidaNC: salida.total_salidas });
+          if (data[0].descalificado) descalificado = true;
+        } else {
+          dat.push({
+            idventa_aceite: null,
+            fecha: new Date(fecha).toISOString(),
+            idempleado: empleados[i].idempleado,
+            idestacion_servicio: Number(idEstacionServicio),
+            cantidad: 0,
+            nombre: empleados[i].nombre,
+            apellido_paterno: empleados[i].apellido_paterno,
+            apellido_materno: empleados[i].apellido_materno,
+            salidaNC: salida.total_salidas,
+            descalificado: false,
+          });
+        }
+      }
+      response.push({ descalificado, empleado: empleados[i], datos: dat });
+    }
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.insertVentaAceite = async (req, res) => {
   try {
-    const { idEmpleado, idEstacionServicio, litrosVendidos, fecha } = req.body;
+    const {
+      idEmpleado,
+      idEstacionServicio,
+      litrosVendidos,
+      fecha,
+      descalificado,
+    } = req.body;
 
     const cuerpo = {
       idempleado: Number(idEmpleado),
       idestacion_servicio: Number(idEstacionServicio),
       fecha: fecha,
       cantidad: litrosVendidos,
+      descalificado: Number(descalificado),
     };
 
     const response = await aceiM.insertVentaAceite(cuerpo);

@@ -9,5 +9,6 @@ route.get(
 );
 route.get("/reporte/:year/:month", acei.findVentasA);
 route.post("/registro", acei.insertVentaAceite);
+route.post("/obtener", acei.findVentasAXestacionXIntervaloTiempo);
 
 export default route;

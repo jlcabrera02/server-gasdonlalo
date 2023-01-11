@@ -14,7 +14,27 @@ controller.findAllArea = async (req, res) => {
   }
 };
 
-controller.findOrdenTrabajoCalidadXEstacion = async (req, res) => {
+controller.findOTmes = async (req, res) => {
+  try {
+    const { year, month, idEs } = req.params;
+    const fecha = new Date(year, month - 1, 1).toISOString().split("T")[0];
+    let response;
+    if (!idEs) {
+      response = await ordenTrabajoCM.findOTmes([fecha, fecha]);
+    } else {
+      response = await ordenTrabajoCM.findOTmesXestacion([fecha, fecha, idEs]);
+    }
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+/* controller.findOrdenTrabajoCalidadXEstacion = async (req, res) => {
   try {
     const { year, month, idEstacionServicio } = req.params;
     let fecha = `${year}-${month}-01`;
@@ -90,7 +110,7 @@ controller.findTotaOTXDetalladaXArea = async (req, res) => {
       res.status(err.code).json(err);
     }
   }
-};
+}; */
 
 controller.insert = async (req, res) => {
   try {
