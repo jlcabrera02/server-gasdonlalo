@@ -1,5 +1,5 @@
 import cmM from "../models/rh.madrugador.model";
-import empleadoM from "../models/empleado.model";
+import empleadoM from "../models/rh.empleado.model";
 const controller = {};
 
 controller.findControlMadrugadorD = async (req, res) => {

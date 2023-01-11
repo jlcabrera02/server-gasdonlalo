@@ -18,9 +18,10 @@ export default {
   transformMinute: (m) => {
     let minutos = Math.abs(m / (1000 * 60));
     let segundo = Math.abs((m % (1000 * 60)) / 1000);
-    minutos = minutos.toString().split() > 1 ? minutos : `0${minutos}`;
+    minutos =
+      Math.trunc(minutos).toString().split() > 1 ? minutos : `0${minutos}`;
     segundo = segundo.toString().split() > 1 ? segundo : `0${segundo}`;
 
-    return `${Math.trunc(minutos)}:${segundo}`;
+    return `${minutos}:${segundo}`;
   },
 };

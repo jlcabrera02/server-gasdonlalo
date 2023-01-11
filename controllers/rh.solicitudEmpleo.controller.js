@@ -1,5 +1,5 @@
 import seM from "../models/rh.solicitudEmpleo.model";
-import empleadoM from "../models/empleado.model";
+import empleadoM from "../models/rh.empleado.model";
 import resErr from "../respuestas/error.respuestas";
 
 const controller = {};
@@ -9,7 +9,6 @@ const { peticionImposible, sinCambios } = resErr;
 controller.find = async (req, res) => {
   try {
     let response = await seM.find();
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -24,7 +23,6 @@ controller.findXEstatus = async (req, res) => {
   try {
     const { estatus } = req.params;
     let response = await seM.findXEstatus(Number(estatus));
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -90,7 +88,6 @@ controller.insert = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -108,7 +105,6 @@ controller.update = async (req, res) => {
     if (ns === 5) throw peticionImposible("No disponible");
 
     const solicitud = await seM.findSolicitud(idSolicitud);
-    console.log({ solicitud });
 
     const empData = {
       idempleado: solicitud.idempleado ? solicitud.idempleado : idEmpleado,
@@ -168,7 +164,6 @@ controller.delete = async (req, res) => {
   try {
     const { id } = req.params;
     let response = await seM.delete(id);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

@@ -10,6 +10,15 @@ respuesta.peticionImposible = (msg, response) => {
   };
 };
 
+respuesta.errorLogin = (msg, response) => {
+  return {
+    success: false,
+    code: 400,
+    msg: msg || "Usuario y/o contraseña incorrectas",
+    response,
+  };
+};
+
 respuesta.errorMath = (msg, response) => {
   return {
     success: false,

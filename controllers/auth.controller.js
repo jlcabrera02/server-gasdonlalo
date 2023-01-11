@@ -1,10 +1,29 @@
-import controlDocumentoM from "../models/rh.controlDocumentos.model";
+import auth from "../models/auth.model";
+import mysql from "mysql2";
 
 const controller = {};
 
-controller.findTotalDocumentos = async (req, res) => {
+controller.login = async (req, res) => {
   try {
-    let response = await controlDocumentoM.findTotalDocumentos();
+    const { user, password } = req.body;
+    const cuerpo = [user, password];
+    let userData = await auth.login(cuerpo);
+    let token = auth.generarToken(userData);
+    res.status(200).json({ success: true, auth: userData, token });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.register = async (req, res) => {
+  try {
+    const { user, password, idEmpleado } = req.body;
+    const cuerpo = [user, mysql.raw(`MD5(${password})`), Number(idEmpleado)];
+    let response = await auth.register(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -15,39 +34,10 @@ controller.findTotalDocumentos = async (req, res) => {
   }
 };
 
-controller.findDocumentosXIdempleado = async (req, res) => {
+controller.as = async (req, res) => {
   try {
-    const { idEmpleado } = req.params;
-    let response = await controlDocumentoM.findDocumentosXIdempleado(
-      idEmpleado
-    );
-    res.status(200).json({ success: true, response });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
-
-controller.insert = async (req, res) => {
-  try {
-    const { idempleado, iddocumento } = req.body;
-
-    const cuerpo = {
-      cumple: 1,
-      idempleado: Number(idempleado),
-      iddocumento: Number(iddocumento),
-    };
-
-    await controlDocumentoM.verificarDExistente([
-      cuerpo.idempleado,
-      cuerpo.iddocumento,
-    ]);
-
-    let response = await controlDocumentoM.insert(cuerpo);
-
+    const { token } = req.body;
+    let response = auth.verificar(token);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -60,10 +50,16 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
-    const { idempleado, iddocumento } = req.body;
+    const { id } = req.params;
+    const { numBomba, bomba, estacionServicio } = req.body;
 
-    const cuerpo = [iddocumento, idempleado];
-    let response = await controlDocumentoM.update(cuerpo);
+    const cuerpo = {
+      num_bomba: numBomba,
+      bomba,
+      idestacion_servicio: Number(estacionServicio),
+    };
+    const data = [cuerpo, id];
+    let response = await auth.update(data);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

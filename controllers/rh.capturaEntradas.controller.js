@@ -23,7 +23,6 @@ controller.findEntradasXidEmpleadoXMes = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -53,7 +52,6 @@ controller.findRetardosXsemanas = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -128,7 +126,6 @@ controller.semanasXmes = async (req, res) => {
 
     res.status(200).json({ success: true, response: response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

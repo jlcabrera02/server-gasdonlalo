@@ -45,7 +45,6 @@ model.findFalta = (data) =>
     let sql = `SELECT * FROM tipo_falta WHERE idtipo_falta > 1`;
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -85,6 +84,5 @@ model.update = (data) =>
       if (res) return resolve(res);
     });
   });
-0;
 
 export default model;

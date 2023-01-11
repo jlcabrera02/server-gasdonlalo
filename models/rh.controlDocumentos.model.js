@@ -1,6 +1,6 @@
 import connection from "./connection";
 import resErr from "../respuestas/error.respuestas";
-const { errorDB, sinRegistro, sinCambios } = resErr;
+const { errorDB, sinRegistro, sinCambios, datosExistentes } = resErr;
 
 const model = {};
 
@@ -23,6 +23,22 @@ model.findDocumentosXIdempleado = (id) =>
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
+    });
+  });
+
+model.verificarDExistente = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM control_documento WHERE idempleado = ? AND iddocumento = ?`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return resolve(false);
+      if (res)
+        return reject(
+          datosExistentes(
+            "El empleado ya tiene el documento que quieres agregar"
+          )
+        );
     });
   });
 

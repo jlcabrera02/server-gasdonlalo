@@ -1,6 +1,6 @@
 import octM from "../models/rh.octanoso.model";
-import empM from "../models/empleado.model";
-import salidaNCM from "../models/salidaNoConforme.model";
+import empM from "../models/rh.empleado.model";
+import salidaNCM from "../models/s.salidaNoConforme.model";
 const controller = {};
 
 controller.findVentasLXestacion = async (req, res) => {

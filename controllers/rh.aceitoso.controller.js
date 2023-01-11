@@ -1,6 +1,6 @@
 import aceiM from "../models/rh.aceitoso.model";
-import empM from "../models/empleado.model";
-import salidaNCM from "../models/salidaNoConforme.model";
+import empM from "../models/rh.empleado.model";
+import salidaNCM from "../models/s.salidaNoConforme.model";
 const controller = {};
 
 /* controller.feaa = async (req, res) => {
