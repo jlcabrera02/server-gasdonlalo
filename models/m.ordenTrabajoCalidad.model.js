@@ -4,6 +4,17 @@ const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
+model.findAllArea = (id, fecha) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM area`;
+
+    connection.query(sql, [id, fecha, fecha], (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.findOrdenTrabajoCalidadXEstacion = (id, fecha) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT otc.idotrabajo_mantenimiento, otc.tipo_mantenimiento, otc.fecha_inicio, otc.fecha_termino,otc.descripcion_falla, otc.idarea, area.area, otc.idempleado_solicita, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS empleado_solicita, ets.nombre AS estacion_servicio FROM otrabajo_mantenimiento otc, empleado emp, estacion_servicio ets, area WHERE area.idarea = otc.idarea AND emp.idempleado = otc.idempleado_solicita AND ets.idestacion_servicio = otc.idestacion_servicio AND ets.idestacion_servicio = ? AND otc.fecha_inicio BETWEEN ? AND LAST_DAY(?)`;

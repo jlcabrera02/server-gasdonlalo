@@ -3,6 +3,8 @@ import ordenTrabajoCalidad from "../controllers/m.ordenTrabajoCalidad.controller
 
 const route = router();
 
+route.get("/areas", ordenTrabajoCalidad.findAllArea);
+
 route.get(
   "/:year/:month/:idEstacionServicio",
   ordenTrabajoCalidad.findOrdenTrabajoCalidadXEstacion

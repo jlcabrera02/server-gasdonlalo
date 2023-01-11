@@ -8,6 +8,7 @@ route.get(
   oct.findVentasLXestacion
 );
 route.get("/reporte/:year/:month", oct.findVentasL);
+route.post("/obtener", oct.findVentasLXestacionXIntervaloTiempo);
 route.post("/registro", oct.insertVentaLitros);
 
 export default route;
