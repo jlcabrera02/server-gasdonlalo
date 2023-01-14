@@ -17,7 +17,7 @@ model.findAllArea = (id, fecha) =>
 
 model.findOTmes = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT ot.*, a.area, a.idmantenimiento,es.nombre AS estacion_servicio, m.mantenimiento,  emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM otrabajo_mantenimiento ot, area a, estacion_servicio es, empleado emp, mantenimiento m WHERE ot.idempleado_solicita = emp.idempleado AND ot.idestacion_servicio = es.idestacion_servicio AND ot.idarea = a.idarea AND m.idmantenimiento = a.idmantenimiento AND ot.fecha_inicio BETWEEN ? AND LAST_DAY(?)`;
+    let sql = `SELECT ot.*, a.area, a.idmantenimiento,es.nombre AS estacion_servicio, m.mantenimiento,  emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM otrabajo_mantenimiento ot, area a, estacion_servicio es, empleado emp, mantenimiento m WHERE ot.idempleado_solicita = emp.idempleado AND ot.idestacion_servicio = es.idestacion_servicio AND ot.idarea = a.idarea AND m.idmantenimiento = a.idmantenimiento AND ot.fecha_inicio BETWEEN ? AND LAST_DAY(?) ORDER BY ot.fecha_inicio`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -28,7 +28,7 @@ model.findOTmes = (data) =>
 
 model.findOTmesXestacion = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT ot.*, a.area, a.idmantenimiento,es.nombre AS estacion_servicio, m.mantenimiento,  emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM otrabajo_mantenimiento ot, area a, estacion_servicio es, empleado emp, mantenimiento m WHERE ot.idempleado_solicita = emp.idempleado AND ot.idestacion_servicio = es.idestacion_servicio AND ot.idarea = a.idarea AND m.idmantenimiento = a.idmantenimiento AND ot.fecha_inicio BETWEEN ? AND LAST_DAY(?) AND ot.idestacion_servicio = ?`;
+    let sql = `SELECT ot.*, a.area, a.idmantenimiento,es.nombre AS estacion_servicio, m.mantenimiento,  emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM otrabajo_mantenimiento ot, area a, estacion_servicio es, empleado emp, mantenimiento m WHERE ot.idempleado_solicita = emp.idempleado AND ot.idestacion_servicio = es.idestacion_servicio AND ot.idarea = a.idarea AND m.idmantenimiento = a.idmantenimiento AND ot.fecha_inicio BETWEEN ? AND LAST_DAY(?) AND ot.idestacion_servicio = ? ORDER BY ot.fecha_inicio`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());

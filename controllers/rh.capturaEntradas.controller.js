@@ -40,14 +40,21 @@ controller.findRetardosXsemanas = async (req, res) => {
     let response = await ceM.findRetardosXsemanas(cuerpo);
 
     response = response.map((el) => {
-      const minutosDiff =
-        diff(tiempoDB(el.fecha), el.hora_anticipo) -
-        diff(tiempoDB(el.fecha), el.hora_entrada);
-      return {
-        ...el,
-        minutosRetardos:
-          minutosDiff > 0 ? "00:00" : transformMinute(minutosDiff),
-      };
+      if (el.hora_entrada) {
+        const minutosDiff =
+          diff(tiempoDB(el.fecha), el.hora_anticipo) -
+          diff(tiempoDB(el.fecha), el.hora_entrada);
+        return {
+          ...el,
+          minutosRetardos:
+            minutosDiff > 0 ? "00:00" : transformMinute(minutosDiff),
+        };
+      } else {
+        return {
+          ...el,
+          minutosRetardos: null,
+        };
+      }
     });
 
     res.status(200).json({ success: true, response });
@@ -142,7 +149,7 @@ controller.insert = async (req, res) => {
       idempleado: Number(idEmpleado),
       hora_entrada: horaEntrada,
       fecha,
-      idturno: Number(idTurno),
+      idturno: Number(idTurno) || 1,
       idtipo_falta: Number(idTipoFalta),
     };
 
@@ -152,11 +159,11 @@ controller.insert = async (req, res) => {
 
     await ceM.validarDuplicados([cuerpo.idempleado, fecha, cuerpo.idturno]); // Validar existencia
 
-    const horaAnticipo = await ceM.horaAnticipo(cuerpo.idturno);
+    /* const horaAnticipo = await ceM.horaAnticipo(cuerpo.idturno);
     let minutosDiff = diff(fecha, horaAnticipo) - diff(fecha, horaEntrada);
     minutosDiff > 0
       ? (cuerpo.idtipo_falta = 1)
-      : (cuerpo.idtipo_falta = cuerpo.idtipo_falta);
+      : (cuerpo.idtipo_falta = cuerpo.idtipo_falta); */
 
     const response = await ceM.insert(cuerpo);
 
