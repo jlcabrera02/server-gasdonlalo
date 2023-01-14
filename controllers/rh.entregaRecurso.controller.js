@@ -1,6 +1,4 @@
 import erM from "../models/rh.entregaRecursos.model";
-import tp from "../assets/formatTiempo";
-const { tiempoDB, transformMinute, diff } = tp;
 
 const controller = {};
 
@@ -36,7 +34,7 @@ controller.insert = async (req, res) => {
     const { fecha, idEmpleado, cantidad, recurso } = req.body;
     const cuerpo = {
       fecha,
-      idempleado: Number(idEmpleado),
+      idempleado_recibe: Number(idEmpleado),
       cantidad: Number(cantidad),
       recurso,
     };

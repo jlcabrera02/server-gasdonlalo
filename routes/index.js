@@ -18,6 +18,7 @@ import ordenTrabajoCalidad from "./m.ordenTrabajoCalidad.router";
 import controlDocumentosRouter from "./rh.controlDocumentos.router";
 import departamentoRouter from "./rh.departamento.router";
 import solicitudEmpleo from "./rh.solicitudEmpleo.route";
+import entregaRecurso from "./rh.entregaRecursos.route";
 import capturaEntrada from "./rh.capturaEntradas.route";
 import empleadoRouter from "./rh.empleado.router";
 import madrugador from "./rh.madrugador.route";
@@ -45,6 +46,7 @@ route.use("/orden-trabajo-calidad", ordenTrabajoCalidad);
 /*Recursos humanos*/
 route.use("/control-documento", controlDocumentosRouter);
 route.use("/departamento", departamentoRouter);
+route.use("/entrega-recursos", entregaRecurso);
 route.use("/empleado", empleadoRouter);
 route.use("/solicitudes", solicitudEmpleo);
 route.use("/madrugador", madrugador);

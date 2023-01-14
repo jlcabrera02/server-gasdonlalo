@@ -6,7 +6,7 @@ const model = {};
 
 model.findRecursos = () =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT re.* emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM recursos_entrega re, empleado emp WHERE re.idempleado_recibe = emp.idempleado ORDER BY re.fecha`;
+    let sql = `SELECT re.*, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM recurso_entrega re, empleado emp WHERE re.idempleado_recibe = emp.idempleado ORDER BY re.fecha`;
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
@@ -16,7 +16,7 @@ model.findRecursos = () =>
 
 model.findRecursosXId = (id) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT re.* emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM recurso_entrega re, empleado emp WHERE re.idempleado_recibe = emp.idempleado AND re.idrecurso_entrega = ? ORDER BY re.fecha`;
+    let sql = `SELECT re.*, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM recurso_entrega re, empleado emp WHERE re.idempleado_recibe = emp.idempleado AND re.idrecurso_entrega = ? ORDER BY re.fecha`;
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
