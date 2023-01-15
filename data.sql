@@ -248,3 +248,8 @@ INSERT INTO tipo_falta VALUES
 (5, "Retardo", "El empleado llego despues de su hora de entrada", 1, "RGBA(253,234,0,1)"),
 (6, "Capacitacion", "El empleado estuvo en capacitación", 0, "RGBA(0,209,141,1)"),
 (7, "No checo entrada", "El empleado por algun motivo no capturo la entrada pero si trabajo", 1, "RGBA(209,0,39,1)");
+
+INSERT INTO concurso VALUES 
+(1, "madrugador"),
+(2, "octanoso"),
+(3, "aceitoso");

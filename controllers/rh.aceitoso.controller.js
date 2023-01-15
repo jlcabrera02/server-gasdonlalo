@@ -29,6 +29,7 @@ controller.findVentasAXestacion = async (req, res) => {
         const salida = await salidaNCM.findTotalSalidasXDiaXEmpleado([
           empleados[i].idempleado,
           fecha,
+          3,
         ]);
         if (data.length > 0) {
           dat.push({ ...data[0], salidaNC: salida.total_salidas });
@@ -77,6 +78,7 @@ controller.findVentasA = async (req, res) => {
         const totalSalidas = await salidaNCM.findTotalSalidasXDiaXEmpleado([
           idempleado,
           fecha,
+          3,
         ]);
         if (venta.length > 0) {
           data.push({ ...venta[0], salidaNC: totalSalidas.total_salidas });
@@ -139,6 +141,7 @@ controller.findVentasAXestacionXIntervaloTiempo = async (req, res) => {
         const salida = await salidaNCM.findTotalSalidasXDiaXEmpleado([
           empleados[i].idempleado,
           fecha,
+          3,
         ]);
         if (data.length > 0) {
           dat.push({ ...data[0], salidaNC: salida.total_salidas });

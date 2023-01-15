@@ -6,7 +6,7 @@ const model = {};
 
 model.findTotalSalidasXDiaXEmpleado = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT COUNT(*) total_salidas FROM salida_noconforme WHERE idempleado = ? AND fecha = ?`;
+    let sql = `SELECT COUNT(*) total_salidas FROM salida_noconforme WHERE idempleado = ? AND fecha = ? AND idincumplimiento IN (SELECT idincumplimiento FROM categorizar_incumplimiento WHERE idconcurso = ?)`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
