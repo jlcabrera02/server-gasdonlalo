@@ -116,28 +116,12 @@ model.findPeriodoMensualEmpleadosXquincena = (data) =>
     );
   });
 
-//De aqui busco un empleado con sus puntos obtenidos de una sola fecha
-model.findOne = (data) =>
+//De aqui busco un empleado con sus puntos con su identificador
+model.findOne = (id) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT 
-	ev_un.idevaluacion_uniforme,
-    ev_un.fecha, emp.idempleado,
-	CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", apellido_materno) AS nombre_completo,
-    cum_u.cumplimiento, ev_un.cumple,
-    CASE
-      WHEN DAY(ev_un.fecha) < 15 THEN "Primera Evaluación"
-      WHEN DAY(ev_un.fecha) > 14 THEN "Segunda Evaluación"
-    END as evaluacion
-FROM 
-	evaluacion_uniforme AS ev_un,
-    empleado AS emp,
-    cumplimiento_uniforme AS cum_u
-WHERE 
-	ev_un.idempleado = emp.idempleado AND
-    ev_un.idcumplimiento_uniforme = cum_u.idcumplimiento_uniforme AND
-	ev_un.idempleado = ? AND ev_un.fecha = ?`;
+    let sql = `SELECT eu.*, cu.cumplimiento FROM evaluacion_uniforme eu, cumplimiento_uniforme cu WHERE eu.idcumplimiento_uniforme = cu.idcumplimiento_uniforme AND eu.identificador = ? ORDER BY cu.idcumplimiento_uniforme;`;
 
-    connection.query(sql, data, (err, res) => {
+    connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -180,6 +164,17 @@ model.validarNoDuplicadoXQuincena = (data) =>
     });
   });
 
+model.findXTiempo = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT eu.*, SUM(eu.cumple) total_evaluacion, emp.nombre, emp.apellido_paterno, emp.apellido_materno, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) nombre_completo, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_uniforme eu, empleado emp WHERE emp.idempleado = eu.idempleado AND emp.idempleado = ? GROUP BY eu.identificador ORDER BY eu.fecha ASC`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =
@@ -210,12 +205,11 @@ model.update = (data) =>
     });
   });
 
-model.delete = (data) =>
+model.delete = (id) =>
   new Promise((resolve, reject) => {
-    let sql =
-      "DELETE FROM evaluacion_uniforme WHERE idempleado = ? AND fecha = ?";
+    let sql = "DELETE FROM evaluacion_uniforme WHERE identificador = ?";
 
-    connection.query(sql, data, (err, res) => {
+    connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

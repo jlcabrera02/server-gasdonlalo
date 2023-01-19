@@ -102,7 +102,6 @@ controller.findPeriodoMensualEmpleados = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -113,14 +112,31 @@ controller.findPeriodoMensualEmpleados = async (req, res) => {
 
 controller.findOne = async (req, res) => {
   try {
-    const { id, fecha } = req.params;
-    const cuerpo = [id, fecha];
-    let response = await evaluacionUniformeM.findOne(cuerpo);
-    console.log(response);
+    const { identificador } = req.params;
+    const response = await evaluacionUniformeM.findOne(identificador);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
+      res
+        .status(400)
+        .json({ success: false, msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findXTiempo = async (req, res) => {
+  try {
+    const { idEmpleado } = req.body;
+    const cuerpo = [Number(idEmpleado)];
+    const response = await evaluacionUniformeM.findXTiempo(cuerpo);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res
+        .status(400)
+        .json({ success: false, msg: "datos no enviados correctamente" });
     } else {
       res.status(err.code).json(err);
     }
@@ -140,7 +156,7 @@ controller.insert = async (req, res) => {
       idGenerico,
     ]);
     console.log(cuerpo);
-    await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro7
+    await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro
     let response = await evaluacionUniformeM.insert(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });
@@ -177,9 +193,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
-    const { empleado, fecha } = req.body;
-    const cuerpo = [empleado, fecha];
-    let response = await evaluacionUniformeM.delete(cuerpo);
+    const { identificador } = req.params;
+    let response = await evaluacionUniformeM.delete(identificador);
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
