@@ -11,7 +11,7 @@ route.get(
   "/total-mes-empleado/:year/:month/:idEmpleado",
   montoFaltante.findXMesXEmpleado
 );
-route.get("/:id", montoFaltante.findOne);
+route.post("/buscar", montoFaltante.findXTiempo);
 route.post("/", montoFaltante.insert);
 route.put("/:id", montoFaltante.update);
 route.delete("/:id", montoFaltante.delete);

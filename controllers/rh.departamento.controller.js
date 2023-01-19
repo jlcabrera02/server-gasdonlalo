@@ -50,7 +50,7 @@ controller.delete = async (req, res) => {
   try {
     const { id } = req.params;
     let response = await departamentoM.delete(id);
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });

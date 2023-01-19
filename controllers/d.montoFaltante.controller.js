@@ -2,6 +2,8 @@ import montoFaltanteM from "../models/d.montoFaltante.model";
 import empleadoM from "../models/rh.empleado.model";
 import resErr from "../respuestas/error.respuestas";
 import Decimal from "decimal.js-light";
+import operacionTiempo from "../assets/operacionTiempo";
+import formatTiempo from "../assets/formatTiempo";
 const { errorMath } = resErr;
 
 const controller = {};
@@ -126,11 +128,38 @@ controller.findXMesXEmpleado = async (req, res) => {
   }
 };
 
-controller.findOne = async (req, res) => {
+controller.findXTiempo = async (req, res) => {
   try {
-    const { id } = req.params;
-    let response = await montoFaltanteM.findOne(id);
-    console.log(response);
+    const { idEmpleado, fechaInicio, fechaFinal } = req.body;
+    const response = [];
+    let dias = operacionTiempo.restarTiempo("days", fechaInicio, fechaFinal);
+
+    let fi = formatTiempo.tiempoLocal(
+      formatTiempo
+        .tiempoLocal(fechaInicio)
+        .setDate(formatTiempo.tiempoLocal(fechaInicio).getDate() - 1)
+    );
+    for (let i = 0; i < dias; i++) {
+      fi.setDate(fi.getDate() + 1);
+      let fecha = formatTiempo.tiempoDB(fi);
+      let op = await montoFaltanteM.findXTiempo([fecha, idEmpleado]);
+      if (op.length > 0) {
+        response.push({ ...op[0], fecha: formatTiempo.tiempoDB(op[0].fecha) });
+      } else {
+        response.push({
+          idmonto_faltante: null,
+          idempleado: 2,
+          nombre_completo: "ANDRES LANDERO JIMENEZ",
+          iddepartamento: 1,
+          nombre: "ANDRES",
+          apellido_paterno: "LANDERO",
+          apellido_materno: "JIMENEZ",
+          estatus: 1,
+          fecha: fecha,
+          cantidad: 0,
+        });
+      }
+    }
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);

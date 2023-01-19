@@ -1,6 +1,6 @@
 import connection from "./connection";
 import resErr from "../respuestas/error.respuestas";
-const { errorDB, sinRegistro, sinCambios } = resErr;
+const { errorDB, sinRegistro, sinCambios, peticionImposible } = resErr;
 
 const model = {};
 
@@ -43,7 +43,18 @@ model.delete = (id) =>
     let sql = "DELETE FROM departamento WHERE iddepartamento = ?";
 
     connection.query(sql, id, (err, res) => {
-      if (err) return reject(errorDB());
+      console.log(err);
+
+      if (err) {
+        if (err.errno === 1451) {
+          return reject(
+            peticionImposible(
+              "No puedes eliminar el departamento por que hay empleados dentro de esta categoría"
+            )
+          );
+        }
+        return reject(errorDB());
+      }
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });

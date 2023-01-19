@@ -55,23 +55,13 @@ WHERE
     });
   });
 
-model.findOne = (id) =>
-  new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM monto_faltante WHERE idempleado = ?";
-
-    connection.query(sql, id, (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
-      if (res) return resolve(res);
-    });
-  });
-
 model.findXMesXEmpleado = (fecha, idEmpleado) =>
   new Promise((resolve, reject) => {
     let sql;
     if (idEmpleado) {
       sql = mysql.format(
         `SELECT
+      mf.idmonto_faltante,
       em.idempleado,
       CONCAT(em.nombre, " ", em.apellido_paterno, " ", em.apellido_materno) AS nombre_completo,
       em.iddepartamento, 
@@ -88,6 +78,7 @@ model.findXMesXEmpleado = (fecha, idEmpleado) =>
     } else {
       sql = mysql.format(
         `SELECT
+      mf.idmonto_faltante,
       em.idempleado,
       em.nombre, 
       em.apellido_paterno,
@@ -107,6 +98,16 @@ model.findXMesXEmpleado = (fecha, idEmpleado) =>
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findXTiempo = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT mf.idmonto_faltante, emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.iddepartamento,emp.nombre, emp.apellido_paterno, emp.apellido_materno, emp.estatus, mf.fecha, SUM(mf.cantidad) cantidad FROM monto_faltante AS mf, empleado AS emp WHERE mf.idempleado = emp.idempleado AND mf.fecha = ? AND emp.idempleado = ?  GROUP BY emp.idempleado ORDER BY emp.idempleado`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
       if (res) return resolve(res);
     });
   });

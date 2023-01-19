@@ -28,6 +28,9 @@ import aceitoso from "./rh.aceitoso.route";
 import auth from "./auth.router";
 const route = Router();
 
+//Complementos adicionales
+import com from "./complementos.router";
+
 //Salidas no conformes
 route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/incumplimiento", incumplimientoRouter);
@@ -55,5 +58,7 @@ route.use("/octanoso", octanoso);
 route.use("/aceitoso", aceitoso);
 //Autenticacion
 route.use("/auth", auth);
+//Complementos
+route.use("/com", com);
 
 export default route;

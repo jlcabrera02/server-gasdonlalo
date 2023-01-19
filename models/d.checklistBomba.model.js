@@ -67,6 +67,8 @@ model.update = (data) =>
     let sql = "UPDATE checklist_bomba SET ? WHERE idchecklist_bomba = ?";
 
     connection.query(sql, data, (err, res) => {
+      console.log(err);
+
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
