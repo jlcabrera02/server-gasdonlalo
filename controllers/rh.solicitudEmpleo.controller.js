@@ -42,7 +42,7 @@ controller.insert = async (req, res) => {
       apellidoMaterno,
       idDepartamento,
       estatus,
-      fechaNacimiento,
+      edad,
       motivo,
     } = req.body;
 
@@ -50,10 +50,6 @@ controller.insert = async (req, res) => {
     if (ns === 3)
       throw peticionImposible(
         "No puedes despedir al empleado si no tiene datos existentes dentro de la empresa"
-      );
-    if (ns === 4)
-      throw peticionImposible(
-        "Para rechazar una solicitud primero debes añadirla"
       );
 
     const cuerpo = {
@@ -63,11 +59,11 @@ controller.insert = async (req, res) => {
       apellido_materno: apellidoMaterno.toLocaleUpperCase(),
       iddepartamento: Number(idDepartamento),
       estatus: ns,
-      fecha_nacimiento: fechaNacimiento,
+      edad: Number(edad) || null,
       motivo,
     };
-    //Si la soliciitud es pendiente no nesesita de un id
-    if (ns === 5) delete cuerpo.idempleado;
+    //Si la soliciitud es pendiente o rechazada no nesesita de un id
+    if (ns === 5 || ns === 4) delete cuerpo.idempleado;
 
     if ((ns === 1 || ns === 2) && !idEmpleado)
       throw peticionImposible("Falta asignar un id");
