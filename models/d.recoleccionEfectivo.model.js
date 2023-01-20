@@ -123,6 +123,16 @@ model.verificar = (data) =>
     });
   });
 
+model.findXTiempo = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT re.*, emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.iddepartamento,emp.nombre, emp.apellido_paterno, emp.apellido_materno, emp.estatus FROM recoleccion_efectivo AS re, empleado AS emp WHERE re.idempleado = emp.idempleado AND re.fecha = ? AND emp.idempleado = ?`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql = "INSERT INTO recoleccion_efectivo SET ?";

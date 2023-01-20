@@ -1,4 +1,6 @@
 import recoleccionEM from "../models/d.recoleccionEfectivo.model";
+import operacionTiempo from "../assets/operacionTiempo";
+import formatTiempo from "../assets/formatTiempo";
 
 const controller = {};
 
@@ -84,6 +86,49 @@ controller.findOne = async (req, res) => {
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findXTiempo = async (req, res) => {
+  try {
+    const { idEmpleado, fechaInicio, fechaFinal } = req.body;
+    const response = [];
+    let dias = operacionTiempo.restarTiempo("days", fechaInicio, fechaFinal);
+
+    let fi = formatTiempo.tiempoLocal(
+      formatTiempo
+        .tiempoLocal(fechaInicio)
+        .setDate(formatTiempo.tiempoLocal(fechaInicio).getDate() - 1)
+    );
+    for (let i = 0; i < dias; i++) {
+      fi.setDate(fi.getDate() + 1);
+      let fecha = formatTiempo.tiempoDB(fi);
+      let op = await recoleccionEM.findXTiempo([fecha, idEmpleado]);
+      if (op.length > 0) {
+        response.push({ ...op[0], fecha: formatTiempo.tiempoDB(op[0].fecha) });
+      } else {
+        response.push({
+          idrecoleccion_efectivo: null,
+          fecha: fecha,
+          idempleado: idEmpleado,
+          cantidad: 0,
+          nombre_completo: null,
+          iddepartamento: 1,
+          nombre: null,
+          apellido_paterno: null,
+          apellido_materno: null,
+          estatus: null,
+        });
+      }
+    }
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

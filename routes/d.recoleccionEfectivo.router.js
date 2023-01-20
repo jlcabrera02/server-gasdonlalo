@@ -10,6 +10,7 @@ route.get(
   recoleccionEfectivo.findAllRegistersXMonthXEmpleado
 );
 route.get("/:id", recoleccionEfectivo.findOne);
+route.post("/buscar", recoleccionEfectivo.findXTiempo);
 route.post("/", recoleccionEfectivo.insert);
 route.put("/:id", recoleccionEfectivo.update);
 route.delete("/:id", recoleccionEfectivo.delete);
