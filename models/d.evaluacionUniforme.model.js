@@ -119,7 +119,7 @@ model.findPeriodoMensualEmpleadosXquincena = (data) =>
 //De aqui busco un empleado con sus puntos con su identificador
 model.findOne = (id) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT eu.*, cu.cumplimiento FROM evaluacion_uniforme eu, cumplimiento_uniforme cu WHERE eu.idcumplimiento_uniforme = cu.idcumplimiento_uniforme AND eu.identificador = ? ORDER BY cu.idcumplimiento_uniforme;`;
+    let sql = `SELECT eu.*, cu.cumplimiento FROM evaluacion_uniforme eu, cumplimiento_uniforme cu WHERE eu.idcumplimiento_uniforme = cu.idcumplimiento_uniforme AND eu.identificador = ? ORDER BY cu.idcumplimiento_uniforme`;
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
