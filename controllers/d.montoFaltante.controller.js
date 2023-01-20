@@ -148,13 +148,13 @@ controller.findXTiempo = async (req, res) => {
       } else {
         response.push({
           idmonto_faltante: null,
-          idempleado: 2,
-          nombre_completo: "ANDRES LANDERO JIMENEZ",
+          idempleado: null,
+          nombre_completo: null,
           iddepartamento: 1,
-          nombre: "ANDRES",
-          apellido_paterno: "LANDERO",
-          apellido_materno: "JIMENEZ",
-          estatus: 1,
+          nombre: null,
+          apellido_paterno: null,
+          apellido_materno: null,
+          estatus: null,
           fecha: fecha,
           cantidad: 0,
         });
