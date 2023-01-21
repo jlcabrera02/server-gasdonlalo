@@ -161,7 +161,7 @@ INSERT INTO cumplimiento_uniforme VALUES
 (7,'El gafete cuenta con correa o broche');
 
 INSERT INTO paso_despachar VALUES
-(1,'jalar y saludar'),
+(1,'Jalar y saludar'),
 (2,'Que combustible desea'),
 (3,'Cuanto combustible requiere'),
 (4,'Su Forma de pago'),

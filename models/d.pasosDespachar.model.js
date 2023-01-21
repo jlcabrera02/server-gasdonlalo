@@ -6,53 +6,31 @@ const { errorDB, sinRegistro, sinCambios, datosExistentes } = resErr;
 const model = {};
 
 //Obtiene todas las evaluaciones del empleado por el periodo de tiempo que le asignemos
-model.findCantidadEvaluacionesXempleado = (data) =>
+model.findEvaluacionesXEmpleado = (id, quincena) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT emp.idempleado,
-CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo,
-emp.estatus, evd.create_time, evd.fecha, evd.identificador FROM evaluacion_despachar evd, empleado emp WHERE evd.idempleado = emp.idempleado AND emp.idempleado = ? AND evd.fecha BETWEEN ? AND ? GROUP BY identificador`;
-
-    let quincena = data.quincena;
-
-    if (quincena > 1) {
-      sql = mysql.format(sql, [
-        data.id,
-        mysql.raw(`DATE_ADD('${data.fecha}', INTERVAL 15 DAY)`),
-        mysql.raw(`LAST_DAY('${data.fecha}')`),
-      ]);
+    let sql;
+    if (quincena) {
+      sql = mysql.format(
+        `SELECT * FROM (SELECT emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.estatus, evd.create_time, evd.fecha, evd.identificador, evd.idpaso_despachar, evd.evaluacion, pd.paso, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar evd, empleado emp, paso_despachar pd WHERE evd.idempleado = emp.idempleado AND pd.idpaso_despachar = evd.idpaso_despachar AND identificador = ? ) evd WHERE evd.quincena = ? ORDER BY evd.idpaso_despachar`,
+        [id, quincena]
+      );
     } else {
-      sql = mysql.format(sql, [
-        data.id,
-        data.fecha,
-        mysql.raw(`DATE_ADD('${data.fecha}', INTERVAL 14 DAY)`),
-      ]);
+      sql = mysql.format(
+        `SELECT emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.estatus, evd.create_time, evd.fecha, evd.identificador, evd.idpaso_despachar, evd.evaluacion, pd.paso, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar evd, empleado emp, paso_despachar pd WHERE evd.idempleado = emp.idempleado AND pd.idpaso_despachar = evd.idpaso_despachar AND identificador = ? ORDER BY evd.idpaso_despachar`,
+        id
+      );
     }
 
-    connection.query(sql, (err, res) => {
+    connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
     });
   });
 
-model.findEvaluacionXempleado = (data) =>
+//Agrupar por identificador lo necesita el modelo findEvaluacionesXEmpleado
+model.agruparEvaluaciones = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT evd.idevaluacion_despachar, evd.fecha, evd.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, evd.evaluacion, pd.idpaso_despachar, pd.paso 
-FROM evaluacion_despachar evd, paso_despachar pd, empleado emp
-WHERE pd.idpaso_despachar = evd.idpaso_despachar AND emp.idempleado = evd.idempleado AND emp.idempleado = ? AND evd.identificador = ? ORDER BY evd.fecha, evd.create_time`;
-
-    connection.query(sql, data, (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
-      if (res) return resolve(res);
-    });
-  });
-
-model.findEvaluacionXempleadoXQuincena = (data) =>
-  new Promise((resolve, reject) => {
-    let sql = `SELECT evd.idevaluacion_despachar, evd.fecha, evd.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, evd.evaluacion, pd.idpaso_despachar, pd.paso 
-FROM evaluacion_despachar evd, paso_despachar pd, empleado emp
-WHERE pd.idpaso_despachar = evd.idpaso_despachar AND emp.idempleado = evd.idempleado AND emp.idempleado = ? AND evd.create_time = ? ORDER BY evd.create_time`;
+    let sql = `SELECT identificador FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND LAST_DAY(?) GROUP BY identificador ORDER BY fecha`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -70,29 +48,6 @@ model.findPasos = (id) =>
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
-    });
-  });
-
-model.findPasosXQuincenaXidempleado = (data) =>
-  new Promise((resolve, reject) => {
-    let sql = `SELECT * FROM (SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_despachar evd WHERE fecha BETWEEN ? AND LAST_DAY(?)) evd WHERE idempleado = ? AND quincena = ?`;
-
-    connection.query(sql, data, (err, res) => {
-      if (err) return reject(errorDB());
-      if (res) return resolve(res);
-    });
-  });
-
-model.verificar = (data) =>
-  new Promise((resolve, reject) => {
-    //funcion validara si el empleado ya tiene recoleccion de efectivo de ese dia
-    let sql =
-      "SELECT * from recoleccion_efectivo WHERE fecha = ? AND idempleado = ?";
-
-    connection.query(sql, data, (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return resolve(true);
-      if (res) return reject(datosExistentes());
     });
   });
 

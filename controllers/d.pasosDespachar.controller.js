@@ -1,65 +1,35 @@
 import generadorId from "../assets/generadorId";
 import pasosDM from "../models/d.pasosDespachar.model";
+import errRes from "../respuestas/error.respuestas";
+const { sinRegistro } = errRes;
 
 const controller = {};
 
-controller.findEvaluacionesXempleado = async (req, res) => {
+controller.findEvaluacionesXEmpleado = async (req, res) => {
   try {
-    const { year, month, quincena, id } = req.params;
+    const { year, month, idEmpleado, quincena } = req.params;
     const fecha = `${year}-${month}-01`;
-    const pasos = await pasosDM.findCantidadEvaluacionesXempleado({
-      id: id,
-      fecha: fecha,
-      quincena: Number(quincena),
-    });
+    const identificador = await pasosDM.agruparEvaluaciones([
+      Number(idEmpleado),
+      fecha,
+      fecha,
+    ]);
+    const response = [];
 
-    let acumular = {
-      idempleado: pasos[0].idempleado,
-      nombre_completo: pasos[0].nombre_completo,
-      status: pasos[0].status,
-      evaluaciones: [],
-    };
-
-    console.log(pasos);
-
-    for (let i = 0; i < pasos.length; i++) {
-      const data = await pasosDM.findEvaluacionXempleado([
-        id,
-        pasos[i].identificador,
-      ]);
-      acumular.evaluaciones.push(data);
+    for (let i = 0; i < identificador.length; i++) {
+      const pasos = await pasosDM.findEvaluacionesXEmpleado(
+        identificador[i].identificador,
+        Number(quincena)
+      );
+      if (pasos.length > 0) {
+        response.push(pasos);
+      }
     }
 
-    res.status(200).json({ success: true, response: acumular });
-  } catch (err) {
-    console.log(err);
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
+    if (response.length < 1) throw sinRegistro();
 
-controller.findPasosXQuincenaXidempleado = async (req, res) => {
-  try {
-    const { year, month, idEmpleado } = req.params;
-    const fecha = `${year}-${month}-01`;
-    const cuerpo = [fecha, fecha, idEmpleado];
-    const quincena1 = await pasosDM.findPasosXQuincenaXidempleado([
-      ...cuerpo,
-      1,
-    ]);
-    const quincena2 = await pasosDM.findPasosXQuincenaXidempleado([
-      ...cuerpo,
-      2,
-    ]);
-    let response = { quincena1, quincena2 };
-
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
