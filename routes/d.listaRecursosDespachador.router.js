@@ -17,6 +17,7 @@ route.get(
   listaRecursosDespachador.findAllXQuicena
 );
 route.get("/get-recurso", listaRecursosDespachador.findRecursos);
+route.post("/buscar", listaRecursosDespachador.findXTiempo);
 route.post("/", listaRecursosDespachador.insert);
 route.put("/:idRecurso", listaRecursosDespachador.update);
 // route.delete(

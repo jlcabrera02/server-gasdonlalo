@@ -30,9 +30,33 @@ model.findEvaluacionesXEmpleado = (id, quincena) =>
 //Agrupar por identificador lo necesita el modelo findEvaluacionesXEmpleado
 model.agruparEvaluaciones = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT identificador FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND LAST_DAY(?) GROUP BY identificador ORDER BY fecha`;
+    let sql;
+    if (data.length > 2) {
+      sql = mysql.format(
+        `SELECT identificador FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND ? GROUP BY identificador ORDER BY fecha`,
+        data
+      );
+    } else {
+      sql = mysql.format(
+        `SELECT identificador FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND LAST_DAY(?) GROUP BY identificador ORDER BY fecha`,
+        [data[0], data[1], data[1]]
+      );
+    }
 
-    connection.query(sql, data, (err, res) => {
+    connection.query(sql, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findOne = (id) =>
+  new Promise((resolve, reject) => {
+    //funcion validara si el empleado ya tiene recoleccion de efectivo de ese dia
+    let sql =
+      "SELECT evd.*, pd.paso FROM evaluacion_despachar evd, paso_despachar pd WHERE evd.idpaso_despachar = pd.idpaso_despachar AND evd.identificador = ?";
+
+    connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -65,10 +89,17 @@ model.insert = (data) =>
 
 model.update = (data) =>
   new Promise((resolve, reject) => {
-    let sql =
-      "UPDATE evaluacion_despachar SET evaluacion = ? WHERE idevaluacion_despachar = ? AND identificador = ?";
+    let sql = "";
+
+    data.forEach((query) => {
+      sql += mysql.format(
+        "UPDATE evaluacion_despachar SET evaluacion = ? WHERE idevaluacion_despachar = ? AND idempleado = ?;  ",
+        query
+      );
+    });
 
     connection.query(sql, data, (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

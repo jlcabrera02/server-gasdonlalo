@@ -12,7 +12,6 @@ controller.findEvaluacionesXEmpleado = async (req, res) => {
     const identificador = await pasosDM.agruparEvaluaciones([
       Number(idEmpleado),
       fecha,
-      fecha,
     ]);
     const response = [];
 
@@ -44,6 +43,52 @@ controller.findPasos = async (req, res) => {
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findOne = async (req, res) => {
+  try {
+    const { identificador } = req.params;
+    const response = await pasosDM.findOne(identificador);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findEvaluacionesXTiempo = async (req, res) => {
+  try {
+    const { fechaInicio, fechaFinal, idEmpleado } = req.body;
+    const identificador = await pasosDM.agruparEvaluaciones([
+      Number(idEmpleado),
+      fechaInicio,
+      fechaFinal,
+    ]);
+    const response = [];
+
+    for (let i = 0; i < identificador.length; i++) {
+      const pasos = await pasosDM.findEvaluacionesXEmpleado(
+        identificador[i].identificador
+      );
+      if (pasos.length > 0) {
+        response.push(pasos);
+      }
+    }
+
+    // if (response.length < 1) throw sinRegistro();
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -92,10 +137,13 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
-    const { idEvaluacion } = req.params;
-    const { evaluacion, empleado } = req.body;
+    const { idEmpleado, evaluaciones } = req.body;
 
-    const cuerpo = [evaluacion, idEvaluacion, empleado];
+    const cuerpo = evaluaciones.map((el) => [
+      el.evaluacion,
+      el.idEvaluacionPaso,
+      Number(idEmpleado),
+    ]);
 
     let response = await pasosDM.update(cuerpo);
     console.log(response);

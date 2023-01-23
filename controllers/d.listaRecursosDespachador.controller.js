@@ -140,6 +140,26 @@ controller.findRecursos = async (req, res) => {
   }
 };
 
+controller.findXTiempo = async (req, res) => {
+  try {
+    const { idEmpleado, fechaInicio, fechaFinal } = req.body;
+    const cuerpo = [Number(idEmpleado), fechaInicio, fechaFinal];
+    const response = [];
+    const evaluaciones = await listaReM.findXTiempoGroup(cuerpo);
+    for (let i = 0; i < evaluaciones.length; i++) {
+      const ev = await listaReM.findXid(evaluaciones[i].identificador);
+      response.push(ev);
+    }
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.insert = async (req, res) => {
   try {
     const { empleado, fecha, recursos } = req.body;

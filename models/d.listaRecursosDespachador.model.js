@@ -110,6 +110,30 @@ model.validarNoDuplicadoXQuincena = (data) =>
     });
   });
 
+model.findXTiempoGroup = (data) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT identificador FROM recurso_despachador WHERE idempleado = ? AND fecha BETWEEN ? AND ? GROUP BY identificador ORDER BY fecha";
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findXid = (id) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM recurso_despachador WHERE identificador = ?";
+
+    connection.query(sql, id, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =
