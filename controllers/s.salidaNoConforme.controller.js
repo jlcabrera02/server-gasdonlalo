@@ -163,7 +163,6 @@ controller.insert = async (req, res) => {
       accionesCorregir,
       concesiones,
       idEmpleadoIncumple,
-      idEmpleadoAutoriza,
       idIncumplimiento,
     } = req.body;
 
@@ -173,7 +172,6 @@ controller.insert = async (req, res) => {
       acciones_corregir: accionesCorregir,
       concesiones,
       idempleado: Number(idEmpleadoIncumple),
-      idempleado_autoriza: Number(idEmpleadoAutoriza),
       idincumplimiento: Number(idIncumplimiento),
     };
 
@@ -181,6 +179,7 @@ controller.insert = async (req, res) => {
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -198,7 +197,6 @@ controller.update = async (req, res) => {
       accionesCorregir,
       concesiones,
       idEmpleadoIncumple,
-      idEmpleadoAutoriza,
       idIncumplimiento,
       idDepartamento,
     } = req.body;
@@ -214,7 +212,6 @@ controller.update = async (req, res) => {
         acciones_corregir: accionesCorregir,
         concesiones,
         idempleado: Number(idEmpleadoIncumple),
-        idempleado_autoriza: Number(idEmpleadoAutoriza),
         idincumplimiento: Number(idIncumplimiento),
       },
       Number(idSalidaNoConforme),

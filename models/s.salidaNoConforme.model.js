@@ -27,7 +27,7 @@ model.findSalidasNoConformesXMes = (fecha) =>
 
 model.findSalidasNoConformesXMesXIddepartamento = (fecha, id) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT TABLEA.*, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_autoriza, emp.iddepartamento AS iddepartamento_autoriza FROM (SELECT sn.idsalida_noconforme, sn.fecha, sn.descripcion_falla, sn.acciones_corregir, sn.concesiones, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_incumple, sn.idempleado_autoriza, emp.iddepartamento AS iddepartamento_incumple, sn.idempleado AS idempleado_incumple FROM salida_noconforme sn, empleado emp, incumplimiento inc WHERE sn.idempleado = emp.idempleado AND sn.idincumplimiento = inc.idincumplimiento AND sn.fecha BETWEEN ? AND LAST_DAY(?)) AS TABLEA, empleado emp WHERE TABLEA.idempleado_autoriza = emp.idempleado AND iddepartamento_incumple = ?`;
+    let sql = `SELECT sn.idsalida_noconforme, sn.fecha, sn.descripcion_falla, sn.acciones_corregir, sn.concesiones, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_incumple, emp.iddepartamento, sn.idempleado AS idempleado_incumple, inc.incumplimiento FROM salida_noconforme sn, empleado emp, incumplimiento inc WHERE sn.idempleado = emp.idempleado AND sn.idincumplimiento = inc.idincumplimiento AND sn.fecha BETWEEN ? AND LAST_DAY(?) AND emp.iddepartamento = ?`;
 
     connection.query(sql, [fecha, fecha, id], (err, res) => {
       if (err) return reject(errorDB());
@@ -38,9 +38,10 @@ model.findSalidasNoConformesXMesXIddepartamento = (fecha, id) =>
 
 model.findOne = (id) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT TABLEA.*, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_autoriza, emp.iddepartamento AS iddepartamento_autoriza FROM (SELECT sn.idsalida_noconforme, sn.fecha, sn.descripcion_falla, sn.acciones_corregir, sn.concesiones, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_incumple, sn.idempleado_autoriza, emp.iddepartamento AS iddepartamento_incumple, sn.idempleado AS idempleado_incumple FROM salida_noconforme sn, empleado emp, incumplimiento inc WHERE sn.idempleado = emp.idempleado AND sn.idincumplimiento = inc.idincumplimiento) AS TABLEA, empleado emp WHERE TABLEA.idempleado_autoriza = emp.idempleado AND TABLEA.idsalida_noconforme = ?`;
+    let sql = `SELECT sn.idsalida_noconforme, sn.fecha, sn.descripcion_falla, sn.acciones_corregir, sn.concesiones, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_incumple, emp.iddepartamento AS iddepartamento_incumple, sn.idempleado AS idempleado_incumple FROM salida_noconforme sn, empleado emp, incumplimiento inc WHERE sn.idempleado = emp.idempleado AND sn.idincumplimiento = inc.idincumplimiento AND sn.idsalida_noconforme = ?`;
 
     connection.query(sql, id, (err, res) => {
+      console.log(id);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
