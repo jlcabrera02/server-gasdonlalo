@@ -21,7 +21,13 @@ controller.findEvaluacionesXEmpleado = async (req, res) => {
         Number(quincena)
       );
       if (pasos.length > 0) {
-        response.push(pasos);
+        let attach = {
+          data: pasos,
+          total: identificador[i].total,
+          promedio: identificador[i].promedio,
+          qna: identificador[i].quincena,
+        };
+        response.push(attach);
       }
     }
 
@@ -42,7 +48,6 @@ controller.findPasos = async (req, res) => {
     const response = await pasosDM.findPasos();
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -57,7 +62,6 @@ controller.findOne = async (req, res) => {
     const response = await pasosDM.findOne(identificador);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -84,8 +88,6 @@ controller.findEvaluacionesXTiempo = async (req, res) => {
         response.push(pasos);
       }
     }
-
-    // if (response.length < 1) throw sinRegistro();
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -146,7 +148,6 @@ controller.update = async (req, res) => {
     ]);
 
     let response = await pasosDM.update(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -159,15 +160,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
-    const { idEvaluacion, longitud, id } = req.params;
-    const idSecond = Number(idEvaluacion) + Number(longitud);
-
-    let response = await pasosDM.delete([
-      Number(idEvaluacion),
-      idSecond,
-      Number(id),
-    ]);
-
+    const { identificador } = req.params;
+    let response = await pasosDM.delete(identificador);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

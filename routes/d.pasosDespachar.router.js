@@ -12,6 +12,6 @@ route.get("/:identificador", pasosDespachar.findOne);
 route.post("/buscar", pasosDespachar.findEvaluacionesXTiempo);
 route.post("/", pasosDespachar.insert);
 route.put("/", pasosDespachar.update);
-route.delete("/eliminar/:idEvaluacion/:longitud/:id", pasosDespachar.delete);
+route.delete("/eliminar/:identificador", pasosDespachar.delete);
 
 export default route;

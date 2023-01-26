@@ -33,13 +33,13 @@ model.agruparEvaluaciones = (data) =>
     let sql;
     if (data.length > 2) {
       sql = mysql.format(
-        `SELECT identificador FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND ? GROUP BY identificador ORDER BY fecha`,
-        data
+        `SELECT evd.*, ev.identificador FROM (SELECT *, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar) ev, (SELECT *, AVG(evd.pro) * 10 promedio FROM (SELECT SUM(evaluacion) total, AVG(evaluacion) pro, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND ? GROUP BY identificador) evd GROUP BY quincena) evd WHERE evd.quincena = ev.quincena AND ev.idempleado = ? AND ev.fecha BETWEEN ? AND ? GROUP BY identificador ORDER BY ev.fecha`,
+        [...data, ...data]
       );
     } else {
       sql = mysql.format(
-        `SELECT identificador FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND LAST_DAY(?) GROUP BY identificador ORDER BY fecha`,
-        [data[0], data[1], data[1]]
+        `SELECT evd.*, ev.identificador, suma.total FROM (SELECT *, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar) ev, (SELECT evd.quincena, AVG(evd.pro) * 10 promedio FROM (SELECT SUM(evaluacion) total, AVG(evaluacion) pro, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND LAST_DAY(?) GROUP BY identificador) evd GROUP BY quincena) evd, (SELECT SUM(evaluacion) total, identificador FROM evaluacion_despachar GROUP BY identificador) suma WHERE evd.quincena = ev.quincena AND ev.identificador = suma.identificador AND ev.idempleado = ? AND ev.fecha BETWEEN ? AND LAST_DAY(?) GROUP BY identificador ORDER BY ev.fecha`,
+        [data[0], data[1], data[1], data[0], data[1], data[1]]
       );
     }
 
@@ -99,7 +99,6 @@ model.update = (data) =>
     });
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
