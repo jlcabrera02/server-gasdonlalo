@@ -313,5 +313,3 @@ INSERT INTO acceso (user, idpermiso) VALUES
 ("jose", 14),
 ("jose", 17),
 ("jose", 20);
-
-INSERT INTO acceso VALUES ("sralcocer", )

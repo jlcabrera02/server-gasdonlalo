@@ -198,12 +198,7 @@ controller.update = async (req, res) => {
       concesiones,
       idEmpleadoIncumple,
       idIncumplimiento,
-      idDepartamento,
     } = req.body;
-
-    let departamento = await empleadoM.validarDepartamento(idEmpleadoIncumple);
-    if (departamento != idDepartamento)
-      throw errorMath("El empleado no pertenece al departamento");
 
     const cuerpo = [
       {
