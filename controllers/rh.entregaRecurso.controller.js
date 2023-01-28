@@ -31,12 +31,13 @@ controller.findRecursosXId = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
-    const { fecha, idEmpleado, cantidad, recurso } = req.body;
+    const { fecha, idEmpleado, cantidad, recurso, tipo } = req.body;
     const cuerpo = {
       fecha,
       idempleado_recibe: Number(idEmpleado),
       cantidad: Number(cantidad),
       recurso,
+      tipo_recibo: Number(tipo),
     };
     const response = await erM.insert(cuerpo);
     res.status(200).json({ success: true, response });
