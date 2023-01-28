@@ -43,10 +43,37 @@ controller.register = async (req, res) => {
   }
 };
 
-controller.as = async (req, res) => {
+controller.findPermisos = async (req, res) => {
   try {
-    const { token } = req.body;
-    let response = auth.verificar(token);
+    const { idEmpleado } = req.params;
+    let response = auth.findPermisos(idEmpleado);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findAll = async (req, res) => {
+  try {
+    let response = await auth.findAll();
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findPermisosXEmpleado = async (req, res) => {
+  try {
+    const { user } = req.params;
+    let response = await auth.findPermisosXEmpleado(user);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

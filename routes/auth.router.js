@@ -3,7 +3,8 @@ import estacionService from "../controllers/auth.controller";
 
 const route = router();
 
-route.post("/lo", estacionService.as);
+route.get("/usuarios", estacionService.findAll);
+route.get("/permisos/:user", estacionService.findPermisosXEmpleado);
 route.post("/login", estacionService.login);
 route.post("/register", estacionService.register);
 

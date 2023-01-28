@@ -20,6 +20,29 @@ model.findPermisos = (user) =>
     });
   });
 
+model.findAll = () =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT emp.*, user.username FROM empleado emp LEFT JOIN user ON user.idempleado = emp.idempleado";
+
+    connection.query(sql, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(errorLogin());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findPermisosXEmpleado = (crendentials) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM permiso LEFT JOIN (SELECT * FROM acceso WHERE acceso.user = ?) acc ON permiso.idpermiso = acc.idpermiso WHERE permiso.idpermiso > 1`;
+
+    connection.query(sql, crendentials, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(errorLogin());
+      if (res) return resolve(res);
+    });
+  });
+
 model.login = (crendentials) =>
   new Promise((resolve, reject) => {
     let sql =
