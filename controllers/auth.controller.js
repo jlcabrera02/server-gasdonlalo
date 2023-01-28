@@ -7,10 +7,19 @@ controller.login = async (req, res) => {
   try {
     const { user, password } = req.body;
     const cuerpo = [user, password];
-    let userData = await auth.login(cuerpo);
-    let token = auth.generarToken(userData);
-    res.status(200).json({ success: true, auth: userData, token });
+    const userData = await auth.login(cuerpo);
+    const permisos = await auth.findPermisos(user);
+    const permisosId = permisos.map((el) => [el.idpermiso, el.departamento]);
+    const token = auth.generarToken(userData);
+    res.status(200).json({
+      success: true,
+      auth: userData,
+      token,
+      permisos: permisosId,
+      permisosGeneral: permisos,
+    });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

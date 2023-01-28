@@ -8,6 +8,18 @@ const { errorDB, sinRegistro, errorLogin } = resErr;
 
 const model = {};
 
+model.findPermisos = (user) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT permiso.* FROM acceso, permiso WHERE acceso.idpermiso = permiso.idpermiso AND user = ?";
+
+    connection.query(sql, user, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(errorLogin());
+      if (res) return resolve(res);
+    });
+  });
+
 model.login = (crendentials) =>
   new Promise((resolve, reject) => {
     let sql =

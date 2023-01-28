@@ -253,3 +253,65 @@ INSERT INTO concurso VALUES
 (1, "madrugador"),
 (2, "octanoso"),
 (3, "aceitoso");
+
+INSERT INTO user VALUES 
+("sralcocer", "sralcocer@donlalo.com.mx", MD5("alcocer2023"), CURRENT_TIME, 50),
+("jose", "jose@donlalo.com.mx", MD5("jose2023"), CURRENT_TIME, 51),
+("raul_al", "raul_al@donlalo.com.mx", MD5("altunar2023"), CURRENT_TIME, 77);
+
+INSERT INTO permiso (idpermiso, permiso, peticion, departamento) VALUES 
+(1, "Universal", "Universal", 1),
+( 2, "obtener y capturar datos", "Monto Faltante", 2)
+(3, "actualizar", "Monto Faltante", 2),
+(4, "eliminar", "Monto Faltante", 2),
+(5, "obtener y capturar datos", "Checklist Bomba", 2),
+(6, "actualizar", "Checklist Bomba", 2),
+(7, "eliminar", "Checklist Bomba", 2),
+(8, "obtener y capturar datos", "Evaluación Uniforme", 2),
+(9, "actualizar", "Evaluación Uniforme", 2),
+(10, "eliminar", "Evaluación Uniforme", 2),
+(11, "obtener y capturar datos", "Recolección Efectivo", 2),
+(12, "actualizar", "Recolección Efectivo", 2),
+(13, "eliminar", "Recolección Efectivo", 2),
+(14, "obtener y capturar datos", "Pasos Para Despachar", 2),
+(15, "actualizar", "Pasos Para Despachar", 2),
+(16, "eliminar", "Pasos Para Despachar", 2),
+(17, "obtener y capturar datos", "Recursos Despachador", 2),
+(18, "actualizar", "Recursos Despachador", 2),
+(19, "eliminar", "Recursos Despachador", 2),
+(20, "obtener y capturar datos", "Salidas No Conformes", 3),
+(21, "actualizar", "Salidas No Conformes", 3),
+(22, "eliminar", "Salidas No Conformes", 3);
+
+INSERT INTO acceso (user, idpermiso) VALUES 
+("sralcocer", 1),
+("raul_al", 2),
+("raul_al", 3),
+("raul_al", 4),
+("raul_al", 5),
+("raul_al", 6),
+("raul_al", 7),
+("raul_al", 8),
+("raul_al", 9),
+("raul_al", 10),
+("raul_al", 11),
+("raul_al", 12),
+("raul_al", 13),
+("raul_al", 14),
+("raul_al", 15),
+("raul_al", 16),
+("raul_al", 17),
+("raul_al", 18),
+("raul_al", 19),
+("raul_al", 20),
+("raul_al", 21),
+("raul_al", 22),
+("jose", 2),
+("jose", 5),
+("jose", 8),
+("jose", 11),
+("jose", 14),
+("jose", 17),
+("jose", 20);
+
+INSERT INTO acceso VALUES ("sralcocer", )
