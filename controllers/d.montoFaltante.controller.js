@@ -4,7 +4,7 @@ import resErr from "../respuestas/error.respuestas";
 import Decimal from "decimal.js-light";
 import operacionTiempo from "../assets/operacionTiempo";
 import formatTiempo from "../assets/formatTiempo";
-const { errorMath } = resErr;
+const { errorMath, sinRegistro } = resErr;
 
 const controller = {};
 
@@ -160,6 +160,8 @@ controller.findXTiempo = async (req, res) => {
         });
       }
     }
+    const registros = response.filter((el) => el.nombre);
+    if (registros.length <= 0) throw sinRegistro();
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);

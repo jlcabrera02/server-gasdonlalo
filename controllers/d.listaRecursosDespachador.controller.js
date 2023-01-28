@@ -143,13 +143,32 @@ controller.findRecursos = async (req, res) => {
 controller.findXTiempo = async (req, res) => {
   try {
     const { idEmpleado, fechaInicio, fechaFinal } = req.body;
-    const cuerpo = [Number(idEmpleado), fechaInicio, fechaFinal];
+    let cuerpo = [];
+    if (fechaInicio || fechaFinal) {
+      cuerpo = [Number(idEmpleado), fechaInicio, fechaFinal];
+    } else {
+      cuerpo = [Number(idEmpleado)];
+    }
     const response = [];
     const evaluaciones = await listaReM.findXTiempoGroup(cuerpo);
     for (let i = 0; i < evaluaciones.length; i++) {
       const ev = await listaReM.findXid(evaluaciones[i].identificador);
       response.push(ev);
     }
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findByIdentificador = async (req, res) => {
+  try {
+    const { identificador } = req.params;
+    const response = await listaReM.findByIdentificador(identificador);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -205,10 +224,13 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
-    const { idRecurso } = req.params;
-    const { evaluacion, empleado } = req.body;
+    const { evaluaciones, idEmpleado } = req.body;
 
-    const cuerpo = [evaluacion, idRecurso, empleado];
+    const cuerpo = evaluaciones.map((el) => [
+      Number(el.evaluacion),
+      Number(el.idRecursoDespachador),
+      Number(idEmpleado),
+    ]);
 
     const response = await listaReM.update(cuerpo);
     res.status(200).json({ success: true, response });
@@ -223,15 +245,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
-    const { idEvaluacion, longitud, id } = req.params;
-    const idSecond = Number(idEvaluacion) + Number(longitud);
-
-    let response = await listaReM.delete([
-      Number(idEvaluacion),
-      idSecond,
-      Number(id),
-    ]);
-
+    const { identificador } = req.params;
+    const response = await listaReM.delete(identificador);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

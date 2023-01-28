@@ -17,12 +17,10 @@ route.get(
   listaRecursosDespachador.findAllXQuicena
 );
 route.get("/get-recurso", listaRecursosDespachador.findRecursos);
+route.get("/:identificador", listaRecursosDespachador.findByIdentificador);
 route.post("/buscar", listaRecursosDespachador.findXTiempo);
 route.post("/", listaRecursosDespachador.insert);
-route.put("/:idRecurso", listaRecursosDespachador.update);
-// route.delete(
-//   "/eliminar/:idEvaluacion/:longitud/:id",
-//   listaRecursosDespachador.delete
-// );
+route.put("/", listaRecursosDespachador.update);
+route.delete("/eliminar/:identificador", listaRecursosDespachador.delete);
 
 export default route;

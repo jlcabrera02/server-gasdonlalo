@@ -1,6 +1,9 @@
 import recoleccionEM from "../models/d.recoleccionEfectivo.model";
 import operacionTiempo from "../assets/operacionTiempo";
 import formatTiempo from "../assets/formatTiempo";
+import errRes from "../respuestas/error.respuestas";
+
+const { sinRegistro } = errRes;
 
 const controller = {};
 
@@ -126,6 +129,9 @@ controller.findXTiempo = async (req, res) => {
         });
       }
     }
+
+    const registros = response.filter((el) => el.nombre);
+    if (registros.length <= 0) throw sinRegistro();
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);

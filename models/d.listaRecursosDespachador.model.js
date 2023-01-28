@@ -8,6 +8,19 @@ const model = {};
 const tiempoLocal = (date) =>
   new Date(new Date(date).getTime() + new Date().getTimezoneOffset() * 60000);
 
+model.findByIdentificador = (id) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT rd.*, r.recurso FROM recurso_despachador rd, recurso r WHERE rd.idrecurso = r.idrecurso AND rd.identificador = ?";
+
+    connection.query(sql, id, (err, res) => {
+      console.log(err);
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 //Obtiene todas las evaluaciones del empleado por el periodo de tiempo que le asignemos
 model.findListRecursosXmes = (fecha) =>
   new Promise((resolve, reject) => {
@@ -112,8 +125,14 @@ model.validarNoDuplicadoXQuincena = (data) =>
 
 model.findXTiempoGroup = (data) =>
   new Promise((resolve, reject) => {
-    let sql =
-      "SELECT identificador FROM recurso_despachador WHERE idempleado = ? AND fecha BETWEEN ? AND ? GROUP BY identificador ORDER BY fecha";
+    let sql;
+    if (data.length > 2) {
+      sql =
+        "SELECT identificador FROM recurso_despachador WHERE idempleado = ? AND fecha BETWEEN ? AND ? GROUP BY identificador ORDER BY fecha";
+    } else {
+      sql =
+        "SELECT identificador FROM recurso_despachador WHERE idempleado = ? GROUP BY identificador ORDER BY fecha";
+    }
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -125,7 +144,7 @@ model.findXTiempoGroup = (data) =>
 model.findXid = (id) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM recurso_despachador WHERE identificador = ?";
+      "SELECT rcd.*, emp.nombre, emp.apellido_paterno, emp.apellido_materno, CASE WHEN DAY(rcd.fecha) < 16 THEN 1 WHEN DAY(rcd.fecha) > 15 THEN 2 END AS quincena FROM recurso_despachador rcd, empleado emp WHERE emp.idempleado = rcd.idempleado AND rcd.identificador = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -148,10 +167,17 @@ model.insert = (data) =>
 
 model.update = (data) =>
   new Promise((resolve, reject) => {
-    let sql =
-      "UPDATE recurso_despachador SET evaluacion = ? WHERE idrecurso_despachador = ? AND idempleado = ?";
+    let sql = "";
+
+    data.forEach((query) => {
+      sql += mysql.format(
+        "UPDATE recurso_despachador SET evaluacion = ? WHERE idrecurso_despachador = ? AND idempleado = ?; ",
+        query
+      );
+    });
 
     connection.query(sql, data, (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
@@ -160,8 +186,7 @@ model.update = (data) =>
 
 model.delete = (data) =>
   new Promise((resolve, reject) => {
-    let sql =
-      "DELETE FROM evaluacion_despachar WHERE idevaluacion_despachar >= ? AND idevaluacion_despachar < ? AND idempleado = ?";
+    let sql = "DELETE FROM recurso_despachador WHERE identificador = ?";
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
