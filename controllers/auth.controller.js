@@ -28,10 +28,40 @@ controller.login = async (req, res) => {
   }
 };
 
+controller.registerPermisos = async (req, res) => {
+  try {
+    const { user, permiso } = req.body;
+    const cuerpo = [user, Number(permiso)];
+    let response = await auth.registerPermisos(cuerpo);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.quitarPermisos = async (req, res) => {
+  try {
+    const { user, permiso } = req.body;
+    const cuerpo = [user, Number(permiso)];
+    let response = await auth.quitarPermisos(cuerpo);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.register = async (req, res) => {
   try {
     const { user, password, idEmpleado } = req.body;
-    const cuerpo = [user, mysql.raw(`MD5(${password})`), Number(idEmpleado)];
+    const cuerpo = [user, mysql.raw(`MD5('${password}')`), Number(idEmpleado)];
     let response = await auth.register(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {

@@ -34,7 +34,7 @@ model.findAll = () =>
 
 model.findPermisosXEmpleado = (crendentials) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT * FROM permiso LEFT JOIN (SELECT * FROM acceso WHERE acceso.user = ?) acc ON permiso.idpermiso = acc.idpermiso WHERE permiso.idpermiso > 1`;
+    let sql = `SELECT permiso.*, acc.user FROM permiso LEFT JOIN (SELECT * FROM acceso WHERE acceso.user = ?) acc ON permiso.idpermiso = acc.idpermiso WHERE permiso.idpermiso > 1`;
 
     connection.query(sql, crendentials, (err, res) => {
       if (err) return reject(errorDB());
@@ -55,14 +55,46 @@ model.login = (crendentials) =>
     });
   });
 
+model.registerPermisos = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = "INSERT INTO acceso (user, idpermiso) VALUE (?, ?)";
+    connection.query(sql, data, (err, res) => {
+      console.log(err);
+      if (err) {
+        if (err.errno === 1062) return reject(errorDB("Ya existe el usuario"));
+        return reject(errorDB());
+      }
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.quitarPermisos = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = "DELETE FROM acceso WHERE user = ? AND idpermiso = ?";
+    connection.query(sql, data, (err, res) => {
+      console.log(res);
+      if (err) {
+        if (err.errno === 1062) return reject(errorDB("Ya existe el usuario"));
+        return reject(errorDB());
+      }
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.register = (data) =>
   new Promise((resolve, reject) => {
     let sql =
       "INSERT INTO user (username, password, idempleado) VALUE (?, ?, ?)";
-
     connection.query(sql, data, (err, res) => {
       if (err) {
-        if (err.errno === 1062) return reject(errorDB("Ya existe el usuario"));
+        if (err.errno === 1062)
+          return reject(
+            errorDB(
+              "Ya existe el usuario el nombre de usuario, por favor escojer otro"
+            )
+          );
         return reject(errorDB());
       }
       if (res.length < 1) return reject(sinRegistro());

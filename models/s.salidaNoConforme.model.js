@@ -41,7 +41,6 @@ model.findOne = (id) =>
     let sql = `SELECT sn.idsalida_noconforme, inc.idincumplimiento, sn.fecha, sn.descripcion_falla, sn.acciones_corregir, sn.concesiones, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_incumple, emp.iddepartamento AS iddepartamento_incumple, sn.idempleado AS idempleado_incumple FROM salida_noconforme sn, empleado emp, incumplimiento inc WHERE sn.idempleado = emp.idempleado AND sn.idincumplimiento = inc.idincumplimiento AND sn.idsalida_noconforme = ?`;
 
     connection.query(sql, id, (err, res) => {
-      console.log(id);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
