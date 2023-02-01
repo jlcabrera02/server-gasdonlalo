@@ -22,9 +22,15 @@ controller.find = async (req, res) => {
 controller.findXEstatus = async (req, res) => {
   try {
     const { estatus } = req.params;
-    let response = await seM.findXEstatus(Number(estatus));
+    let response;
+    if (Number(estatus) === 6) {
+      response = await seM.findXTrabajando();
+    } else {
+      response = await seM.findXEstatus(Number(estatus));
+    }
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -121,6 +127,7 @@ controller.update = async (req, res) => {
       ]);
     }
     if (solicitud.estatus === "Practica" && ns === 1) {
+      console.log("jp;a");
       await empleadoM.update([empData, solicitud.idempleado]);
       response = await seM.update([
         { estatus: ns, motivo: motivo || null },

@@ -3,6 +3,7 @@ import se from "../controllers/rh.solicitudEmpleo.controller";
 
 const route = router();
 
+route.get("/", se.find);
 route.get("/estatus/:estatus", se.findXEstatus);
 route.post("/nuevo", se.insert);
 route.put("/control/:idSolicitud", se.update);

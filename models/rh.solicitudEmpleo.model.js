@@ -38,6 +38,18 @@ model.findXEstatus = (id) =>
     });
   });
 
+model.findXTrabajando = () =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT * FROM solicitud_empleo WHERE estatus = 1 OR estatus = 2;";
+
+    connection.query(sql, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =
@@ -55,6 +67,7 @@ model.update = (data) =>
     let sql = "UPDATE solicitud_empleo SET ? WHERE idsolicitud_empleo = ?";
 
     connection.query(sql, data, (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
