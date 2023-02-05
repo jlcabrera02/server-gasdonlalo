@@ -4,14 +4,26 @@ import Jwt from "jsonwebtoken";
 import { config } from "dotenv";
 config(); //
 
-const { errorDB, sinRegistro, errorLogin } = resErr;
+const { errorDB, sinRegistro, errorLogin, sinCambios } = resErr;
 
 const model = {};
+
+model.findPermisosByUser = (user) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT permiso.*, at.area FROM acceso, permiso, area_trabajo at WHERE acceso.idpermiso = permiso.idpermiso AND permiso.idarea_trabajo = at.idarea_trabajo AND user = ? ORDER BY permiso.idarea_trabajo";
+
+    connection.query(sql, user, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(errorLogin());
+      if (res) return resolve(res);
+    });
+  });
 
 model.findPermisos = (user) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT permiso.* FROM acceso, permiso WHERE acceso.idpermiso = permiso.idpermiso AND user = ?";
+      "SELECT permiso.*, at.area FROM permiso, area_trabajo at WHERE permiso.idarea_trabajo = at.idarea_trabajo AND idpermiso > 1 ORDER BY permiso.idarea_trabajo";
 
     connection.query(sql, user, (err, res) => {
       if (err) return reject(errorDB());
@@ -32,11 +44,22 @@ model.findAll = () =>
     });
   });
 
-model.findPermisosXEmpleado = (crendentials) =>
+model.findByIdEmpleado = (id) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT permiso.*, acc.user FROM permiso LEFT JOIN (SELECT * FROM acceso WHERE acceso.user = ?) acc ON permiso.idpermiso = acc.idpermiso WHERE permiso.idpermiso > 1`;
+    let sql =
+      "SELECT emp.*, user.username FROM empleado emp LEFT JOIN user ON user.idempleado = emp.idempleado WHERE user.idempleado = ?";
 
-    connection.query(sql, crendentials, (err, res) => {
+    connection.query(sql, id, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
+model.findPermisosXEmpleado = (id) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT permiso.*, at.area, acc.user FROM area_trabajo at, permiso LEFT JOIN (SELECT * FROM acceso, user WHERE user.username = acceso.user AND user.idempleado = ?) acc ON permiso.idpermiso = acc.idpermiso WHERE at.idarea_trabajo = permiso.idarea_trabajo AND permiso.idpermiso > 1`;
+
+    connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(errorLogin());
       if (res) return resolve(res);
@@ -57,8 +80,8 @@ model.login = (crendentials) =>
 
 model.registerPermisos = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "INSERT INTO acceso (user, idpermiso) VALUE (?, ?)";
-    connection.query(sql, data, (err, res) => {
+    let sql = "INSERT INTO acceso (user, idpermiso) VALUE ?";
+    connection.query(sql, [data], (err, res) => {
       console.log(err);
       if (err) {
         if (err.errno === 1062) return reject(errorDB("Ya existe el usuario"));
@@ -71,9 +94,9 @@ model.registerPermisos = (data) =>
 
 model.quitarPermisos = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "DELETE FROM acceso WHERE user = ? AND idpermiso = ?";
+    let sql = "DELETE FROM acceso WHERE user = ? AND idpermiso IN (?)";
     connection.query(sql, data, (err, res) => {
-      console.log(res);
+      console.log(err);
       if (err) {
         if (err.errno === 1062) return reject(errorDB("Ya existe el usuario"));
         return reject(errorDB());
@@ -102,10 +125,20 @@ model.register = (data) =>
     });
   });
 
-model.generarToken = (datos) => {
+model.changePass = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `UPDATE user SET password = ? WHERE username = ?`;
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
+model.generarToken = (datos, permisos) => {
   const payload = {
     check: true,
-    data: datos,
+    data: { datos, permisos },
   };
 
   const token = Jwt.sign(payload, process.env.PASSWORD_DB, {
@@ -118,7 +151,7 @@ model.generarToken = (datos) => {
   };
 };
 
-model.verificar = (header, permisos = []) => {
+model.verificar = (header, idPer = null) => {
   if (!header) {
     return {
       success: false,
@@ -140,13 +173,10 @@ model.verificar = (header, permisos = []) => {
     } else {
       let acceso = false;
 
-      if (permisos.length > 0) {
-        for (let el in permisos) {
-          if (roles[permisos[el]]) {
-            acceso = true;
-            break;
-          }
-        }
+      if (idPer) {
+        acceso = tokenCall.data.permisos.some(
+          (el) => el[0] === 1 || el[0] === idPer
+        );
       }
 
       response = {

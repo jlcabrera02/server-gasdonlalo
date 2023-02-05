@@ -8,9 +8,9 @@ controller.login = async (req, res) => {
     const { user, password } = req.body;
     const cuerpo = [user, password];
     const userData = await auth.login(cuerpo);
-    const permisos = await auth.findPermisos(user);
-    const permisosId = permisos.map((el) => [el.idpermiso, el.departamento]);
-    const token = auth.generarToken(userData);
+    const permisos = await auth.findPermisosByUser(user);
+    const permisosId = permisos.map((el) => [el.idpermiso, el.idarea_trabajo]);
+    const token = auth.generarToken(userData, permisosId);
     res.status(200).json({
       success: true,
       auth: userData,
@@ -28,10 +28,24 @@ controller.login = async (req, res) => {
   }
 };
 
+controller.findPermisos = async (req, res) => {
+  try {
+    let response = await auth.findPermisos();
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.registerPermisos = async (req, res) => {
   try {
     const { user, permiso } = req.body;
-    const cuerpo = [user, Number(permiso)];
+    const cuerpo = permiso.map((el) => [user, el]);
     let response = await auth.registerPermisos(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -46,7 +60,8 @@ controller.registerPermisos = async (req, res) => {
 controller.quitarPermisos = async (req, res) => {
   try {
     const { user, permiso } = req.body;
-    const cuerpo = [user, Number(permiso)];
+    const permisos = permiso.map((el) => Number(el));
+    const cuerpo = [user, permisos];
     let response = await auth.quitarPermisos(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -73,10 +88,9 @@ controller.register = async (req, res) => {
   }
 };
 
-controller.findPermisos = async (req, res) => {
+controller.findAll = async (req, res) => {
   try {
-    const { idEmpleado } = req.params;
-    let response = auth.findPermisos(idEmpleado);
+    let response = await auth.findAll();
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -87,9 +101,10 @@ controller.findPermisos = async (req, res) => {
   }
 };
 
-controller.findAll = async (req, res) => {
+controller.findByIdEmpleado = async (req, res) => {
   try {
-    let response = await auth.findAll();
+    const { idEmpleado } = req.params;
+    let response = (await auth.findByIdEmpleado(idEmpleado)) || null;
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -104,6 +119,22 @@ controller.findPermisosXEmpleado = async (req, res) => {
   try {
     const { user } = req.params;
     let response = await auth.findPermisosXEmpleado(user);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.changePass = async (req, res) => {
+  try {
+    const { user, newPassword } = req.body;
+
+    const cuerpo = [mysql.raw(`MD5('${newPassword}')`), user];
+    let response = await auth.changePass(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

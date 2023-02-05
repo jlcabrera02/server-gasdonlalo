@@ -1,7 +1,9 @@
 import salidaNoCM from "../models/s.salidaNoConforme.model";
 import empleadoM from "../models/rh.empleado.model";
+import auth from "../models/auth.model";
 import resErr from "../respuestas/error.respuestas";
 const { errorMath } = resErr;
+const { verificar } = auth;
 
 const controller = {};
 
@@ -12,6 +14,7 @@ controller.findTotalSalidasXDiaXEmpleado = async (req, res) => {
     const response = await salidaNoCM.findTotalSalidasXDiaXEmpleado(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -27,6 +30,7 @@ controller.findSalidasNoConformesXMes = async (req, res) => {
     const response = await salidaNoCM.findSalidasNoConformesXMes(fecha);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -45,6 +49,7 @@ controller.findSalidasNoConformesXMesXIddepartamento = async (req, res) => {
     );
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -65,6 +70,7 @@ controller.findSalidasXInconformidadXMesXiddepartemento = async (req, res) => {
       ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -75,7 +81,7 @@ controller.findSalidasXInconformidadXMesXiddepartemento = async (req, res) => {
 
 controller.findSalidasXSemana = async (req, res) => {
   try {
-    const { year, month } = req.params;
+    const { year, month, idSalida } = req.params;
     const fecha = `${year}-${month}-01`;
     let diasDelMes = new Date(year, month, 0).getDate(); //Me obtiene el numero de dias del mes
     let numSemana = diasDelMes / 7 > 4 ? 5 : 4; //Me obtiene cuantas semanas tiene el mes
@@ -83,6 +89,7 @@ controller.findSalidasXSemana = async (req, res) => {
       1,
       fecha,
     ]);
+    console.log(empleados);
     let acumulador = [];
     for (let i = 0; i < empleados.length; i++) {
       let semanas = [];
@@ -118,6 +125,7 @@ controller.findSalidasXSemana = async (req, res) => {
             nombre_completo: empleados[i].nombre_completo,
             total: response.length > 0 ? response[0].total : 0,
           });
+          console.log(response);
         }
         iterador = iterador + 7;
       }
@@ -125,6 +133,7 @@ controller.findSalidasXSemana = async (req, res) => {
     }
     res.status(200).json({ success: true, response: acumulador });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -139,6 +148,7 @@ controller.findOne = async (req, res) => {
     const response = await salidaNoCM.findOne(idSalida);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -148,6 +158,8 @@ controller.findOne = async (req, res) => {
 };
 
 controller.insert = async (req, res) => {
+  let user = verificar(req.headers.authorization, 20);
+  if (!user.success) throw user;
   try {
     const {
       fecha,
@@ -158,20 +170,21 @@ controller.insert = async (req, res) => {
       idIncumplimiento,
     } = req.body;
 
-    console.log(req.headers);
-
     const cuerpo = {
       fecha,
       descripcion_falla: descripcionFalla,
       acciones_corregir: accionesCorregir,
       concesiones,
       idempleado: Number(idEmpleadoIncumple),
+      idempleado_autoriza: Number(user.token.data.datos.idempleado),
       idincumplimiento: Number(idIncumplimiento),
     };
 
     let response = await salidaNoCM.insert(cuerpo);
+    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -189,8 +202,14 @@ controller.update = async (req, res) => {
       accionesCorregir,
       concesiones,
       idEmpleadoIncumple,
+      idEmpleadoAutoriza,
       idIncumplimiento,
+      idDepartamento,
     } = req.body;
+
+    let departamento = await empleadoM.validarDepartamento(idEmpleadoIncumple);
+    if (departamento != idDepartamento)
+      throw errorMath("El empleado no pertenece al departamento");
 
     const cuerpo = [
       {
@@ -199,12 +218,14 @@ controller.update = async (req, res) => {
         acciones_corregir: accionesCorregir,
         concesiones,
         idempleado: Number(idEmpleadoIncumple),
+        idempleado_autoriza: Number(idEmpleadoAutoriza),
         idincumplimiento: Number(idIncumplimiento),
       },
       Number(idSalidaNoConforme),
     ];
 
     let response = await salidaNoCM.update(cuerpo);
+    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -219,6 +240,7 @@ controller.delete = async (req, res) => {
   try {
     const { idSalidaNoConforme } = req.params;
     let response = await salidaNoCM.delete(idSalidaNoConforme);
+    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

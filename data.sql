@@ -256,10 +256,22 @@ INSERT INTO concurso VALUES
 
 INSERT INTO user VALUES 
 ("sralcocer", "sralcocer@donlalo.com.mx", MD5("alcocer2023"), CURRENT_TIME, 50),
-("jose", "jose@donlalo.com.mx", MD5("jose2023"), CURRENT_TIME, 77),
+("jose", "jose@donlalo.com.mx", MD5("jose2023"), CURRENT_TIME, 59),
 ("raul_al", "raul_al@donlalo.com.mx", MD5("altunar2023"), CURRENT_TIME, 51);
 
-INSERT INTO permiso (idpermiso, permiso, peticion, departamento) VALUES 
+INSERT INTO area_trabajo VALUES 
+(1, "Super usuario"),
+(2, "Despacho"),
+(3, "Salidas no conformes"),
+(4, "Mantenimiento"),
+(5, "Almacen"),
+(6, "Calidad"),
+(7, "Recursos Humanos"),
+(8, "Administrativos"),
+(9, "Seguridad"),
+(10, "Documentos SGG");
+
+INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo) VALUES 
 (1, "Universal", "Universal", 1),
 ( 2, "obtener y capturar datos", "Monto Faltante", 2),
 (3, "actualizar", "Monto Faltante", 2),
