@@ -7,6 +7,10 @@ route.get(
   "/inconformidad/:year/:month/:iddepartamento",
   salidaNoConforme.findSalidasXInconformidadXMesXiddepartemento
 );
+route.get(
+  "/pendientes/:year/:month",
+  salidaNoConforme.findSalidasNoConformesXMesPendientes
+);
 route.get("/semanas/:year/:month", salidaNoConforme.findSalidasXSemana);
 route.get("/:idSalida", salidaNoConforme.findOne);
 route.get("/:year/:month", salidaNoConforme.findSalidasNoConformesXMes);

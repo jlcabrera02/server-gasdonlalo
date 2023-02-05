@@ -14,7 +14,6 @@ controller.findTotalSalidasXDiaXEmpleado = async (req, res) => {
     const response = await salidaNoCM.findTotalSalidasXDiaXEmpleado(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -30,7 +29,45 @@ controller.findSalidasNoConformesXMes = async (req, res) => {
     const response = await salidaNoCM.findSalidasNoConformesXMes(fecha);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findSalidasNoConformesXMesPendientes = async (req, res) => {
+  try {
+    const { year, month } = req.params;
+    let fecha = `${year}-${month}-01`;
+    const response = await salidaNoCM.findSNCPendiente([fecha, fecha]);
+    response.forEach((el) => {
+      el.empleadoIncumple = {
+        nombre: el.nombre,
+        idempleado: el.idempleado,
+        apellido_paterno: el.apellido_paterno,
+        apellido_materno: el.apellido_materno,
+      };
+      el.empleadoAutoriza = {
+        idempleado: el.idempleado_autoriza,
+        nombre: el.nombrea,
+        apellido_paterno: el.apellidopa,
+        apellido_materno: el.apellidoma,
+      };
+
+      delete el.idempleado;
+      delete el.idempleado_autoriza;
+      delete el.nombre;
+      delete el.apellido_paterno;
+      delete el.apellido_materno;
+      delete el.idempleado_autoriza;
+      delete el.nombrea;
+      delete el.apellidopa;
+      delete el.apellidoma;
+    });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -49,7 +86,6 @@ controller.findSalidasNoConformesXMesXIddepartamento = async (req, res) => {
     );
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -70,7 +106,6 @@ controller.findSalidasXInconformidadXMesXiddepartemento = async (req, res) => {
       ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -89,7 +124,6 @@ controller.findSalidasXSemana = async (req, res) => {
       1,
       fecha,
     ]);
-    console.log(empleados);
     let acumulador = [];
     for (let i = 0; i < empleados.length; i++) {
       let semanas = [];
@@ -125,7 +159,6 @@ controller.findSalidasXSemana = async (req, res) => {
             nombre_completo: empleados[i].nombre_completo,
             total: response.length > 0 ? response[0].total : 0,
           });
-          console.log(response);
         }
         iterador = iterador + 7;
       }
@@ -133,7 +166,6 @@ controller.findSalidasXSemana = async (req, res) => {
     }
     res.status(200).json({ success: true, response: acumulador });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -148,7 +180,6 @@ controller.findOne = async (req, res) => {
     const response = await salidaNoCM.findOne(idSalida);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -181,10 +212,8 @@ controller.insert = async (req, res) => {
     };
 
     let response = await salidaNoCM.insert(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -225,7 +254,6 @@ controller.update = async (req, res) => {
     ];
 
     let response = await salidaNoCM.update(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -240,7 +268,6 @@ controller.delete = async (req, res) => {
   try {
     const { idSalidaNoConforme } = req.params;
     let response = await salidaNoCM.delete(idSalidaNoConforme);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
