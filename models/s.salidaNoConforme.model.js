@@ -59,7 +59,7 @@ model.findSalidasXSemanaXidEmpleado = (id) =>
 
 model.findSNCPendiente = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT snc.*, emp.nombre nombrea, emp.apellido_paterno apellidopa, emp.apellido_materno apellidoma FROM (SELECT sn.*, emp.nombre, inc.incumplimiento, emp.apellido_paterno, emp.apellido_materno FROM salida_noconforme sn, incumplimiento inc, empleado emp WHERE inc.idincumplimiento = sn.idincumplimiento AND emp.idempleado = sn.idempleado AND acciones_corregir IS NULL AND sn.fecha BETWEEN "2023-02-01" AND LAST_DAY("2023-02-01")) snc, empleado emp WHERE snc.idempleado_autoriza = emp.idempleado ORDER BY sn.fecha DESC`;
+    let sql = `SELECT snc.*, emp.nombre nombrea, emp.apellido_paterno apellidopa, emp.apellido_materno apellidoma FROM (SELECT sn.*, emp.nombre, inc.incumplimiento, emp.apellido_paterno, emp.apellido_materno FROM salida_noconforme sn, incumplimiento inc, empleado emp WHERE inc.idincumplimiento = sn.idincumplimiento AND emp.idempleado = sn.idempleado AND acciones_corregir IS NULL AND sn.fecha BETWEEN ? AND LAST_DAY(?)) snc, empleado emp WHERE snc.idempleado_autoriza = emp.idempleado ORDER BY sn.fecha DESC`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
