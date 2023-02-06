@@ -25,6 +25,18 @@ model.findTipoFalta = (data) =>
     });
   });
 
+model.findSN = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT COUNT(*) total FROM salida_noconforme WHERE idempleado = ? AND fecha = ?`;
+    //[idTipoFalta, idempleado, fecha]
+    //TipoFalta - 4 falta - 5 retardo - 7 entrada/salida-
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.findChecksBomba = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT COUNT(*) total FROM (SELECT * FROM checklist_bomba WHERE idempleado_entrante = ? AND fecha = ?) AS chk WHERE isla_limpia = 0 OR aceites_completos = 0`;

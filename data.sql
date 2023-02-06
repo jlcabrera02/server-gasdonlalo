@@ -249,10 +249,10 @@ INSERT INTO tipo_falta VALUES
 (6, "Capacitacion", "El empleado estuvo en capacitación", 0, "RGBA(0,209,141,1)"),
 (7, "No checo entrada", "El empleado por algun motivo no capturo la entrada pero si trabajo", 1, "RGBA(209,0,39,1)");
 
-INSERT INTO concurso VALUES 
-(1, "madrugador"),
-(2, "octanoso"),
-(3, "aceitoso");
+INSERT INTO concurso (idconcurso, concurso, iddepartamento) VALUES 
+(1,1, 1),
+(2, 2, 1),
+(3, 3, 1);
 
 INSERT INTO user VALUES 
 ("sralcocer", "sralcocer@donlalo.com.mx", MD5("alcocer2023"), CURRENT_TIME, 50),

@@ -1,5 +1,6 @@
 import cmM from "../models/rh.madrugador.model";
 import empleadoM from "../models/rh.empleado.model";
+import incModel from "../models/s.incumplimiento.model";
 const controller = {};
 
 controller.findControlMadrugadorD = async (req, res) => {
@@ -62,34 +63,38 @@ controller.findControlMadrugadorM = async (req, res) => {
 
 controller.findControlMadrugadorMG = async (req, res) => {
   try {
-    const { year, month } = req.params;
+    const { year, month, iddepartamento } = req.params;
     const fecha = `${year}-${month}-01`;
     const diasMes = new Date(year, month, 0).getDate();
     const empDesp = await empleadoM.findEmpleadosXmesXiddepartamento([
-      1,
+      iddepartamento,
       fecha,
     ]);
     const puntosMes = await cmM.findPuntajeMes();
+    const inc = await incModel.findByConcurso(iddepartamento);
 
     const response = [];
+
+    console.log(empDesp.length);
 
     for (let i = 0; i < empDesp.length; i++) {
       const data = [];
       const idEmpleado = empDesp[i].idempleado;
       for (let j = 1; j <= diasMes; j++) {
         const fecha = `${year}-${month}-${j}`;
-        let entradaSalida = await cmM.findTipoFalta([7, idEmpleado, fecha]);
+        const columns = inc.map((el) => [el.incumplimiento, el.cantidad]);
+        const puntos = {};
+        for (let k = 0; k < columns.length; k++) {
+          const total = await cmM.findSN([idEmpleado, fecha]);
+          puntos[columns[k][0]] = total > 0 ? -columns[k][1] : 0;
+        }
+        /* let entradaSalida = await cmM.findTipoFalta([7, idEmpleado, fecha]);
         let retardo = await cmM.findTipoFalta([5, idEmpleado, fecha]);
         let falta = await cmM.findTipoFalta([4, idEmpleado, fecha]);
-        let check = await cmM.findChecksBomba([idEmpleado, fecha]);
+        let check = await cmM.findChecksBomba([idEmpleado, fecha]); */
         data.push({
           fecha,
-          puntos: {
-            entradaSalida: entradaSalida.total > 0 ? -10 : 0,
-            retardo: retardo.total > 0 ? -20 : 0,
-            check: check.total > 0 ? -30 : 0,
-            falta: falta.total > 0 ? -40 : 0,
-          },
+          puntos,
         });
       }
       let puntosPerdidos = Math.abs(
@@ -97,17 +102,22 @@ controller.findControlMadrugadorMG = async (req, res) => {
           .map((el) => Object.values(el.puntos).reduce((a, b) => a + b))
           .reduce((a, b) => a + b)
       );
+
       response.push({
-        empleado: empDesp[i],
-        puntosMes,
-        puntosPerdidos,
-        puntosRestantes: puntosMes - puntosPerdidos,
-        fechas: data,
+        data: {
+          empleado: empDesp[i],
+          puntosMes,
+          puntosPerdidos,
+          puntosRestantes: puntosMes - puntosPerdidos,
+          fechas: data,
+        },
+        columns: inc,
       });
     }
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

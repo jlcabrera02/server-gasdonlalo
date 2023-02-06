@@ -223,6 +223,8 @@ controller.insert = async (req, res) => {
 };
 
 controller.update = async (req, res) => {
+  let user = verificar(req.headers.authorization, 20);
+  if (!user.success) throw user;
   try {
     const { idSalidaNoConforme } = req.params;
     const {
@@ -231,14 +233,13 @@ controller.update = async (req, res) => {
       accionesCorregir,
       concesiones,
       idEmpleadoIncumple,
-      idEmpleadoAutoriza,
       idIncumplimiento,
       idDepartamento,
     } = req.body;
 
-    let departamento = await empleadoM.validarDepartamento(idEmpleadoIncumple);
-    if (departamento != idDepartamento)
-      throw errorMath("El empleado no pertenece al departamento");
+    // let departamento = await empleadoM.validarDepartamento(idEmpleadoIncumple);
+    // if (departamento != idDepartamento)
+    //   throw errorMath("El empleado no pertenece al departamento");
 
     const cuerpo = [
       {
@@ -247,7 +248,7 @@ controller.update = async (req, res) => {
         acciones_corregir: accionesCorregir,
         concesiones,
         idempleado: Number(idEmpleadoIncumple),
-        idempleado_autoriza: Number(idEmpleadoAutoriza),
+        idempleado_autoriza: Number(user.token.data.datos.idempleado),
         idincumplimiento: Number(idIncumplimiento),
       },
       Number(idSalidaNoConforme),

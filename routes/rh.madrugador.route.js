@@ -4,7 +4,7 @@ import madrugador from "../controllers/rh.madrugador.controller";
 const route = router();
 
 route.get(
-  "/control-mensual/todos/:year/:month/",
+  "/control-mensual/:iddepartamento/:year/:month/",
   madrugador.findControlMadrugadorMG
 );
 route.get(
