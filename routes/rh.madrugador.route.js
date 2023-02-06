@@ -3,6 +3,7 @@ import madrugador from "../controllers/rh.madrugador.controller";
 
 const route = router();
 
+route.get("/departamentos", madrugador.findDepartamentosByMadrugador);
 route.get(
   "/control-mensual/:iddepartamento/:year/:month/",
   madrugador.findControlMadrugadorMG
@@ -15,5 +16,7 @@ route.get(
   "/control-mensual/:year/:month/:idEmpleado",
   madrugador.findControlMadrugadorM
 );
+
+route.post("/insertar", madrugador.insert);
 
 export default route;

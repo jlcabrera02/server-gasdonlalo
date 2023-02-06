@@ -29,6 +29,19 @@ controller.findControlMadrugadorD = async (req, res) => {
   }
 };
 
+controller.findDepartamentosByMadrugador = async (req, res) => {
+  try {
+    const response = await cmM.findDepartamentosByMadrugador();
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.findControlMadrugadorM = async (req, res) => {
   try {
     const { year, month, idEmpleado } = req.params;
@@ -72,21 +85,24 @@ controller.findControlMadrugadorMG = async (req, res) => {
     ]);
     const puntosMes = await cmM.findPuntajeMes();
     const inc = await incModel.findByConcurso(iddepartamento);
+    console.log(inc);
 
     const response = [];
-
-    console.log(empDesp.length);
 
     for (let i = 0; i < empDesp.length; i++) {
       const data = [];
       const idEmpleado = empDesp[i].idempleado;
       for (let j = 1; j <= diasMes; j++) {
         const fecha = `${year}-${month}-${j}`;
-        const columns = inc.map((el) => [el.incumplimiento, el.cantidad]);
+        const columns = inc.map((el) => [
+          el.idincumplimiento,
+          el.incumplimiento,
+          el.cantidad,
+        ]);
         const puntos = {};
         for (let k = 0; k < columns.length; k++) {
-          const total = await cmM.findSN([idEmpleado, fecha]);
-          puntos[columns[k][0]] = total > 0 ? -columns[k][1] : 0;
+          const total = await cmM.findSN([idEmpleado, fecha, columns[k][0]]);
+          puntos[columns[k][1]] = total > 0 ? -columns[k][2] : 0;
         }
         /* let entradaSalida = await cmM.findTipoFalta([7, idEmpleado, fecha]);
         let retardo = await cmM.findTipoFalta([5, idEmpleado, fecha]);
@@ -104,17 +120,31 @@ controller.findControlMadrugadorMG = async (req, res) => {
       );
 
       response.push({
-        data: {
-          empleado: empDesp[i],
-          puntosMes,
-          puntosPerdidos,
-          puntosRestantes: puntosMes - puntosPerdidos,
-          fechas: data,
-        },
-        columns: inc,
+        empleado: empDesp[i],
+        puntosMes,
+        puntosPerdidos,
+        puntosRestantes: puntosMes - puntosPerdidos,
+        fechas: data,
       });
     }
 
+    res
+      .status(200)
+      .json({ success: true, response: { data: response, columns: inc } });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.insert = async (req, res) => {
+  try {
+    const { idDepartamento } = req.body;
+    await cmM.validarNoDuplicados(idDepartamento);
+    const response = await cmM.insertDepartamento(idDepartamento);
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);

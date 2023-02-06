@@ -94,7 +94,6 @@ model.updateCantidadInc = (data) =>
       "UPDATE categorizar_incumplimiento SET cantidad = ? WHERE idconcurso = ? AND idincumplimiento = ?";
 
     connection.query(sql, data, (err, res) => {
-      console.log(err, res, data);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
