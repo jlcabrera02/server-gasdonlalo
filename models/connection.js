@@ -17,6 +17,8 @@ const connection = mysql2.createConnection({
       return bytes[0] === 1;
     } else if (field.type === "NEWDECIMAL") {
       return Number(field.string());
+    } else if (field.type === "DATETIME") {
+      return field.string();
     } else {
       return next();
     }

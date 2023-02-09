@@ -30,7 +30,6 @@ controller.findXEstatus = async (req, res) => {
     }
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -42,7 +41,7 @@ controller.findXEstatus = async (req, res) => {
 controller.insert = async (req, res) => {
   try {
     const {
-      idEmpleado,
+      idChecador,
       nombre,
       apellidoPaterno,
       apellidoMaterno,
@@ -59,7 +58,7 @@ controller.insert = async (req, res) => {
       );
 
     const cuerpo = {
-      idempleado: idEmpleado || null,
+      idchecador: idChecador || null,
       nombre: nombre.toLocaleUpperCase(),
       apellido_paterno: apellidoPaterno.toLocaleUpperCase(),
       apellido_materno: apellidoMaterno.toLocaleUpperCase(),
@@ -68,23 +67,11 @@ controller.insert = async (req, res) => {
       edad: Number(edad) || null,
       motivo,
     };
-    //Si la soliciitud es pendiente o rechazada no nesesita de un id
-    if (ns === 5 || ns === 4) delete cuerpo.idempleado;
+    //Si la solicitud es pendiente o rechazada no nesesita de un idchecador
+    if (ns === 5 || ns === 4) delete cuerpo.idchecador;
 
-    if ((ns === 1 || ns === 2) && !idEmpleado)
+    if ((ns === 1 || ns === 2) && !idChecador)
       throw peticionImposible("Falta asignar un id");
-
-    if (ns === 1 || ns === 2) {
-      const empData = {
-        idempleado: Number(idEmpleado),
-        nombre: nombre.toLocaleUpperCase(),
-        apellido_paterno: apellidoPaterno.toLocaleUpperCase(),
-        apellido_materno: apellidoMaterno.toLocaleUpperCase(),
-        iddepartamento: idDepartamento,
-        estatus: ns,
-      };
-      await empleadoM.insert(empData);
-    }
 
     let response = await seM.insert(cuerpo);
 
@@ -98,58 +85,46 @@ controller.insert = async (req, res) => {
   }
 };
 
+controller.updateMotivo = async (req, res) => {
+  try {
+    const { idEmpleado } = req.params;
+    const { motivo } = req.body;
+
+    const cuerpo = [{ motivo: motivo }, idEmpleado];
+
+    const response = await seM.update(cuerpo);
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.update = async (req, res) => {
   try {
-    const { idSolicitud } = req.params;
-    const { estatus, idEmpleado, motivo } = req.body;
+    const { idEmpleado } = req.params;
+    const { estatus, idChecador, motivo } = req.body;
     const ns = Number(estatus);
 
-    if (ns === 5) throw peticionImposible("No disponible");
-
-    const solicitud = await seM.findSolicitud(idSolicitud);
-
-    const empData = {
-      idempleado: solicitud.idempleado ? solicitud.idempleado : idEmpleado,
-      nombre: solicitud.nombre.toLocaleUpperCase(),
-      apellido_paterno: solicitud.apellido_paterno.toLocaleUpperCase(),
-      apellido_materno: solicitud.apellido_materno.toLocaleUpperCase(),
-      iddepartamento: solicitud.iddepartamento,
+    const cuerpo = {
+      idchecador: idChecador,
       estatus: ns,
+      motivo: motivo || null,
     };
 
-    let response;
+    if (ns === 3 || ns === 4 || ns === 5) {
+      cuerpo.idchecador = null;
+    }
+    if (ns === 1 || ns === 2) {
+      if (!cuerpo.idchecador)
+        throw peticionImposible("Falta asignar el idChecador");
+    }
 
-    if (solicitud.estatus === "Pendiente" && (ns === 1 || ns === 2)) {
-      await empleadoM.insert(empData);
-      response = await seM.update([
-        { estatus: ns, idEmpleado: idEmpleado, motivo: motivo || null },
-        idSolicitud,
-      ]);
-    }
-    if (solicitud.estatus === "Practica" && ns === 1) {
-      console.log("jp;a");
-      await empleadoM.update([empData, solicitud.idempleado]);
-      response = await seM.update([
-        { estatus: ns, motivo: motivo || null },
-        idSolicitud,
-      ]);
-    }
-    if (
-      (solicitud.estatus === "Contrato" || solicitud.estatus === "Practica") &&
-      ns === 3
-    ) {
-      await empleadoM.delete(solicitud.idempleado);
-      response = await seM.update([
-        { estatus: ns, motivo: motivo || null },
-        idSolicitud,
-      ]);
-    }
-    if (solicitud.estatus === "Pendiente" && ns === 4) {
-      response = await seM.update([
-        { estatus: ns, motivo: motivo || null },
-        idSolicitud,
-      ]);
-    }
+    const response = await seM.update([cuerpo, idEmpleado]);
 
     if (!response) throw sinCambios();
 

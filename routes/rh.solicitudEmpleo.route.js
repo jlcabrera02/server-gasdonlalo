@@ -6,6 +6,7 @@ const route = router();
 route.get("/", se.find);
 route.get("/estatus/:estatus", se.findXEstatus);
 route.post("/nuevo", se.insert);
-route.put("/control/:idSolicitud", se.update);
+route.put("/actualizar/motivo/:idEmpleado", se.updateMotivo); //actualiza el motivo
+route.put("/control/:idEmpleado", se.update); //idSolicitud = idempleado
 
 export default route;

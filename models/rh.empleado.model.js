@@ -92,10 +92,10 @@ model.update = (data) =>
 
 model.delete = (id) =>
   new Promise((resolve, reject) => {
-    let sql =
-      "UPDATE empleado SET estatus = 0, date_baja = CURRENT_DATE WHERE idempleado = ?";
+    let sql = "UPDATE empleado SET estatus = 3 WHERE idchecador = ?";
 
     connection.query(sql, id, (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

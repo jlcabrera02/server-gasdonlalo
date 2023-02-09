@@ -1,12 +1,12 @@
 import connection from "./connection";
 import resErr from "../respuestas/error.respuestas";
-const { errorDB, sinRegistro, sinCambios } = resErr;
+const { errorDB, sinRegistro, sinCambios, peticionImposible } = resErr;
 
 const model = {};
 
 model.find = () =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM solicitud_empleo";
+    let sql = "SELECT * FROM empleado";
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
@@ -17,7 +17,7 @@ model.find = () =>
 
 model.findSolicitud = (id) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM solicitud_empleo WHERE idsolicitud_empleo = ?";
+    let sql = "SELECT * FROM empleado WHERE idempleado = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -29,7 +29,7 @@ model.findSolicitud = (id) =>
 
 model.findXEstatus = (id) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM solicitud_empleo WHERE estatus = ?";
+    let sql = "SELECT * FROM empleado WHERE estatus = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -41,7 +41,7 @@ model.findXEstatus = (id) =>
 model.findXTrabajando = () =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT * FROM solicitud_empleo WHERE estatus = 1 OR estatus = 2;";
+      "SELECT * FROM empleado WHERE estatus = 1 OR estatus = 2 ORDER BY idchecador";
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
@@ -53,7 +53,7 @@ model.findXTrabajando = () =>
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =
-      "INSERT INTO solicitud_empleo SET `fecha_registro` = CURRENT_TIMESTAMP, ?";
+      "INSERT INTO empleado SET `fecha_registro` = CURRENT_TIMESTAMP, ?";
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -64,11 +64,16 @@ model.insert = (data) =>
 
 model.update = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "UPDATE solicitud_empleo SET ? WHERE idsolicitud_empleo = ?";
+    let sql =
+      "UPDATE empleado SET `update_time` = CURRENT_TIMESTAMP, ? WHERE idempleado = ?";
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
-      if (err) return reject(errorDB());
+      console.log(data);
+      if (err) {
+        if (err.errno === 1062)
+          return reject(peticionImposible("El id ya esta asignado"));
+        return reject(errorDB());
+      }
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
