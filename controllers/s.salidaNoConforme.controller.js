@@ -94,6 +94,45 @@ controller.findSalidasNoConformesXMesXIddepartamento = async (req, res) => {
   }
 };
 
+controller.findSNCXIncumplimiento = async (req, res) => {
+  try {
+    const { year, month, iddepartamento } = req.params;
+    let fecha = `${year}-${month}-01`;
+    const empleados = await empleadoM.findEmpleadosXmesXiddepartamento(
+      iddepartamento
+    );
+
+    const response = [];
+
+    for (let i = 0; i < empleados.length; i++) {
+      const { idempleado, nombre, apellido_materno, apellido_paterno } =
+        empleados[i];
+      const incumplimientos = await salidaNoCM.findSNCXIncumplimiento([
+        idempleado,
+        fecha,
+        fecha,
+      ]);
+
+      const total = incumplimientos
+        .map((el) => el.total)
+        .reduce((a, b) => a + b, 0);
+      response.push({
+        empleado: `${nombre} ${apellido_paterno} ${apellido_materno}`,
+        totalSNC: total,
+        incumplimientos,
+      });
+    }
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.findSalidasXInconformidadXMesXiddepartemento = async (req, res) => {
   try {
     const { year, month, iddepartamento } = req.params;

@@ -15,6 +15,10 @@ route.get("/semanas/:year/:month", salidaNoConforme.findSalidasXSemana);
 route.get("/:idSalida", salidaNoConforme.findOne);
 route.get("/:year/:month", salidaNoConforme.findSalidasNoConformesXMes);
 route.get(
+  "/:year/:month/incumplimientoxiddepartamento/:iddepartamento",
+  salidaNoConforme.findSNCXIncumplimiento
+);
+route.get(
   "/:year/:month/:iddepartamento",
   salidaNoConforme.findSalidasNoConformesXMesXIddepartamento
 );

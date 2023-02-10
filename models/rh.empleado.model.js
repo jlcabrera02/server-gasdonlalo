@@ -7,9 +7,9 @@ const model = {};
 model.find = (query = null) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND estatus = !0 ORDER BY empleado.nombre";
+      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND estatus IN (1,2) ORDER BY empleado.nombre";
     if (query)
-      sql = `SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND estatus = !0 AND departamento.iddepartamento = ${query} ORDER BY empleado.nombre`;
+      sql = `SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND estatus IN (1,2) AND departamento.iddepartamento = ${query} ORDER BY empleado.nombre`;
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
@@ -21,7 +21,7 @@ model.find = (query = null) =>
 model.findOne = (id) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND idempleado = ?";
+      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND idchecador = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -30,11 +30,11 @@ model.findOne = (id) =>
     });
   });
 
-model.findEmpleadosXmesXiddepartamento = (data) =>
+model.findEmpleadosXmesXiddepartamento = (idDepartamento) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT *, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo FROM empleado emp WHERE emp.iddepartamento = ? AND emp.date_baja IS NULL OR emp.date_baja > ? ORDER BY nombre_completo`;
+    let sql = `SELECT *, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo FROM empleado emp WHERE emp.iddepartamento = ? AND emp.estatus IN (1,2) ORDER BY nombre_completo`;
 
-    connection.query(sql, data, (err, res) => {
+    connection.query(sql, idDepartamento, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -43,7 +43,7 @@ model.findEmpleadosXmesXiddepartamento = (data) =>
 
 model.findEmpleadosXmes = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT *, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo FROM empleado emp WHERE emp.date_baja IS NULL OR emp.date_baja > ? ORDER BY nombre_completo`;
+    let sql = `SELECT *, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo FROM empleado emp WHERE emp.estatus IN (1,2) ORDER BY nombre_completo`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
