@@ -56,7 +56,11 @@ model.insert = (data) =>
       "INSERT INTO empleado SET `fecha_registro` = CURRENT_TIMESTAMP, ?";
 
     connection.query(sql, data, (err, res) => {
-      if (err) return reject(errorDB());
+      if (err) {
+        if (err.errno === 1062)
+          return reject(peticionImposible("Ya esta asignado el id"));
+        return reject(errorDB());
+      }
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
