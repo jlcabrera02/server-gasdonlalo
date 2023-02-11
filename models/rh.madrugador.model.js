@@ -27,6 +27,7 @@ model.validarNoDuplicados = (iddepartamento) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT * FROM concurso WHERE iddepartamento = ?`;
     connection.query(sql, iddepartamento, (err, res) => {
+      console.log({ res });
       if (err) return reject(errorDB());
       if (res.length < 1) return resolve(true);
       if (res) return reject(datosExistentes());
