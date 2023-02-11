@@ -44,13 +44,15 @@ controller.findSalidasNoConformesXMesPendientes = async (req, res) => {
     const response = await salidaNoCM.findSNCPendiente([fecha, fecha]);
     response.forEach((el) => {
       el.empleadoIncumple = {
-        nombre: el.nombre,
         idempleado: el.idempleado,
+        idchecador: el.idchecador,
+        nombre: el.nombre,
         apellido_paterno: el.apellido_paterno,
         apellido_materno: el.apellido_materno,
       };
       el.empleadoAutoriza = {
         idempleado: el.idempleado_autoriza,
+        idchecador: el.idchecadora,
         nombre: el.nombrea,
         apellido_paterno: el.apellidopa,
         apellido_materno: el.apellidoma,
@@ -105,8 +107,13 @@ controller.findSNCXIncumplimiento = async (req, res) => {
     const response = [];
 
     for (let i = 0; i < empleados.length; i++) {
-      const { idempleado, nombre, apellido_materno, apellido_paterno } =
-        empleados[i];
+      const {
+        idempleado,
+        nombre,
+        apellido_materno,
+        apellido_paterno,
+        idcheador,
+      } = empleados[i];
       const incumplimientos = await salidaNoCM.findSNCXIncumplimiento([
         idempleado,
         fecha,
@@ -117,6 +124,8 @@ controller.findSNCXIncumplimiento = async (req, res) => {
         .map((el) => el.total)
         .reduce((a, b) => a + b, 0);
       response.push({
+        idempleado: idempleado,
+        idchecador: idcheador,
         empleado: `${nombre} ${apellido_paterno} ${apellido_materno}`,
         totalSNC: total,
         incumplimientos,
