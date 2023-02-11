@@ -1,6 +1,7 @@
 import salidaNoCM from "../models/s.salidaNoConforme.model";
 import empleadoM from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
+import sncaM from "../models/s.acumular.model";
 const { verificar } = auth;
 
 const controller = {};
@@ -29,6 +30,23 @@ controller.findSalidasNoConformesXMes = async (req, res) => {
     const { year, month } = req.params;
     let fecha = `${year}-${month}-01`;
     const response = await salidaNoCM.findSalidasNoConformesXMes(fecha);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findSNCPorCapturar = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
+    console.log("hola");
+    const { idDepartamento } = req.params;
+    const response = await sncaM.find(idDepartamento);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

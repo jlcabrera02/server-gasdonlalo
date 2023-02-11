@@ -4,6 +4,7 @@ import resErr from "../respuestas/error.respuestas";
 import Decimal from "decimal.js-light";
 import operacionTiempo from "../assets/operacionTiempo";
 import formatTiempo from "../assets/formatTiempo";
+import sncaM from "../models/s.acumular.model";
 import auth from "../models/auth.model";
 const { verificar } = auth;
 const { errorMath, sinRegistro } = resErr;
@@ -201,6 +202,8 @@ controller.insert = async (req, res) => {
       throw errorMath(
         "El empleado no pertenece al departamento de despachadores"
       );
+
+    await sncaM.insert([6, empleado, fecha]);
     let response = await montoFaltanteM.insert(cuerpo);
     console.log(response);
     res.status(200).json({ success: true, response });

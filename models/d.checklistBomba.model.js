@@ -6,7 +6,7 @@ const model = {};
 
 model.find = (fecha) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT em.idempleado, CONCAT(em.nombre, " ", em.apellido_paterno, " ", em.apellido_materno) AS nombre_completo, ch.isla_limpia, ch.aceites_completos, ch.fecha as fecha_db, CASE WHEN (COUNT(em.idempleado) * 2) =  SUM(isla_limpia + aceites_completos) THEN 1 ELSE 0 END AS cumple FROM (SELECT * FROM empleado WHERE estatus = 1 AND iddepartamento = 1) AS em LEFT OUTER JOIN (SELECT * FROM checklist_bomba WHERE fecha = ?) AS ch ON ch.idempleado_entrante = em.idempleado GROUP BY em.idempleado ORDER BY nombre_completo`;
+    let sql = `SELECT em.idempleado, CONCAT(em.nombre, " ", em.apellido_paterno, " ", em.apellido_materno) AS nombre_completo, ch.isla_limpia, ch.aceites_completos, ch.fecha as fecha_db, ch.cumple, ch.motivo, CASE WHEN (COUNT(em.idempleado) * 2) =  SUM(isla_limpia + aceites_completos) THEN 1 ELSE 0 END AS advertencia FROM (SELECT * FROM empleado WHERE estatus IN (1,2) AND iddepartamento = 1) AS em LEFT OUTER JOIN (SELECT * FROM checklist_bomba WHERE fecha = ?) AS ch ON ch.idempleado_entrante = em.idempleado GROUP BY em.idempleado ORDER BY nombre_completo`;
 
     connection.query(sql, fecha, (err, res) => {
       if (err) return reject(errorDB());
@@ -17,7 +17,7 @@ model.find = (fecha) =>
 
 model.findXidempleadoXfecha = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT ck.*, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_saliente FROM (SELECT ck.*, b.bomba, es.nombre AS estacion_servicio, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_entrante FROM checklist_bomba ck, empleado emp, bomba b, estacion_servicio es WHERE ck.idempleado_entrante = emp.idempleado AND ck.idbomba = b.idbomba AND b.idestacion_servicio = es.idestacion_servicio) ck, empleado emp WHERE emp.idempleado = ck.idempleado_saliente AND idempleado_entrante = ? AND fecha = ?`;
+    let sql = `SELECT ck.*, emp.nombre, emp.apellido_paterno, emp.apellido_materno, empSaliente.nombre AS nombreS, empSaliente.apellido_paterno AS apellidoPS, empSaliente.apellido_materno AS apellidoMS FROM checklist_bomba ck, empleado emp, (SELECT * from empleado emp) empSaliente WHERE ck.idempleado_entrante = emp.idempleado AND ck.idempleado_saliente = empSaliente.idempleado AND emp.idempleado = ? AND ck.fecha = ?`;
 
     //data = ["fecha", idempleado]
 

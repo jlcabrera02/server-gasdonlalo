@@ -17,7 +17,8 @@ model.find = () =>
 
 model.findSolicitud = (id) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM empleado WHERE idempleado = ?";
+    let sql =
+      "SELECT emp.*, dep.departamento FROM emp.empleado emp, departameto dep WHERE emp.iddepartamento = dep.iddepartamento AND  emp.idempleado = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -29,7 +30,8 @@ model.findSolicitud = (id) =>
 
 model.findXEstatus = (id) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM empleado WHERE estatus = ?";
+    let sql =
+      "SELECT emp.*, dep.departamento FROM empleado emp, departamento dep WHERE emp.iddepartamento = dep.iddepartamento AND emp.estatus = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -41,7 +43,7 @@ model.findXEstatus = (id) =>
 model.findXTrabajando = () =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT * FROM empleado WHERE estatus = 1 OR estatus = 2 ORDER BY idchecador";
+      "SELECT emp.*, dep.departamento FROM empleado emp, departamento dep WHERE emp.iddepartamento = dep.iddepartamento AND emp.estatus IN (1, 2) ORDER BY emp.idchecador";
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());

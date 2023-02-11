@@ -1,5 +1,6 @@
 import checklistBombaM from "../models/d.checklistBomba.model";
 import auth from "../models/auth.model";
+import sncaM from "../models/s.acumular.model";
 const { verificar } = auth;
 
 const controller = {};
@@ -17,6 +18,7 @@ controller.find = async (req, res) => {
       let response = await checklistBombaM.find(fecha);
       response = response.map((el) => ({
         ...el,
+        advertencia: el.advertencia === 1 ? true : false,
         fechaGenerada: fecha,
       }));
       almacenar.push({ fecha, data: [...response] });
@@ -78,40 +80,31 @@ controller.insert = async (req, res) => {
       fecha,
       islaLimpia,
       aceitesCompletos,
-      idbomba,
+      bomba,
+      estacionServicio,
       turno,
-      idempleadoEntrante,
-      idempleadoSaliente,
-      cumple,
-      motivo,
+      idEmpleado,
     } = req.body;
 
     const cuerpo = {
       fecha,
-      isla_limpia: Number(islaLimpia),
-      aceites_completos: Number(aceitesCompletos),
-      idbomba: Number(idbomba),
-      turno,
-      idempleado_entrante: Number(idempleadoEntrante),
-      idempleado_saliente: Number(idempleadoSaliente),
-      idpuntaje_minimo: 1,
-      motivo,
-      cumple: cumple,
+      isla_limpia: islaLimpia ? islaLimpia : 0,
+      aceites_completos: aceitesCompletos ? aceitesCompletos : 0,
+      bomba: bomba ? bomba : 0,
+      turno: turno ? turno : 0,
+      estacion_servicio: estacionServicio ? estacionServicio : 0,
+      idEmpleado: Number(idEmpleado),
     };
 
-    if (!cumple) {
-      delete cuerpo.isla_limpia;
-      delete cuerpo.aceites_completos;
-      delete cuerpo.turno;
-      delete cuerpo.idbomba;
-      delete cuerpo.idbomba;
+    if (
+      cuerpo.isla_limpia === 0 ||
+      cuerpo.aceites_completos === 0 ||
+      cuerpo.bomba === 0 ||
+      cuerpo.turno === 0 ||
+      cuerpo.estacion_servicio === 0
+    ) {
+      await sncaM.insert([3, idempleadoEntrante, fecha]);
     }
-
-    await checklistBombaM.validarExistencia([
-      fecha,
-      idempleadoEntrante,
-      idbomba,
-    ]); //valida si que no alla datos duplicados
 
     let response = await checklistBombaM.insert(cuerpo);
     res.status(200).json({ success: true, response });

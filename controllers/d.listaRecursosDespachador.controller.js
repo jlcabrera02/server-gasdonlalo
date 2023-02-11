@@ -3,6 +3,7 @@ import listaReM from "../models/d.listaRecursosDespachador.model";
 import resErr from "../respuestas/error.respuestas";
 import empleado from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
+import sncaM from "../models/s.acumular.model";
 const { verificar } = auth;
 const { sinRegistro } = resErr;
 
@@ -202,6 +203,7 @@ controller.insert = async (req, res) => {
     const { empleado, fecha, recursos } = req.body;
     const idGenerico = generadorId();
 
+    await sncaM.insert([7, empleado, fecha]);
     const recursosDB = await listaReM.findRecursos();
     let insertarRecursos = recursosDB.map((el) => ({
       idRecurso: el.idrecurso,

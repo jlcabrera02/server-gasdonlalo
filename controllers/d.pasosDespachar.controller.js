@@ -1,6 +1,7 @@
 import generadorId from "../assets/generadorId";
 import pasosDM from "../models/d.pasosDespachar.model";
 import errRes from "../respuestas/error.respuestas";
+import sncaM from "../models/s.acumular.model";
 import auth from "../models/auth.model";
 const { verificar } = auth;
 const { sinRegistro } = errRes;
@@ -115,6 +116,7 @@ controller.insert = async (req, res) => {
     if (!user.success) throw user;
     const { empleado, fecha, pasos } = req.body;
     const idGenerico = generadorId();
+    await sncaM.insert([1, empleado, fecha]);
 
     let pasosGet = await pasosDM.findPasos();
     let insertPasos = pasosGet.map((el) => ({

@@ -1,6 +1,8 @@
 import evaluacionUniformeM from "../models/d.evaluacionUniforme.model";
 import generadorId from "../assets/generadorId";
 import auth from "../models/auth.model";
+import sncaM from "../models/s.acumular.model";
+
 const { verificar } = auth;
 
 const controller = {};
@@ -175,6 +177,7 @@ controller.insert = async (req, res) => {
       idGenerico,
     ]);
     console.log(cuerpo);
+    await sncaM.insert([11, empleado, fecha]);
     await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro
     let response = await evaluacionUniformeM.insert(cuerpo);
     console.log(response);
