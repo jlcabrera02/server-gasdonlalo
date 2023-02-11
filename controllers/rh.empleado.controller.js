@@ -1,10 +1,14 @@
 import empleadoM from "../models/rh.empleado.model";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 import { mayus } from "./formatearText.controller";
 
 const controller = {};
 
 controller.find = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { departamento } = req.query;
     let response = await empleadoM.find(departamento);
     res.status(200).json({ success: true, response });
@@ -19,6 +23,8 @@ controller.find = async (req, res) => {
 
 controller.findOne = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { id } = req.params;
     let response = await empleadoM.findOne(id);
     console.log(response);
@@ -34,6 +40,8 @@ controller.findOne = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { nombre, apellidoPaterno, apellidoMaterno, departamento } = req.body;
 
     const cuerpo = {
@@ -57,6 +65,8 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idEmpleado } = req.params;
     const empleadoById = await empleadoM.findOne(idEmpleado);
 
@@ -97,6 +107,8 @@ controller.update = async (req, res) => {
 
 /* controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { id } = req.params;
     const { nombre, apellidoPaterno, apellidoMaterno, departamento } = req.body;
 
@@ -122,6 +134,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { id } = req.params;
     let response = await empleadoM.delete(id);
     console.log(response);

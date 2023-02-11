@@ -1,10 +1,14 @@
 import cmM from "../models/rh.madrugador.model";
 import empleadoM from "../models/rh.empleado.model";
 import incModel from "../models/s.incumplimiento.model";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 const controller = {};
 
 controller.findControlMadrugadorD = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { year, month, day, idEmpleado } = req.params;
     const fecha = `${year}-${month}-${day}`;
     let entradaSalida = await cmM.findTipoFalta([7, idEmpleado, fecha]);
@@ -31,6 +35,8 @@ controller.findControlMadrugadorD = async (req, res) => {
 
 controller.findDepartamentosByMadrugador = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const response = await cmM.findDepartamentosByMadrugador();
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -44,6 +50,8 @@ controller.findDepartamentosByMadrugador = async (req, res) => {
 
 controller.findControlMadrugadorM = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { year, month, idEmpleado } = req.params;
     const diasMes = new Date(year, month, 0).getDate();
     const response = [];
@@ -76,6 +84,8 @@ controller.findControlMadrugadorM = async (req, res) => {
 
 controller.findControlMadrugadorMG = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { year, month, iddepartamento } = req.params;
     // const fecha = `${year}-${month}-01`;s
     const diasMes = new Date(year, month, 0).getDate();
@@ -141,6 +151,8 @@ controller.findControlMadrugadorMG = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idDepartamento } = req.body;
     await cmM.validarNoDuplicados(idDepartamento);
     const response = await cmM.insertDepartamento(idDepartamento);

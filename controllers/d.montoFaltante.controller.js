@@ -4,16 +4,21 @@ import resErr from "../respuestas/error.respuestas";
 import Decimal from "decimal.js-light";
 import operacionTiempo from "../assets/operacionTiempo";
 import formatTiempo from "../assets/formatTiempo";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 const { errorMath, sinRegistro } = resErr;
 
 const controller = {};
 
 controller.find = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 2);
+    if (!user.success) throw user;
     let response = await montoFaltanteM.find();
     console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -24,6 +29,8 @@ controller.find = async (req, res) => {
 
 controller.findXSemana = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 2);
+    if (!user.success) throw user;
     const { year, month } = req.params;
     let fecha = `${year}-${month}-01`;
     let diasDelMes = new Date(year, month, 0).getDate(); //Me obtiene el numero de dias del mes
@@ -98,6 +105,8 @@ controller.findXSemana = async (req, res) => {
 
 controller.findCantidadXMes = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 2);
+    if (!user.success) throw user;
     const { year, month } = req.params;
     let fecha = `${year}-${month}-01`;
     let response = await montoFaltanteM.findCantidadXMes(fecha);
@@ -113,6 +122,8 @@ controller.findCantidadXMes = async (req, res) => {
 
 controller.findXMesXEmpleado = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 2);
+    if (!user.success) throw user;
     const { year, month, idEmpleado } = req.params;
     let idempleado = idEmpleado || null;
     let fecha = `${year}-${month}-01`;
@@ -130,6 +141,8 @@ controller.findXMesXEmpleado = async (req, res) => {
 
 controller.findXTiempo = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 2);
+    if (!user.success) throw user;
     const { idEmpleado, fechaInicio, fechaFinal } = req.body;
     const response = [];
     let dias = operacionTiempo.restarTiempo("days", fechaInicio, fechaFinal);
@@ -175,6 +188,8 @@ controller.findXTiempo = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 2);
+    if (!user.success) throw user;
     const { cantidad, fecha, empleado } = req.body;
     const cuerpo = {
       cantidad: Number(cantidad),
@@ -201,6 +216,8 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 3);
+    if (!user.success) throw user;
     const { id } = req.params;
     const { cantidad, fecha, empleado } = req.body;
     const cuerpo = {
@@ -223,6 +240,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 4);
+    if (!user.success) throw user;
     const { id } = req.params;
     let response = await montoFaltanteM.delete(id);
     console.log(response);

@@ -2,10 +2,14 @@ import octM from "../models/rh.octanoso.model";
 import empM from "../models/rh.empleado.model";
 import salidaNCM from "../models/s.salidaNoConforme.model";
 import formatTiempo from "../assets/formatTiempo";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 const controller = {};
 
 controller.findVentasLXestacion = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { year, month, idEstacionServicio } = req.params;
     const dias = new Date(year, month, 0).getDate();
     const fecha = `${year}-${month}-01`;
@@ -62,6 +66,8 @@ controller.findVentasLXestacion = async (req, res) => {
 
 controller.findVentasL = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { year, month } = req.params;
     const dias = new Date(year, month, 0).getDate();
     const fecha = `${year}-${month}-01`;
@@ -111,6 +117,8 @@ controller.findVentasL = async (req, res) => {
 
 controller.findVentasLXestacionXIntervaloTiempo = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { fechaInicio, fechaFinal, idEstacionServicio } = req.body;
     const diaI = formatTiempo.tiempoLocal(fechaInicio).getDate();
     const milisegundos =
@@ -176,6 +184,8 @@ controller.findVentasLXestacionXIntervaloTiempo = async (req, res) => {
 
 controller.insertVentaLitros = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const {
       idEmpleado,
       idEstacionServicio,

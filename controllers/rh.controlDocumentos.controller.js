@@ -1,9 +1,13 @@
 import controlDocumentoM from "../models/rh.controlDocumentos.model";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 
 const controller = {};
 
 controller.findTotalDocumentos = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     let response = await controlDocumentoM.findTotalDocumentos();
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -17,6 +21,8 @@ controller.findTotalDocumentos = async (req, res) => {
 
 controller.findDocumentosXIdempleado = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idEmpleado } = req.params;
     let response = await controlDocumentoM.findDocumentosXIdempleado(
       idEmpleado
@@ -33,6 +39,8 @@ controller.findDocumentosXIdempleado = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idempleado, iddocumento } = req.body;
 
     const cuerpo = {
@@ -60,6 +68,8 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idempleado, iddocumento } = req.body;
 
     const cuerpo = [iddocumento, idempleado];

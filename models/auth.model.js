@@ -171,20 +171,30 @@ model.verificar = (header, idPer = null) => {
         acceso: false,
       };
     } else {
-      let acceso = false;
+      let acceso = true;
 
       if (idPer) {
         acceso = tokenCall.data.permisos.some(
           (el) => el[0] === 1 || el[0] === idPer
         );
+        // console.log(tokenCall.data.permisos);
       }
 
-      response = {
-        success: true,
-        msg: "token válido",
-        token: tokenCall,
-        acceso,
-      };
+      if (acceso) {
+        response = {
+          success: true,
+          msg: "token válido",
+          token: tokenCall,
+          acceso,
+        };
+      } else {
+        response = {
+          success: false,
+          code: 400,
+          msg: "No hay autorización para usar la peticion",
+          acceso,
+        };
+      }
     }
   });
 

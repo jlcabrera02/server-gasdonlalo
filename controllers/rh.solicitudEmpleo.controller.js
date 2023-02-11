@@ -1,5 +1,7 @@
 import seM from "../models/rh.solicitudEmpleo.model";
 import empleadoM from "../models/rh.empleado.model";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 import resErr from "../respuestas/error.respuestas";
 
 const controller = {};
@@ -8,6 +10,8 @@ const { peticionImposible, sinCambios } = resErr;
 
 controller.find = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     let response = await seM.find();
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -21,6 +25,8 @@ controller.find = async (req, res) => {
 
 controller.findXEstatus = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { estatus } = req.params;
     let response;
     if (Number(estatus) === 6) {
@@ -40,6 +46,8 @@ controller.findXEstatus = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const {
       idChecador,
       nombre,
@@ -87,6 +95,8 @@ controller.insert = async (req, res) => {
 
 controller.updateMotivo = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idEmpleado } = req.params;
     const { motivo } = req.body;
 
@@ -107,6 +117,8 @@ controller.updateMotivo = async (req, res) => {
 controller.changeDep = async (req, res) => {
   //Sirve para que se pueda hacer un cambio a un empleado de departamento.
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idDepartamento, idEmpleado } = req.body;
 
     const cuerpo = [{ idDepartamento }, idEmpleado];
@@ -125,6 +137,8 @@ controller.changeDep = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idEmpleado } = req.params;
     const { estatus, idChecador, motivo } = req.body;
     const ns = Number(estatus);
@@ -159,6 +173,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { id } = req.params;
     let response = await seM.delete(id);
     res.status(200).json({ success: true, response });

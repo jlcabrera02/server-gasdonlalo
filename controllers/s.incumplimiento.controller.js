@@ -1,10 +1,14 @@
 import incumplimientoM from "../models/s.incumplimiento.model";
 import mayusxPalabra from "./formatearText.controller";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 
 const controller = {};
 
 controller.find = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     let response = await incumplimientoM.find();
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -18,6 +22,8 @@ controller.find = async (req, res) => {
 
 controller.findByConcurso = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { idConcurso } = req.params;
     let response = await incumplimientoM.findByConcurso(Number(idConcurso));
     res.status(200).json({ success: true, response });
@@ -32,6 +38,8 @@ controller.findByConcurso = async (req, res) => {
 
 controller.findIncumplimientosXcategorizacion = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { idCategorizacion, iddepartamento } = req.params;
     const response = await incumplimientoM.findIncumplimientosXcategorizacion(
       idCategorizacion,
@@ -49,6 +57,8 @@ controller.findIncumplimientosXcategorizacion = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { incumplimiento } = req.body;
     const cuerpo = {
       incumplimiento: mayusxPalabra(incumplimiento),
@@ -66,6 +76,8 @@ controller.insert = async (req, res) => {
 
 controller.categorizarSNC = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { idIncumplimiento, idConcurso } = req.body;
     const cuerpo = [Number(idConcurso), Number(idIncumplimiento)];
     let response = await incumplimientoM.categorizarSNC(cuerpo);
@@ -81,6 +93,8 @@ controller.categorizarSNC = async (req, res) => {
 
 controller.descategorizarSNC = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { idIncumplimiento, idConcurso } = req.body;
     const cuerpo = [Number(idConcurso), Number(idIncumplimiento)];
     let response = await incumplimientoM.descategorizarSNC(cuerpo);
@@ -95,6 +109,8 @@ controller.descategorizarSNC = async (req, res) => {
 };
 controller.categorizarSNC = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { idIncumplimiento, idConcurso } = req.body;
     const cuerpo = [Number(idConcurso), Number(idIncumplimiento)];
     let response = await incumplimientoM.categorizarSNC(cuerpo);
@@ -110,6 +126,8 @@ controller.categorizarSNC = async (req, res) => {
 
 controller.updateCantidadInc = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { cantidad, idConcurso, idIncumplimiento } = req.body;
     const cuerpo = [
       Number(cantidad),
@@ -129,6 +147,8 @@ controller.updateCantidadInc = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { id } = req.params;
     const { incumplimiento } = req.body;
     const cuerpo = {
@@ -148,6 +168,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const { id } = req.params;
     let response = await incumplimientoM.delete(id);
     res.status(200).json({ success: true, response });

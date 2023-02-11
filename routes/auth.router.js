@@ -3,6 +3,7 @@ import estacionService from "../controllers/auth.controller";
 
 const route = router();
 
+route.get("/", estacionService.validarTiempoSesion); //Me valida el tiempo en sesion
 route.get("/usuarios/:idEmpleado", estacionService.findByIdEmpleado);
 route.get("/usuarios", estacionService.findAll);
 route.get("/permisos/:user", estacionService.findPermisosXEmpleado);

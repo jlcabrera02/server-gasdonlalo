@@ -2,12 +2,16 @@ import generadorId from "../assets/generadorId";
 import listaReM from "../models/d.listaRecursosDespachador.model";
 import resErr from "../respuestas/error.respuestas";
 import empleado from "../models/rh.empleado.model";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 const { sinRegistro } = resErr;
 
 const controller = {};
 
 controller.findListRecursosXmes = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 17);
+    if (!user.success) throw user;
     const { year, month } = req.params;
     let fecha = `${year}-${month}-01`;
     const response = await listaReM.findListRecursosXmes(fecha);
@@ -23,6 +27,8 @@ controller.findListRecursosXmes = async (req, res) => {
 
 controller.findListRecursosXmesXidEmpleado = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 17);
+    if (!user.success) throw user;
     const { year, month, idEmpleado } = req.params;
     const fecha = `${year}-${month}-01`;
     const response = [];
@@ -72,6 +78,8 @@ controller.findListRecursosXmesXidEmpleado = async (req, res) => {
 
 controller.findListRecursosXmesXidEmpleadoXquincena = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 17);
+    if (!user.success) throw user;
     const { year, month, idEmpleado, quincena } = req.params;
     const fecha = `${year}-${month}-01`;
     const response = await listaReM.findListRecursosXmesXidEmpleadoXquincena([
@@ -93,6 +101,8 @@ controller.findListRecursosXmesXidEmpleadoXquincena = async (req, res) => {
 
 controller.findAllXQuicena = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 17);
+    if (!user.success) throw user;
     const { year, month, quincena } = req.params;
     const fecha = `${year}-${month}-01`;
     const almacenar = [];
@@ -129,6 +139,8 @@ controller.findAllXQuicena = async (req, res) => {
 
 controller.findRecursos = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 17);
+    if (!user.success) throw user;
     const response = await listaReM.findRecursos();
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -142,6 +154,8 @@ controller.findRecursos = async (req, res) => {
 
 controller.findXTiempo = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 17);
+    if (!user.success) throw user;
     const { idEmpleado, fechaInicio, fechaFinal } = req.body;
     let cuerpo = [];
     if (fechaInicio || fechaFinal) {
@@ -167,6 +181,8 @@ controller.findXTiempo = async (req, res) => {
 
 controller.findByIdentificador = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 17);
+    if (!user.success) throw user;
     const { identificador } = req.params;
     const response = await listaReM.findByIdentificador(identificador);
     res.status(200).json({ success: true, response });
@@ -181,6 +197,8 @@ controller.findByIdentificador = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 17);
+    if (!user.success) throw user;
     const { empleado, fecha, recursos } = req.body;
     const idGenerico = generadorId();
 
@@ -224,6 +242,8 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 18);
+    if (!user.success) throw user;
     const { evaluaciones, idEmpleado } = req.body;
 
     const cuerpo = evaluaciones.map((el) => [
@@ -245,6 +265,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 19);
+    if (!user.success) throw user;
     const { identificador } = req.params;
     const response = await listaReM.delete(identificador);
     res.status(200).json({ success: true, response });

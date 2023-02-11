@@ -1,12 +1,16 @@
 import generadorId from "../assets/generadorId";
 import pasosDM from "../models/d.pasosDespachar.model";
 import errRes from "../respuestas/error.respuestas";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 const { sinRegistro } = errRes;
 
 const controller = {};
 
 controller.findEvaluacionesXEmpleado = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 14);
+    if (!user.success) throw user;
     const { year, month, idEmpleado, quincena } = req.params;
     const fecha = `${year}-${month}-01`;
     const identificador = await pasosDM.agruparEvaluaciones([
@@ -45,6 +49,8 @@ controller.findEvaluacionesXEmpleado = async (req, res) => {
 
 controller.findPasos = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 14);
+    if (!user.success) throw user;
     const response = await pasosDM.findPasos();
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -58,6 +64,8 @@ controller.findPasos = async (req, res) => {
 
 controller.findOne = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 14);
+    if (!user.success) throw user;
     const { identificador } = req.params;
     const response = await pasosDM.findOne(identificador);
     res.status(200).json({ success: true, response });
@@ -72,6 +80,8 @@ controller.findOne = async (req, res) => {
 
 controller.findEvaluacionesXTiempo = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 14);
+    if (!user.success) throw user;
     const { fechaInicio, fechaFinal, idEmpleado } = req.body;
     const identificador = await pasosDM.agruparEvaluaciones([
       Number(idEmpleado),
@@ -101,6 +111,8 @@ controller.findEvaluacionesXTiempo = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 14);
+    if (!user.success) throw user;
     const { empleado, fecha, pasos } = req.body;
     const idGenerico = generadorId();
 
@@ -139,6 +151,8 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 15);
+    if (!user.success) throw user;
     const { idEmpleado, evaluaciones } = req.body;
 
     const cuerpo = evaluaciones.map((el) => [
@@ -160,6 +174,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 16);
+    if (!user.success) throw user;
     const { identificador } = req.params;
     let response = await pasosDM.delete(identificador);
     res.status(200).json({ success: true, response });

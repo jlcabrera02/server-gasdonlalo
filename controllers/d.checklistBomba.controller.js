@@ -1,9 +1,13 @@
 import checklistBombaM from "../models/d.checklistBomba.model";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 
 const controller = {};
 
 controller.find = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 5);
+    if (!user.success) throw user;
     const { year, month } = req.params;
     const dias = new Date(year, month, 0).getDate();
     const almacenar = [];
@@ -30,6 +34,8 @@ controller.find = async (req, res) => {
 
 controller.findXidempleadoXfecha = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 5);
+    if (!user.success) throw user;
     const { idEmpleado, fecha } = req.params;
 
     const response = await checklistBombaM.findXidempleadoXfecha([
@@ -49,6 +55,8 @@ controller.findXidempleadoXfecha = async (req, res) => {
 
 controller.totalChecks = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 5);
+    if (!user.success) throw user;
     const { year, month } = req.params;
     const fecha = `${year}-${month}-01`;
     let response = await checklistBombaM.totalChecks(fecha);
@@ -64,6 +72,8 @@ controller.totalChecks = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 5);
+    if (!user.success) throw user;
     const {
       fecha,
       islaLimpia,
@@ -117,6 +127,8 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 6);
+    if (!user.success) throw user;
     const { id } = req.params;
     const {
       fecha,
@@ -154,6 +166,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 7);
+    if (!user.success) throw user;
     const { id } = req.params;
     let response = await checklistBombaM.delete(id);
     console.log(response);

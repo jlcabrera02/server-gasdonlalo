@@ -1,10 +1,14 @@
 import departamentoM from "../models/rh.departamento.model";
 import mayusxPalabra from "./formatearText.controller";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 
 const controller = {};
 
 controller.find = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     let response = await departamentoM.find();
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -18,6 +22,8 @@ controller.find = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const departamento = mayusxPalabra(req.body.departamento);
     let response = await departamentoM.insert(departamento);
     res.status(200).json({ success: true });
@@ -32,6 +38,8 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { id } = req.params;
     const departamento = mayusxPalabra(req.body.departamento);
     const data = [departamento, id];
@@ -48,6 +56,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { id } = req.params;
     let response = await departamentoM.delete(id);
     res.status(200).json({ success: true, response });

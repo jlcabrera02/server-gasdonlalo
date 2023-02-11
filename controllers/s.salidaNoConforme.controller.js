@@ -1,14 +1,14 @@
 import salidaNoCM from "../models/s.salidaNoConforme.model";
 import empleadoM from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
-import resErr from "../respuestas/error.respuestas";
-const { errorMath } = resErr;
 const { verificar } = auth;
 
 const controller = {};
 
 controller.findTotalSalidasXDiaXEmpleado = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
     const { fecha, idEmpleado } = req.params;
     const cuerpo = [idEmpleado, fecha];
     const response = await salidaNoCM.findTotalSalidasXDiaXEmpleado(cuerpo);
@@ -24,6 +24,8 @@ controller.findTotalSalidasXDiaXEmpleado = async (req, res) => {
 
 controller.findSalidasNoConformesXMes = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
     const { year, month } = req.params;
     let fecha = `${year}-${month}-01`;
     const response = await salidaNoCM.findSalidasNoConformesXMes(fecha);
@@ -39,6 +41,8 @@ controller.findSalidasNoConformesXMes = async (req, res) => {
 
 controller.findSalidasNoConformesXMesPendientes = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
     const { year, month } = req.params;
     let fecha = `${year}-${month}-01`;
     const response = await salidaNoCM.findSNCPendiente([fecha, fecha]);
@@ -80,6 +84,8 @@ controller.findSalidasNoConformesXMesPendientes = async (req, res) => {
 
 controller.findSalidasNoConformesXMesXIddepartamento = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
     const { year, month, iddepartamento } = req.params;
     let fecha = `${year}-${month}-01`;
     const response = await salidaNoCM.findSalidasNoConformesXMesXIddepartamento(
@@ -98,6 +104,8 @@ controller.findSalidasNoConformesXMesXIddepartamento = async (req, res) => {
 
 controller.findSNCXIncumplimiento = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
     const { year, month, iddepartamento } = req.params;
     let fecha = `${year}-${month}-01`;
     const empleados = await empleadoM.findEmpleadosXmesXiddepartamento(
@@ -144,6 +152,8 @@ controller.findSNCXIncumplimiento = async (req, res) => {
 
 controller.findSalidasXInconformidadXMesXiddepartemento = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
     const { year, month, iddepartamento } = req.params;
     let fecha = `${year}-${month}-01`;
     const response =
@@ -164,6 +174,8 @@ controller.findSalidasXInconformidadXMesXiddepartemento = async (req, res) => {
 
 controller.findSalidasXSemana = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
     const { year, month, idSalida } = req.params;
     const fecha = `${year}-${month}-01`;
     let diasDelMes = new Date(year, month, 0).getDate(); //Me obtiene el numero de dias del mes
@@ -224,6 +236,8 @@ controller.findSalidasXSemana = async (req, res) => {
 
 controller.findOne = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
     const { idSalida } = req.params;
     const response = await salidaNoCM.findOne(idSalida);
     res.status(200).json({ success: true, response });
@@ -237,9 +251,9 @@ controller.findOne = async (req, res) => {
 };
 
 controller.insert = async (req, res) => {
-  let user = verificar(req.headers.authorization, 20);
-  if (!user.success) throw user;
   try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
     const {
       fecha,
       descripcionFalla,
@@ -271,9 +285,9 @@ controller.insert = async (req, res) => {
 };
 
 controller.update = async (req, res) => {
-  let user = verificar(req.headers.authorization, 20);
-  if (!user.success) throw user;
   try {
+    let user = verificar(req.headers.authorization, 21);
+    if (!user.success) throw user;
     const { idSalidaNoConforme } = req.params;
     const {
       fecha,
@@ -282,7 +296,7 @@ controller.update = async (req, res) => {
       concesiones,
       idEmpleadoIncumple,
       idIncumplimiento,
-      idDepartamento,
+      // idDepartamento,
     } = req.body;
 
     // let departamento = await empleadoM.validarDepartamento(idEmpleadoIncumple);
@@ -315,6 +329,8 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 23);
+    if (!user.success) throw user;
     const { idSalidaNoConforme } = req.params;
     let response = await salidaNoCM.delete(idSalidaNoConforme);
     res.status(200).json({ success: true, response });

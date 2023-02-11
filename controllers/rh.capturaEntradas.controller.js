@@ -1,11 +1,15 @@
 import ceM from "../models/rh.capturaEntradas.model";
 import tp from "../assets/formatTiempo";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 const { tiempoDB, transformMinute, diff } = tp;
 
 const controller = {};
 
 controller.findEntradasXidEmpleadoXMes = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { year, month, idEmpleado } = req.params;
     const fecha = `${year}-${month}-01`;
     let response = await ceM.findEntradasXidEmpleadoXMes(idEmpleado, fecha);
@@ -33,6 +37,8 @@ controller.findEntradasXidEmpleadoXMes = async (req, res) => {
 
 controller.findRetardosXsemanas = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idEmpleado } = req.params;
     const { dateStart, dateEnd } = req.body;
     const cuerpo = [Number(idEmpleado), dateStart, dateEnd];
@@ -69,6 +75,8 @@ controller.findRetardosXsemanas = async (req, res) => {
 
 controller.findFalta = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const response = await ceM.findFalta();
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -82,6 +90,8 @@ controller.findFalta = async (req, res) => {
 
 controller.semanasXmes = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { year, month } = req.params;
     let diasDelMes = new Date(year, month, 0).getDate();
     let primerSabado;
@@ -143,6 +153,8 @@ controller.semanasXmes = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idEmpleado, horaEntrada, fecha, idTurno, idTipoFalta } = req.body;
 
     const cuerpo = {
@@ -179,6 +191,8 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idempleado, idcontrolDocumento } = req.body;
 
     const cuerpo = [idcontrolDocumento, idempleado];

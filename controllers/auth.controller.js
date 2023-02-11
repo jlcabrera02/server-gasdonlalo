@@ -1,5 +1,6 @@
 import auth from "../models/auth.model";
 import mysql from "mysql2";
+const { verificar } = auth;
 
 const controller = {};
 
@@ -126,6 +127,16 @@ controller.findPermisosXEmpleado = async (req, res) => {
     } else {
       res.status(err.code).json(err);
     }
+  }
+};
+
+controller.validarTiempoSesion = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    res.status(200).json({ success: true, msg: "Token correcto" });
+  } catch (err) {
+    res.status(err.code).json(err);
   }
 };
 

@@ -1,9 +1,13 @@
 import erM from "../models/rh.entregaRecursos.model";
+import auth from "../models/auth.model";
+const { verificar } = auth;
 
 const controller = {};
 
 controller.findRecursos = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const response = await erM.findRecursos();
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -17,6 +21,8 @@ controller.findRecursos = async (req, res) => {
 
 controller.findRecursosXId = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { idEntregaRecurso } = req.params;
     const response = await erM.findRecursosXId(idEntregaRecurso);
     res.status(200).json({ success: true, response });
@@ -31,6 +37,8 @@ controller.findRecursosXId = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
     const { fecha, idEmpleado, cantidad, recurso, tipo } = req.body;
     const cuerpo = {
       fecha,
