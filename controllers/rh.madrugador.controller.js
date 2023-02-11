@@ -77,12 +77,11 @@ controller.findControlMadrugadorM = async (req, res) => {
 controller.findControlMadrugadorMG = async (req, res) => {
   try {
     const { year, month, iddepartamento } = req.params;
-    const fecha = `${year}-${month}-01`;
+    // const fecha = `${year}-${month}-01`;s
     const diasMes = new Date(year, month, 0).getDate();
-    const empDesp = await empleadoM.findEmpleadosXmesXiddepartamento([
-      iddepartamento,
-      fecha,
-    ]);
+    const empDesp = await empleadoM.findEmpleadosXmesXiddepartamento(
+      iddepartamento
+    );
     const puntosMes = await cmM.findPuntajeMes();
     const inc = await incModel.findByConcurso(iddepartamento);
     console.log(inc);

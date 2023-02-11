@@ -18,12 +18,13 @@ model.find = (query = null) =>
     });
   });
 
-model.findOne = (id) =>
+model.findOne = (idEmpleado) =>
+  //La usare para obtener todo los atributos con el idempleado.
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND idchecador = ?";
+      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND empleado.idempleado = ?";
 
-    connection.query(sql, id, (err, res) => {
+    connection.query(sql, idEmpleado, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -79,11 +80,12 @@ model.insert = (data) =>
     });
   });
 
-model.update = (data) =>
+model.update = (data, idEmpleado) =>
   new Promise((resolve, reject) => {
-    let sql = "UPDATE empleado SET ? WHERE idempleado = ?";
+    let sql =
+      "UPDATE empleado SET `update_time` = CURRENT_TIMESTAMP, ? WHERE idempleado = ?";
 
-    connection.query(sql, data, (err, res) => {
+    connection.query(sql, [data, idEmpleado], (err, res) => {
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

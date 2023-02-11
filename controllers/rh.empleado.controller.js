@@ -1,5 +1,5 @@
 import empleadoM from "../models/rh.empleado.model";
-import mayusxPalabra from "./formatearText.controller";
+import { mayus } from "./formatearText.controller";
 
 const controller = {};
 
@@ -37,9 +37,9 @@ controller.insert = async (req, res) => {
     const { nombre, apellidoPaterno, apellidoMaterno, departamento } = req.body;
 
     const cuerpo = {
-      nombre: mayusxPalabra(nombre),
-      apellido_paterno: mayusxPalabra(apellidoPaterno),
-      apellido_materno: mayusxPalabra(apellidoMaterno),
+      nombre: mayus(nombre),
+      apellido_paterno: mayus(apellidoPaterno),
+      apellido_materno: mayus(apellidoMaterno),
       iddepartamento: Number(departamento),
     };
 
@@ -57,13 +57,53 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
+    const { idEmpleado } = req.params;
+    const empleadoById = await empleadoM.findOne(idEmpleado);
+
+    const {
+      nombre,
+      idchecador,
+      apellido_paterno,
+      apellido_materno,
+      iddepartamento,
+      estatus,
+      edad,
+      motivo,
+    } = empleadoById[0];
+
+    const cuerpo = {
+      idchecador: req.body.idChecador || idchecador,
+      nombre: mayus(req.body.nombre || nombre),
+      apellido_paterno: mayus(req.body.apellidoPaterno || apellido_paterno),
+      apellido_materno: mayus(req.body.apellidoMaterno || apellido_materno),
+      iddepartamento: req.body.idDepartamento || iddepartamento,
+      estatus: req.body.estatus || estatus,
+      edad: req.body.edad || edad,
+      motivo: req.body.motivo || motivo,
+    };
+
+    const response = await empleadoM.update(cuerpo, idEmpleado);
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+/* controller.update = async (req, res) => {
+  try {
     const { id } = req.params;
     const { nombre, apellidoPaterno, apellidoMaterno, departamento } = req.body;
 
     const cuerpo = {
-      nombre: mayusxPalabra(nombre),
-      apellido_paterno: mayusxPalabra(apellidoPaterno),
-      apellido_materno: mayusxPalabra(apellidoMaterno),
+      nombre: mayus(nombre),
+      apellido_paterno: mayus(apellidoPaterno),
+      apellido_materno: mayus(apellidoMaterno),
       iddepartamento: Number(departamento),
     };
 
@@ -78,7 +118,7 @@ controller.update = async (req, res) => {
       res.status(err.code).json(err);
     }
   }
-};
+}; */
 
 controller.delete = async (req, res) => {
   try {

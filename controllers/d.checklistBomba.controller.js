@@ -72,6 +72,8 @@ controller.insert = async (req, res) => {
       turno,
       idempleadoEntrante,
       idempleadoSaliente,
+      cumple,
+      motivo,
     } = req.body;
 
     const cuerpo = {
@@ -83,7 +85,17 @@ controller.insert = async (req, res) => {
       idempleado_entrante: Number(idempleadoEntrante),
       idempleado_saliente: Number(idempleadoSaliente),
       idpuntaje_minimo: 1,
+      motivo,
+      cumple: cumple,
     };
+
+    if (!cumple) {
+      delete cuerpo.isla_limpia;
+      delete cuerpo.aceites_completos;
+      delete cuerpo.turno;
+      delete cuerpo.idbomba;
+      delete cuerpo.idbomba;
+    }
 
     await checklistBombaM.validarExistencia([
       fecha,
@@ -92,7 +104,6 @@ controller.insert = async (req, res) => {
     ]); //valida si que no alla datos duplicados
 
     let response = await checklistBombaM.insert(cuerpo);
-    console.log("Inserción de checklist");
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);

@@ -33,12 +33,10 @@ controller.findByConcurso = async (req, res) => {
 controller.findIncumplimientosXcategorizacion = async (req, res) => {
   try {
     const { idCategorizacion, iddepartamento } = req.params;
-    let response;
-    if (!iddepartamento) {
-      response = await incumplimientoM.findIncumplimientosXcategorizacion(
-        idCategorizacion
-      );
-    }
+    const response = await incumplimientoM.findIncumplimientosXcategorizacion(
+      idCategorizacion,
+      iddepartamento
+    );
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

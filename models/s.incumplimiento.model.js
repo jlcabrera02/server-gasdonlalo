@@ -33,16 +33,19 @@ model.findIncumplimientosXcategorizacion = (idConcurso, iddepartamento) =>
     /* let sql = `SELECT * FROM (SELECT i.*, ci.idconcurso FROM incumplimiento i LEFT JOIN categorizar_incumplimiento ci ON i.idincumplimiento = ci.idincumplimiento WHERE ci.idconcurso = ? UNION SELECT i.*, ci.idconcurso FROM incumplimiento i LEFT JOIN categorizar_incumplimiento ci ON i.idincumplimiento = ci.idincumplimiento WHERE ci.idconcurso IS NULL) tableA ORDER BY tableA.idincumplimiento`; */
 
     let sql;
-
+    //Si viene el departamento es por que solo estoy permitiendo que existan mas concursos de tipo madrugador en diferentes departamentos que no sea unicamente despacho, el concurso octanoso y aceitoso solo son para el departamento de despacho
+    //Por lo que si viene el departamento, lo que hace el else, es que me traiga todos los incumplimientos del concurso madrugador = 1 del departamento ? el cual el id del concurso nuevo sera 1 o n>3. los idconcurso  es octanoso y el 4 aceitoso.
     if (!iddepartamento) {
+      //Como el idconcurso y el concurso son iguales por eso no separo el idconcurso con una nueva propiedad concurso
       sql = mysql.format(
         `SELECT inc.incumplimiento, inc.idincumplimiento, cinc.idconcurso, cinc.cantidad  FROM (SELECT * FROM concurso c, incumplimiento inc WHERE c.concurso = ? AND iddepartamento = 1) inc LEFT JOIN (SELECT * FROM categorizar_incumplimiento WHERE idconcurso = ?) cinc ON inc.idincumplimiento = cinc.idincumplimiento`,
         [idConcurso, idConcurso]
       );
     } else {
       sql = mysql.format(
-        `SELECT inc.incumplimiento, inc.idincumplimiento, cinc.idconcurso, cinc.cantidad  FROM (SELECT * FROM concurso c, incumplimiento inc WHERE c.concurso = 1 AND c.iddepartamento = ?) inc LEFT JOIN (SELECT * FROM categorizar_incumplimiento WHERE idconcurso = 1) cinc ON inc.idincumplimiento = cinc.idincumplimiento`,
-        [idConcurso, iddepartamento, idConcurso]
+        `SELECT inc.incumplimiento, inc.idincumplimiento, cinc.idconcurso, cinc.cantidad  FROM (SELECT * FROM concurso c, incumplimiento inc WHERE c.concurso = 1 AND c.iddepartamento = ?) inc LEFT JOIN (SELECT * FROM categorizar_incumplimiento WHERE idconcurso = ?) cinc ON inc.idincumplimiento = cinc.idincumplimiento`,
+        [iddepartamento, idConcurso]
+        //Aqui el c.concurso va a hacer siempre 1 haciendo referencia al concurso madrugador.
       );
     }
 

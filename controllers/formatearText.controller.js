@@ -6,4 +6,8 @@ export default function mayusxPalabra(string) {
   return primeraLetra + textoEntero;
 }
 
+export function mayus(string) {
+  return string.toLocaleUpperCase();
+}
+
 //Esta función me da un formato especifico de con que sintaxis se guardaran los datos en la base de datos del usuario. IMPORTANTE

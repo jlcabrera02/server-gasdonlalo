@@ -104,6 +104,25 @@ controller.updateMotivo = async (req, res) => {
   }
 };
 
+controller.changeDep = async (req, res) => {
+  //Sirve para que se pueda hacer un cambio a un empleado de departamento.
+  try {
+    const { idDepartamento, idEmpleado } = req.body;
+
+    const cuerpo = [{ idDepartamento }, idEmpleado];
+
+    const response = await seM.update(cuerpo);
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.update = async (req, res) => {
   try {
     const { idEmpleado } = req.params;
