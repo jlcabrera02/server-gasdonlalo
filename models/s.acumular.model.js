@@ -24,6 +24,16 @@ model.find = (idDepartamento) =>
     });
   });
 
+model.validar = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM sncacumuladas WHERE idempleado = ? AND idincumplimiento = ? AND fecha = ?`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =
@@ -44,7 +54,6 @@ model.capturarSNC = (data) =>
     let sql = "UPDATE sncacumuladas SET ? WHERE idsncacumuladas = ?";
 
     connection.query(sql, data, (err, res) => {
-      console.log(data);
       if (err) {
         return reject(errorDB());
       }

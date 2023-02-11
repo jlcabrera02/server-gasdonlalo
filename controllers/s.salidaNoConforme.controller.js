@@ -44,7 +44,6 @@ controller.findSNCPorCapturar = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 20);
     if (!user.success) throw user;
-    console.log("hola");
     const { idDepartamento } = req.params;
     const response = await sncaM.find(idDepartamento);
     res.status(200).json({ success: true, response });
@@ -290,6 +289,20 @@ controller.insert = async (req, res) => {
       idempleado_autoriza: Number(user.token.data.datos.idempleado),
       idincumplimiento: Number(idIncumplimiento),
     };
+
+    //obtiene la SNC que se formo pero no se ha redactado.
+    const SNCPendiente = await sncaM.validar([
+      idEmpleadoIncumple,
+      idIncumplimiento,
+      fecha,
+    ]);
+    console.log(SNCPendiente);
+    if (SNCPendiente.length > 0) {
+      await sncaM.capturarSNC([
+        { capturado: 1 },
+        SNCPendiente[0].idsncacumuladas,
+      ]);
+    }
 
     let response = await salidaNoCM.insert(cuerpo);
     res.status(200).json({ success: true, response });
