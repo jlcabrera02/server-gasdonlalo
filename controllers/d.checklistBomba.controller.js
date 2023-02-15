@@ -1,4 +1,5 @@
 import checklistBombaM from "../models/d.checklistBomba.model";
+import empM from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
 const { verificar } = auth;
@@ -11,17 +12,33 @@ controller.find = async (req, res) => {
     if (!user.success) throw user;
     const { year, month } = req.params;
     const dias = new Date(year, month, 0).getDate();
+    const empleado = await empM.find(1);
     const almacenar = [];
 
-    for (let i = 1; i <= dias; i++) {
-      let fecha = `${year}-${month}-${i}`;
-      let response = await checklistBombaM.find(fecha);
-      response = response.map((el) => ({
-        ...el,
-        advertencia: el.advertencia === 1 ? true : false,
-        fechaGenerada: fecha,
-      }));
-      almacenar.push({ fecha, data: [...response] });
+    for (let i = 0; i < empleado.length; i++) {
+      const { idempleado } = empleado[i];
+      const almacenarXempleado = [];
+      for (let j = 1; j <= dias; j++) {
+        let fecha = `${year}-${month}-${j}`;
+        let response = await checklistBombaM.find([idempleado, fecha]);
+        if (response.length > 0) {
+          response = response.map((el) => ({
+            ...el,
+            fecha,
+          }));
+        } else {
+          response = [
+            {
+              idchecklist_bomba: null,
+              idempleado,
+              fecha,
+              cumple: null,
+            },
+          ];
+        }
+        almacenarXempleado.push(response[0]);
+      }
+      almacenar.push({ empleado: empleado[i], fechas: almacenarXempleado });
     }
 
     res.status(200).json({ success: true, response: almacenar });
@@ -34,35 +51,25 @@ controller.find = async (req, res) => {
   }
 };
 
-controller.findXidempleadoXfecha = async (req, res) => {
+controller.findChecklistXmes = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 5);
     if (!user.success) throw user;
-    const { idEmpleado, fecha } = req.params;
+    const { idEmpleado, year, month } = req.params;
+    const fecha = `${year}-${month}-01`;
 
-    const response = await checklistBombaM.findXidempleadoXfecha([
+    const empleado = await empM.findOne(idEmpleado);
+
+    const response = await checklistBombaM.findChecklistXmes([
       idEmpleado,
+      fecha,
       fecha,
     ]);
 
-    res.status(200).json({ success: true, response });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
-
-controller.totalChecks = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization, 5);
-    if (!user.success) throw user;
-    const { year, month } = req.params;
-    const fecha = `${year}-${month}-01`;
-    let response = await checklistBombaM.totalChecks(fecha);
-    res.status(200).json({ success: true, response });
+    res.status(200).json({
+      success: true,
+      response: { empleado: empleado[0], data: response },
+    });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
@@ -88,28 +95,27 @@ controller.insert = async (req, res) => {
 
     const cuerpo = {
       fecha,
-      isla_limpia: islaLimpia ? islaLimpia : 0,
-      aceites_completos: aceitesCompletos ? aceitesCompletos : 0,
-      bomba: bomba ? bomba : 0,
-      turno: turno ? turno : 0,
-      estacion_servicio: estacionServicio ? estacionServicio : 0,
-      idEmpleado: Number(idEmpleado),
+      isla_limpia: islaLimpia ? islaLimpia : false,
+      aceites_completos: aceitesCompletos ? aceitesCompletos : false,
+      bomba: bomba ? bomba : false,
+      turno: turno ? turno : false,
+      estacion_servicio: estacionServicio ? estacionServicio : false,
+      idempleado: Number(idEmpleado),
     };
 
     if (
-      cuerpo.isla_limpia === 0 ||
-      cuerpo.aceites_completos === 0 ||
-      cuerpo.bomba === 0 ||
-      cuerpo.turno === 0 ||
-      cuerpo.estacion_servicio === 0
+      !cuerpo.isla_limpia ||
+      !cuerpo.aceites_completos ||
+      !cuerpo.bomba ||
+      !cuerpo.turno ||
+      !cuerpo.estacion_servicio
     ) {
-      await sncaM.insert([3, idempleadoEntrante, fecha]);
+      await sncaM.insert([3, idEmpleado, fecha]);
     }
 
     let response = await checklistBombaM.insert(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -123,32 +129,70 @@ controller.update = async (req, res) => {
     let user = verificar(req.headers.authorization, 6);
     if (!user.success) throw user;
     const { id } = req.params;
+    const viejo = await checklistBombaM.findOne(id);
+
     const {
       fecha,
       islaLimpia,
       aceitesCompletos,
-      idbomba,
+      bomba,
       turno,
-      idempleadoEntrante,
-      idempleadoSaliente,
+      idEmpleado,
+      estacionServicio,
     } = req.body;
 
     const cuerpo = {
-      fecha,
-      isla_limpia: Number(islaLimpia),
-      aceites_completos: Number(aceitesCompletos),
-      idbomba: Number(idbomba),
-      turno,
-      idempleado_entrante: Number(idempleadoEntrante),
-      idempleado_saliente: Number(idempleadoSaliente),
-      idpuntaje_minimo: 1,
+      fecha: fecha ? fecha : viejo.fecha,
+      isla_limpia: islaLimpia ? islaLimpia : false,
+      aceites_completos: aceitesCompletos ? aceitesCompletos : false,
+      bomba: bomba ? bomba : false,
+      turno: turno ? turno : false,
+      estacion_servicio: estacionServicio ? estacionServicio : false,
+      idempleado: Number(idEmpleado),
     };
+
+    const snca = await sncaM.validar([cuerpo.idempleado, 3, cuerpo.fecha]);
+    console.log(snca);
+
+    //Elimina la snc pendiente si todo esta bien
+    if (viejo.cumple === 0) {
+      console.log("Cumple 1");
+      if (
+        cuerpo.isla_limpia &&
+        cuerpo.aceites_completos &&
+        cuerpo.bomba &&
+        cuerpo.turno &&
+        cuerpo.estacion_servicio
+      ) {
+        console.log("Cumple 2");
+        await sncaM.update([
+          {
+            fecha: cuerpo.fecha,
+            idempleado: cuerpo.idempleado,
+            capturado: 1,
+          },
+          snca[0].idsncacumuladas,
+        ]);
+      }
+    }
+
+    if (viejo.cumple === 1) {
+      if (
+        !cuerpo.isla_limpia ||
+        !cuerpo.aceites_completos ||
+        !cuerpo.bomba ||
+        !cuerpo.turno ||
+        !cuerpo.estacion_servicio
+      ) {
+        await sncaM.insert([3, idEmpleado, fecha]);
+      }
+    }
 
     const data = [cuerpo, id];
     let response = await checklistBombaM.update(data);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -162,8 +206,10 @@ controller.delete = async (req, res) => {
     let user = verificar(req.headers.authorization, 7);
     if (!user.success) throw user;
     const { id } = req.params;
+    const viejo = await checklistBombaM.findOne(id);
+    const snca = await sncaM.validar([viejo.idempleado, 3, viejo.fecha]);
+    await sncaM.delete(snca[0].idsncacumuladas);
     let response = await checklistBombaM.delete(id);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

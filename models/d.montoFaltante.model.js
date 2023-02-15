@@ -112,6 +112,18 @@ model.findXTiempo = (data) =>
     });
   });
 
+model.findOne = (
+  idMf //Usada para actualizar
+) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM monto_faltante WHERE idmonto_faltante = ?`;
+
+    connection.query(sql, idMf, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql = "INSERT INTO monto_faltante SET ?";

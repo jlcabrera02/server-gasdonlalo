@@ -4,51 +4,34 @@ const { errorDB, sinRegistro, sinCambios, datosExistentes } = resErr;
 
 const model = {};
 
-model.find = (fecha) =>
+model.find = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT em.idempleado, CONCAT(em.nombre, " ", em.apellido_paterno, " ", em.apellido_materno) AS nombre_completo, ch.isla_limpia, ch.aceites_completos, ch.fecha as fecha_db, ch.cumple, ch.motivo, CASE WHEN (COUNT(em.idempleado) * 2) =  SUM(isla_limpia + aceites_completos) THEN 1 ELSE 0 END AS advertencia FROM (SELECT * FROM empleado WHERE estatus IN (1,2) AND iddepartamento = 1) AS em LEFT OUTER JOIN (SELECT * FROM checklist_bomba WHERE fecha = ?) AS ch ON ch.idempleado_entrante = em.idempleado GROUP BY em.idempleado ORDER BY nombre_completo`;
-
-    connection.query(sql, fecha, (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
-      if (res) return resolve(res);
-    });
-  });
-
-model.findXidempleadoXfecha = (data) =>
-  new Promise((resolve, reject) => {
-    let sql = `SELECT ck.*, emp.nombre, emp.apellido_paterno, emp.apellido_materno, empSaliente.nombre AS nombreS, empSaliente.apellido_paterno AS apellidoPS, empSaliente.apellido_materno AS apellidoMS FROM checklist_bomba ck, empleado emp, (SELECT * from empleado emp) empSaliente WHERE ck.idempleado_entrante = emp.idempleado AND ck.idempleado_saliente = empSaliente.idempleado AND emp.idempleado = ? AND ck.fecha = ?`;
-
-    //data = ["fecha", idempleado]
-
-    connection.query(sql, data, (err, res) => {
-      console.log(data);
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
-      if (res) return resolve(res);
-    });
-  });
-
-model.totalChecks = (fecha) =>
-  new Promise((resolve, reject) => {
-    let sql = `SELECT emp.*, SUM(ch.cumple) total_checklist FROM (SELECT *, CONCAT(nombre, " ", apellido_paterno, " ", apellido_materno) AS nombre_completo FROM empleado WHERE iddepartamento = 1 AND date_baja IS NULL OR date_baja > ?) emp  LEFT JOIN (SELECT *, CASE WHEN (COUNT(idempleado_entrante) * 2) =  SUM(isla_limpia + aceites_completos) THEN 1 ELSE 0 END AS cumple FROM checklist_bomba WHERE fecha BETWEEN ? AND LAST_DAY(?)  GROUP BY idempleado_entrante, fecha) ch  ON emp.idempleado = ch.idempleado_entrante GROUP BY emp.idempleado ORDER BY emp.nombre`;
-
-    connection.query(sql, [fecha, fecha, fecha], (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
-      if (res) return resolve(res);
-    });
-  });
-
-model.validarExistencia = (data) =>
-  new Promise((resolve, reject) => {
-    let sql =
-      "SELECT * FROM checklist_bomba WHERE fecha = ? AND idempleado_entrante = ? AND idbomba = ?";
+    let sql = `SELECT idchecklist_bomba, idempleado, fecha, CASE WHEN isla_limpia = isla_limpia AND aceites_completos = aceites_completos AND turno = COUNT(turno) AND bomba = COUNT(bomba) AND estacion_servicio = COUNT(estacion_servicio) THEN TRUE ELSE FALSE END cumple FROM checklist_bomba WHERE idempleado = ? AND fecha = ? GROUP BY idempleado, fecha`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
-      if (res.length < 1) return resolve(false);
-      if (res) return reject(datosExistentes());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findOne = (idCk) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT *, CASE WHEN isla_limpia = 1 AND aceites_completos = 1 AND turno = 1 AND bomba = 1 AND estacion_servicio = 1 THEN TRUE ELSE FALSE END cumple FROM checklist_bomba WHERE idchecklist_bomba = ?`;
+
+    connection.query(sql, idCk, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
+model.findChecklistXmes = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM checklist_bomba WHERE idempleado = ? AND fecha BETWEEN ? AND LAST_DAY(?) ORDER BY fecha`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
     });
   });
 
@@ -57,7 +40,6 @@ model.insert = (data) =>
     let sql = "INSERT INTO checklist_bomba SET ?";
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
@@ -69,8 +51,6 @@ model.update = (data) =>
     let sql = "UPDATE checklist_bomba SET ? WHERE idchecklist_bomba = ?";
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
-
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

@@ -176,13 +176,17 @@ controller.insert = async (req, res) => {
       Number(el.cumple),
       idGenerico,
     ]);
-    console.log(cuerpo);
-    await sncaM.insert([11, empleado, fecha]);
+
+    const SNCvalidar = cuerpo.some((el) => el[4] === 0);
+    if (SNCvalidar) {
+      await sncaM.insert([11, empleado, fecha]);
+    }
+
     await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro
     let response = await evaluacionUniformeM.insert(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res
         .status(400)

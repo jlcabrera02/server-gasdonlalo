@@ -16,10 +16,8 @@ controller.find = async (req, res) => {
     let user = verificar(req.headers.authorization, 2);
     if (!user.success) throw user;
     let response = await montoFaltanteM.find();
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -95,7 +93,6 @@ controller.findXSemana = async (req, res) => {
         .reduce((a, b) => new Decimal(Number(a)).plus(Number(b)).toNumber(), 0),
     });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -131,7 +128,6 @@ controller.findXMesXEmpleado = async (req, res) => {
     let response = await montoFaltanteM.findXMesXEmpleado(fecha, idempleado);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -178,7 +174,6 @@ controller.findXTiempo = async (req, res) => {
     if (registros.length <= 0) throw sinRegistro();
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -205,10 +200,8 @@ controller.insert = async (req, res) => {
 
     await sncaM.insert([6, empleado, fecha]);
     let response = await montoFaltanteM.insert(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -229,8 +222,8 @@ controller.update = async (req, res) => {
       idempleado: Number(empleado),
     };
     const data = [cuerpo, id];
+
     let response = await montoFaltanteM.update(data);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -246,8 +239,10 @@ controller.delete = async (req, res) => {
     let user = verificar(req.headers.authorization, 4);
     if (!user.success) throw user;
     const { id } = req.params;
+    const viejo = await montoFaltanteM.findOne(id);
+    const snca = await sncaM.validar([viejo.idempleado, 6, viejo.fecha]);
+    await sncaM.delete(snca[0].idsncacumuladas);
     let response = await montoFaltanteM.delete(id);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

@@ -22,7 +22,7 @@ model.findOne = (idEmpleado) =>
   //La usare para obtener todo los atributos con el idempleado.
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND empleado.idempleado = ?";
+      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND empleado.idempleado = ?"; //idEmpleado no cambiar importante!
 
     connection.query(sql, idEmpleado, (err, res) => {
       if (err) return reject(errorDB());

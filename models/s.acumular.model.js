@@ -9,12 +9,12 @@ model.find = (idDepartamento) =>
     let sql;
     if (idDepartamento) {
       sql = mysql.format(
-        "SELECT snc.*, inc.incumplimiento FROM sncacumuladas snc, empleado emp, incumplimiento inc WHERE snc.idempleado = emp.idempleado AND snc.idincumplimiento = inc.idincumplimiento AND snc.capturado = 0 AND emp.iddepartamento = 1 ORDER BY snc.fecha",
+        "SELECT snc.*, inc.incumplimiento, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM sncacumuladas snc, empleado emp, incumplimiento inc WHERE snc.idempleado = emp.idempleado AND snc.idincumplimiento = inc.idincumplimiento AND snc.capturado = 0 AND emp.iddepartamento = 1 ORDER BY snc.fecha",
         idDepartamento
       );
     } else {
       sql = mysql.format(
-        "SELECT snc.*, inc.incumplimiento FROM sncacumuladas snc, empleado emp, incumplimiento inc WHERE snc.idempleado = emp.idempleado AND snc.idincumplimiento = inc.idincumplimiento AND snc.capturado = 0 ORDER BY snc.fecha"
+        "SELECT snc.*, inc.incumplimiento, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM sncacumuladas snc, empleado emp, incumplimiento inc WHERE snc.idempleado = emp.idempleado AND snc.idincumplimiento = inc.idincumplimiento AND snc.capturado = 0 ORDER BY snc.fecha"
       );
     }
 
@@ -26,7 +26,7 @@ model.find = (idDepartamento) =>
 
 model.validar = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT * FROM sncacumuladas WHERE idempleado = ? AND idincumplimiento = ? AND fecha = ?`;
+    let sql = `SELECT * FROM sncacumuladas WHERE idempleado = ? AND idincumplimiento = ? AND fecha = ? AND capturado = 0`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -40,9 +40,22 @@ model.insert = (data) =>
       "INSERT INTO sncacumuladas (idincumplimiento, capturado, idempleado, fecha) VALUES (?, 0, ?, ?)";
 
     connection.query(sql, data, (err, res) => {
-      console.log(err, data);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
+model.update = (data) =>
+  new Promise((resolve, reject) => {
+    // por si cambian los datos que se actualize tambien el id del incumplimiento y el id del empleadp
+    let sql = "UPDATE sncacumuladas SET ? WHERE idsncacumuladas = ?";
+
+    connection.query(sql, data, (err, res) => {
+      if (err) {
+        return reject(errorDB());
+      }
+      if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });
