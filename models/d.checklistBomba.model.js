@@ -1,12 +1,12 @@
 import connection from "./connection";
 import resErr from "../respuestas/error.respuestas";
-const { errorDB, sinRegistro, sinCambios, datosExistentes } = resErr;
+const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
 model.find = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT idchecklist_bomba, idempleado, fecha, CASE WHEN isla_limpia = isla_limpia AND aceites_completos = aceites_completos AND turno = COUNT(turno) AND bomba = COUNT(bomba) AND estacion_servicio = COUNT(estacion_servicio) THEN TRUE ELSE FALSE END cumple FROM checklist_bomba WHERE idempleado = ? AND fecha = ? GROUP BY idempleado, fecha`;
+    let sql = `SELECT idchecklist_bomba, idempleado, fecha, CASE WHEN isla_limpia = COUNT(isla_limpia) AND aceites_completos = COUNT(aceites_completos) AND turno = COUNT(turno) AND bomba = COUNT(bomba) AND estacion_servicio = COUNT(estacion_servicio) THEN TRUE ELSE FALSE END cumple FROM checklist_bomba WHERE idempleado = ? AND fecha = ? GROUP BY idempleado, fecha`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());

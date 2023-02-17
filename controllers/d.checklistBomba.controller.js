@@ -156,7 +156,6 @@ controller.update = async (req, res) => {
 
     //Elimina la snc pendiente si todo esta bien
     if (viejo.cumple === 0) {
-      console.log("Cumple 1");
       if (
         cuerpo.isla_limpia &&
         cuerpo.aceites_completos &&
@@ -164,15 +163,9 @@ controller.update = async (req, res) => {
         cuerpo.turno &&
         cuerpo.estacion_servicio
       ) {
-        console.log("Cumple 2");
-        await sncaM.update([
-          {
-            fecha: cuerpo.fecha,
-            idempleado: cuerpo.idempleado,
-            capturado: 1,
-          },
-          snca[0].idsncacumuladas,
-        ]);
+        if (snca.length > 0) {
+          await sncaM.delete(snca[0].idsncacumuladas);
+        }
       }
     }
 
@@ -192,7 +185,6 @@ controller.update = async (req, res) => {
     let response = await checklistBombaM.update(data);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -208,7 +200,9 @@ controller.delete = async (req, res) => {
     const { id } = req.params;
     const viejo = await checklistBombaM.findOne(id);
     const snca = await sncaM.validar([viejo.idempleado, 3, viejo.fecha]);
-    await sncaM.delete(snca[0].idsncacumuladas);
+    if (snca.length > 0) {
+      await sncaM.delete(snca[0].idsncacumuladas);
+    }
     let response = await checklistBombaM.delete(id);
     res.status(200).json({ success: true, response });
   } catch (err) {

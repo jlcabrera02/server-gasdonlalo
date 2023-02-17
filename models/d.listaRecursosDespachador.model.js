@@ -14,7 +14,18 @@ model.findByIdentificador = (id) =>
       "SELECT rd.*, r.recurso FROM recurso_despachador rd, recurso r WHERE rd.idrecurso = r.idrecurso AND rd.identificador = ?";
 
     connection.query(sql, id, (err, res) => {
-      console.log(err);
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findOne = (idRecursoDespachador) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT * FROM recurso_despachador WHERE idrecurso_despachador = ?";
+
+    connection.query(sql, idRecursoDespachador, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -177,7 +188,6 @@ model.update = (data) =>
     });
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

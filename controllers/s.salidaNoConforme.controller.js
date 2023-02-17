@@ -2,6 +2,8 @@ import salidaNoCM from "../models/s.salidaNoConforme.model";
 import empleadoM from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
+import fTiempo from "../assets/formatTiempo";
+const { tiempoDB } = fTiempo;
 const { verificar } = auth;
 
 const controller = {};
@@ -296,12 +298,9 @@ controller.insert = async (req, res) => {
       idIncumplimiento,
       fecha,
     ]);
-    console.log(SNCPendiente);
+
     if (SNCPendiente.length > 0) {
-      await sncaM.capturarSNC([
-        { capturado: 1 },
-        SNCPendiente[0].idsncacumuladas,
-      ]);
+      await sncaM.update([{ capturado: 1 }, SNCPendiente[0].idsncacumuladas]);
     }
 
     let response = await salidaNoCM.insert(cuerpo);
@@ -320,6 +319,7 @@ controller.update = async (req, res) => {
     let user = verificar(req.headers.authorization, 21);
     if (!user.success) throw user;
     const { idSalidaNoConforme } = req.params;
+
     const {
       fecha,
       descripcionFalla,
@@ -330,9 +330,43 @@ controller.update = async (req, res) => {
       // idDepartamento,
     } = req.body;
 
-    // let departamento = await empleadoM.validarDepartamento(idEmpleadoIncumple);
-    // if (departamento != idDepartamento)
-    //   throw errorMath("El empleado no pertenece al departamento");
+    const viejo = await salidaNoCM.findOne(idSalidaNoConforme);
+    const validarViejo = await sncaM.validar(
+      [viejo[0].idempleado_incumple, viejo[0].idincumplimiento, viejo[0].fecha],
+      1
+    );
+
+    const validar = await sncaM.validar([
+      idEmpleadoIncumple,
+      idIncumplimiento,
+      fecha,
+    ]);
+
+    //A la hora de actualizar, si se encuentra una snc acumulada que la capture.
+    if (validar.length > 0) {
+      await sncaM.update([{ capturado: 1 }, validar[0].idsncacumuladas]);
+    }
+
+    //Si los cambios son totalmente diferentes a los anteriores entonces la snacumulada se pone en pendiente
+    if (
+      viejo[0].idempleado_incumple !== idEmpleadoIncumple ||
+      viejo[0].idincumplimiento !== idIncumplimiento ||
+      tiempoDB(viejo[0].fecha) !== tiempoDB(fecha)
+    ) {
+      if (validarViejo.length > 0) {
+        if (
+          validarViejo[0].idempleado !== idEmpleadoIncumple ||
+          validarViejo[0].idincumplimiento !== idIncumplimiento ||
+          validarViejo[0].fecha !== fecha
+        ) {
+          console.log("cumple");
+          await sncaM.update([
+            { capturado: 0 },
+            validarViejo[0].idsncacumuladas,
+          ]);
+        }
+      }
+    }
 
     const cuerpo = [
       {

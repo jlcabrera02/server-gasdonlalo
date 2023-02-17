@@ -24,11 +24,12 @@ model.find = (idDepartamento) =>
     });
   });
 
-model.validar = (data) =>
+model.validar = (data, capturado = 0) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT * FROM sncacumuladas WHERE idempleado = ? AND idincumplimiento = ? AND fecha = ? AND capturado = 0`;
+    let sql = `SELECT * FROM sncacumuladas WHERE idempleado = ? AND idincumplimiento = ? AND fecha = ? AND capturado = ?`;
 
-    connection.query(sql, data, (err, res) => {
+    connection.query(sql, [...data, capturado], (err, res) => {
+      console.log("validando", data);
       if (err) return reject(errorDB());
       if (res) return resolve(res);
     });

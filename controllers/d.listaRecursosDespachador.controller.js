@@ -3,7 +3,9 @@ import listaReM from "../models/d.listaRecursosDespachador.model";
 import resErr from "../respuestas/error.respuestas";
 import empleado from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
+import formatTiempo from "../assets/formatTiempo";
 import sncaM from "../models/s.acumular.model";
+const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 const { sinRegistro } = resErr;
 
@@ -203,7 +205,6 @@ controller.insert = async (req, res) => {
     const { empleado, fecha, recursos } = req.body;
     const idGenerico = generadorId();
 
-    await sncaM.insert([7, empleado, fecha]);
     const recursosDB = await listaReM.findRecursos();
     let insertarRecursos = recursosDB.map((el) => ({
       idRecurso: el.idrecurso,
@@ -231,6 +232,11 @@ controller.insert = async (req, res) => {
       fecha,
     });
 
+    const incorrecto = cuerpo.map((el) => el[4]).includes(0);
+    if (incorrecto) {
+      await sncaM.insert([7, empleado, fecha]);
+    }
+
     let response = await listaReM.insert(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -253,6 +259,25 @@ controller.update = async (req, res) => {
       Number(el.idRecursoDespachador),
       Number(idEmpleado),
     ]);
+    const viejo = await listaReM.findOne(cuerpo[0][1]);
+    const fecha = tiempoDB(viejo[0].fecha);
+    const snca = await sncaM.validar([idEmpleado, 7, fecha]);
+    const viejoGroup = await listaReM.findByIdentificador(
+      viejo[0].identificador
+    );
+
+    const incorrecto = cuerpo.map((el) => el[0]).includes(0);
+    const viejoIncorrecto = viejoGroup
+      .map((el) => el.evaluacion)
+      .includes(false);
+
+    if (!viejoIncorrecto && incorrecto) {
+      await sncaM.insert([7, idEmpleado, fecha]);
+    }
+
+    if (snca.length > 0 && !incorrecto) {
+      await sncaM.delete(snca[0].idsncacumuladas);
+    }
 
     const response = await listaReM.update(cuerpo);
     res.status(200).json({ success: true, response });
@@ -270,9 +295,20 @@ controller.delete = async (req, res) => {
     let user = verificar(req.headers.authorization, 19);
     if (!user.success) throw user;
     const { identificador } = req.params;
+    const viejo = await listaReM.findByIdentificador(identificador);
+    const snca = await sncaM.validar([
+      viejo[0].idempleado,
+      7,
+      tiempoDB(viejo[0].fecha),
+    ]);
+    if (snca.length > 0) {
+      await sncaM.delete(snca[0].idsncacumuladas);
+    }
     const response = await listaReM.delete(identificador);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

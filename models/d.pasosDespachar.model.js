@@ -63,6 +63,19 @@ model.findOne = (id) =>
     });
   });
 
+model.findOneId = (idEvDes) =>
+  new Promise((resolve, reject) => {
+    //funcion validara si el empleado ya tiene recoleccion de efectivo de ese dia
+    let sql =
+      "SELECT * FROM evaluacion_despachar WHERE idevaluacion_despachar = ?";
+
+    connection.query(sql, idEvDes, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.findPasos = (id) =>
   new Promise((resolve, reject) => {
     //funcion validara si el empleado ya tiene recoleccion de efectivo de ese dia

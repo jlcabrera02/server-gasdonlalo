@@ -1,8 +1,9 @@
 import evaluacionUniformeM from "../models/d.evaluacionUniforme.model";
 import generadorId from "../assets/generadorId";
 import auth from "../models/auth.model";
+import formatTiempo from "../assets/formatTiempo";
 import sncaM from "../models/s.acumular.model";
-
+const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 
 const controller = {};
@@ -12,7 +13,6 @@ controller.find = async (req, res) => {
     let user = verificar(req.headers.authorization, 8);
     if (!user.success) throw user;
     let response = await evaluacionUniformeM.find();
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -28,7 +28,6 @@ controller.findPasosEvUniforme = async (req, res) => {
     let user = verificar(req.headers.authorization, 8);
     if (!user.success) throw user;
     let response = await evaluacionUniformeM.findPasosEvUniforme();
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -46,7 +45,6 @@ controller.findPeriodoMensual = async (req, res) => {
     const { year, month } = req.params;
     const fecha = `${year}-${month}-01`;
     let response = await evaluacionUniformeM.findPeriodoMensual(fecha);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -65,7 +63,6 @@ controller.findPeriodoMensualEmpleado = async (req, res) => {
     const fecha = `${year}-${month}-01`;
     const cuerpo = [id, fecha, fecha];
     let response = await evaluacionUniformeM.findPeriodoMensualEmpleado(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -186,7 +183,6 @@ controller.insert = async (req, res) => {
     let response = await evaluacionUniformeM.insert(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res
         .status(400)
@@ -202,13 +198,35 @@ controller.update = async (req, res) => {
     let user = verificar(req.headers.authorization, 9);
     if (!user.success) throw user;
     const { empleado, evaluaciones } = req.body;
+
+    const viejo = await evaluacionUniformeM.findByOne(
+      evaluaciones[0].idEvaluacionUniforme
+    );
+
+    const viejoGroup = await evaluacionUniformeM.findOne(viejo.identificador);
+
     const cuerpo = evaluaciones.map((el) => [
       el.cumple,
       el.idEvaluacionUniforme,
       empleado,
     ]);
+
+    const fecha = tiempoDB(viejo.fecha);
+
+    const snca = await sncaM.validar([empleado, 11, fecha]);
+    const correcto = viejoGroup.map((el) => el.cumple).includes(false);
+
+    if (!correcto) {
+      if (snca.length === 0) {
+        await sncaM.insert([11, empleado, fecha]);
+      }
+    } else {
+      const SNCvalidar = cuerpo.map((el) => el[0]).includes(0);
+      if (!SNCvalidar && snca.length > 0) {
+        await sncaM.delete(snca[0].idsncacumuladas);
+      }
+    }
     let response = await evaluacionUniformeM.update(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -224,8 +242,15 @@ controller.delete = async (req, res) => {
     let user = verificar(req.headers.authorization, 10);
     if (!user.success) throw user;
     const { identificador } = req.params;
+    const viejo = await evaluacionUniformeM.findOne(identificador);
+    let cuerpo = [viejo[0].idempleado, 11, tiempoDB(viejo[0].fecha)];
+    const validar = await sncaM.validar(cuerpo);
+    if (validar.length > 0) {
+      await sncaM.delete(validar[0].idsncacumuladas);
+    }
+
     let response = await evaluacionUniformeM.delete(identificador);
-    console.log(response);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

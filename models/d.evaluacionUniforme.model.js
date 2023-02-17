@@ -128,6 +128,18 @@ model.findOne = (id) =>
     });
   });
 
+//Me obtienen solo el elemento no agrupado.
+model.findByOne = (idEvUni) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM evaluacion_uniforme WHERE idevaluacion_uniforme = ?`;
+
+    connection.query(sql, idEvUni, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.validarNoDuplicadoXQuincena = (data) =>
   new Promise((resolve, reject) => {
     let quinceFechaMes = `${tiempoLocal(data.fecha).getFullYear()}-${
