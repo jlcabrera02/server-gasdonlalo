@@ -1,5 +1,4 @@
 import incumplimientoM from "../models/s.incumplimiento.model";
-import mayusxPalabra from "./formatearText.controller";
 import auth from "../models/auth.model";
 const { verificar } = auth;
 
@@ -57,11 +56,11 @@ controller.findIncumplimientosXcategorizacion = async (req, res) => {
 
 controller.insert = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization);
+    let user = verificar(req.headers.authorization, 11);
     if (!user.success) throw user;
     const { incumplimiento } = req.body;
     const cuerpo = {
-      incumplimiento: mayusxPalabra(incumplimiento),
+      incumplimiento: incumplimiento.toUpperCase(),
     };
     let response = await incumplimientoM.insert(cuerpo);
     res.status(200).json({ success: true, response });
@@ -147,12 +146,12 @@ controller.updateCantidadInc = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization);
+    let user = verificar(req.headers.authorization, 11);
     if (!user.success) throw user;
     const { id } = req.params;
     const { incumplimiento } = req.body;
     const cuerpo = {
-      incumplimiento: mayusxPalabra(incumplimiento),
+      incumplimiento: incumplimiento.toUpperCase(),
     };
     const data = [cuerpo, id];
     let response = await incumplimientoM.update(data);
@@ -168,7 +167,7 @@ controller.update = async (req, res) => {
 
 controller.delete = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization);
+    let user = verificar(req.headers.authorization, 11);
     if (!user.success) throw user;
     const { id } = req.params;
     let response = await incumplimientoM.delete(id);

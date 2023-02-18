@@ -10,6 +10,14 @@ export default {
         new Date(date).getTime() + new Date().getTimezoneOffset() * 60000
       )
     ),
+  formatMes: (date) =>
+    new Intl.DateTimeFormat("es-MX", {
+      month: "long",
+    }).format(
+      new Date(
+        new Date(date).getTime() + new Date().getTimezoneOffset() * 60000
+      )
+    ),
 
   tiempoDB: (f) => new Date(f).toISOString().split("T")[0],
 

@@ -84,7 +84,11 @@ model.findPeriodoMensualEmpleado = (data) =>
     CASE
 WHEN DAY(fecha) < 15 THEN "Primera Evaluación"
 WHEN DAY(fecha) > 14 THEN "Segunda Evaluación"
-END as evaluacion
+END as evaluacion,
+CASE
+WHEN DAY(fecha) < 15 THEN 1
+WHEN DAY(fecha) > 14 THEN 2
+END as evNum
 FROM 
 	(SELECT *, sum(cumple) AS total FROM evaluacion_uniforme GROUP BY fecha, idempleado) as ev_un,
     empleado AS emp,
@@ -97,7 +101,7 @@ ORDER BY fecha`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
+      // if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
     });
   });

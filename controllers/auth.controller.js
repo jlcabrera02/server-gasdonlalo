@@ -104,8 +104,8 @@ controller.findAll = async (req, res) => {
 
 controller.findByIdEmpleado = async (req, res) => {
   try {
-    const { idEmpleado } = req.params;
-    let response = (await auth.findByIdEmpleado(idEmpleado)) || null;
+    const { idChecador } = req.params;
+    let response = (await auth.findByIdEmpleado(idChecador)) || null;
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

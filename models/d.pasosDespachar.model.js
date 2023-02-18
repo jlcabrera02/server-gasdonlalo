@@ -1,7 +1,7 @@
 import connection from "./connection";
 import resErr from "../respuestas/error.respuestas";
 import mysql from "mysql2";
-const { errorDB, sinRegistro, sinCambios, datosExistentes } = resErr;
+const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
@@ -45,7 +45,7 @@ model.agruparEvaluaciones = (data) =>
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
+      // if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
     });
   });

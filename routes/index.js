@@ -25,6 +25,8 @@ import octanoso from "./rh.octanoso.route";
 import aceitoso from "./rh.aceitoso.route";
 //Autenticacion
 import auth from "./auth.router";
+//Excel
+import excel from "./excel.route";
 const route = Router();
 
 //Complementos adicionales
@@ -58,5 +60,7 @@ route.use("/aceitoso", aceitoso);
 route.use("/auth", auth);
 //Complementos
 route.use("/com", com);
+//exceles
+route.use("/excel", excel);
 
 export default route;

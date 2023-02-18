@@ -1,6 +1,7 @@
 import ceM from "../models/rh.capturaEntradas.model";
 import tp from "../assets/formatTiempo";
 import auth from "../models/auth.model";
+import sncaM from "../models/s.acumular.model";
 const { verificar } = auth;
 const { tiempoDB, transformMinute, diff } = tp;
 
@@ -156,7 +157,6 @@ controller.insert = async (req, res) => {
     let user = verificar(req.headers.authorization, 24);
     if (!user.success) throw user;
     const { idEmpleado, horaEntrada, fecha, idTurno, idTipoFalta } = req.body;
-
     const cuerpo = {
       idempleado: Number(idEmpleado),
       hora_entrada: horaEntrada,
@@ -167,7 +167,17 @@ controller.insert = async (req, res) => {
 
     if (!idTipoFalta) cuerpo.idtipo_falta = 1;
 
-    console.log(cuerpo);
+    if (cuerpo.idtipo_falta === 4) {
+      await sncaM.insert([8, cuerpo.idempleado, fecha]);
+    }
+
+    if (cuerpo.idtipo_falta === 5) {
+      await sncaM.insert([2, cuerpo.idempleado, fecha]);
+    }
+
+    if (cuerpo.idtipo_falta === 7) {
+      await sncaM.insert([4, cuerpo.idempleado, fecha]);
+    }
 
     await ceM.validarDuplicados([cuerpo.idempleado, fecha, cuerpo.idturno]); // Validar existencia
 
@@ -181,6 +191,7 @@ controller.insert = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    // console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

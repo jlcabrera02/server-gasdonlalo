@@ -41,6 +41,7 @@ model.insert = (data) =>
       "INSERT INTO sncacumuladas (idincumplimiento, capturado, idempleado, fecha) VALUES (?, 0, ?, ?)";
 
     connection.query(sql, data, (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

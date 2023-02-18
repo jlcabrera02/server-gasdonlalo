@@ -16,7 +16,7 @@ model.findTotalSalidasXDiaXEmpleado = (data) =>
 
 model.findSalidasNoConformesXMes = (fecha) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT sn.*, inc.incumplimiento, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_incumple FROM salida_noconforme sn, empleado emp, incumplimiento inc WHERE sn.idincumplimiento = inc.idincumplimiento AND emp.idempleado = sn.idempleado AND sn.fecha BETWEEN ? AND LAST_DAY(?) ORDER BY sn.fecha DESC`;
+    let sql = `SELECT sn.*, inc.incumplimiento, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo_incumple FROM salida_noconforme sn, empleado emp, incumplimiento inc WHERE sn.idincumplimiento = inc.idincumplimiento AND emp.idempleado = sn.idempleado AND sn.fecha BETWEEN ? AND LAST_DAY(?) ORDER BY sn.fecha, create_time DESC`;
 
     connection.query(sql, [fecha, fecha], (err, res) => {
       if (err) return reject(errorDB());

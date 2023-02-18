@@ -35,7 +35,7 @@ model.findPermisos = (user) =>
 model.findAll = () =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT emp.*, user.username FROM empleado emp LEFT JOIN user ON user.idempleado = emp.idempleado";
+      "SELECT emp.*, user.username, dep.departamento FROM departamento dep, empleado emp LEFT JOIN user ON user.idempleado = emp.idempleado WHERE dep.iddepartamento = emp.iddepartamento";
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
@@ -47,7 +47,7 @@ model.findAll = () =>
 model.findByIdEmpleado = (id) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT emp.*, user.username FROM empleado emp LEFT JOIN user ON user.idempleado = emp.idempleado WHERE user.idempleado = ?";
+      "SELECT emp.*, user.username FROM empleado emp LEFT JOIN user ON user.idempleado = emp.idempleado WHERE emp.idchecador = ?";
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
