@@ -6,6 +6,24 @@ import auth from "../models/auth.model";
 const { verificar } = auth;
 const controller = {};
 
+controller.find = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { month, year } = req.params;
+    const fecha = `${year}-${month}-01`;
+    const response = await octM.find([fecha, fecha]);
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.findVentasLXestacion = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
@@ -203,6 +221,24 @@ controller.insertVentaLitros = async (req, res) => {
     };
 
     const response = await octM.insertVentaLitros(cuerpo);
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.delete = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { idOct } = req.params;
+
+    const response = await octM.delete(idOct);
 
     res.status(200).json({ success: true, response });
   } catch (err) {

@@ -4,6 +4,16 @@ const { errorDB, sinRegistro } = resErr;
 
 const model = {};
 
+model.find = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT vl.*, emp.*,  es.nombre as estacion_servicio FROM venta_litros vl, empleado emp, estacion_servicio es WHERE es.idestacion_servicio = vl.idestacion_servicio AND vl.idempleado = emp.idempleado AND vl.fecha BETWEEN ? AND LAST_DAY(?)`;
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.obtenerEmpleadosXRegistro = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT emp.* FROM venta_litros vl, empleado emp WHERE vl.idempleado = emp.idempleado AND vl.idestacion_servicio = ? AND vl.fecha BETWEEN ? AND LAST_DAY(?) GROUP BY emp.idempleado`;
@@ -46,6 +56,15 @@ model.insertVentaLitros = (data) =>
   new Promise((resolve, reject) => {
     let sql = `INSERT INTO venta_litros SET ?`;
     connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
+model.delete = (idLitro) =>
+  new Promise((resolve, reject) => {
+    let sql = `DELETE FROM venta_litros WHERE idventa_litros = ?`;
+    connection.query(sql, idLitro, (err, res) => {
       if (err) return reject(errorDB());
       if (res) return resolve(res);
     });
