@@ -11,6 +11,6 @@ route.get(
 route.get("/reporte/:year/:month", acei.findVentasA);
 route.post("/registro", acei.insertVentaAceite);
 route.post("/obtener", acei.findVentasAXestacionXIntervaloTiempo);
-route.delete("/:idAceite");
+route.delete("/delete/:idAceite", acei.delete);
 
 export default route;

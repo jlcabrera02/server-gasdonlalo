@@ -6,7 +6,7 @@ const model = {};
 
 model.find = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT SELECT vl.*, emp.*,  es.nombre as estacion_servicio FROM venta_aceite vl, empleado emp, estacion_servicio es WHERE es.idestacion_servicio = vl.idestacion_servicio AND vl.idempleado = emp.idempleado AND vl.fecha BETWEEN ? AND LAST_DAY(?)`;
+    let sql = `SELECT vl.*, emp.*,  es.nombre as estacion_servicio FROM venta_aceite vl, empleado emp, estacion_servicio es WHERE es.idestacion_servicio = vl.idestacion_servicio AND vl.idempleado = emp.idempleado AND vl.fecha BETWEEN ? AND LAST_DAY(?)`;
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
