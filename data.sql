@@ -241,6 +241,18 @@ INSERT INTO documento VALUES
 (10, "CURP"),
 (11, "TARJETA BANCARIA");
 
+INSERT INTO oyl_cumplimiento (idoyl_cumplimiento, cumplimiento, descripcion, parte) VALUES 
+(1, "Exibidor de aceite", "productos ordenados", "Parte 1. Elementos de la isla"),
+(2, "Contenedor limpiaparabrisas", "sin roturas", "Parte 1. Elementos de la isla"),
+(3, "Manguera de la bomba", "enrrolladas sin tocar el piso", "Parte 1. Elementos de la isla"),
+(4, "Manguera despachadora de agua y aire", "enrrolladas sin tocar el piso", "Parte 1. Elementos de la isla"),
+(5, "Maseteros, solo aplica a isla 1 y 2 de GDL1", "sin basura", "Parte 1. Elementos de la isla"),
+(6, "Bomba limpia", "sin lodo o polvo", "Parte 2. Limpieza de la isla"),
+(7, "Piso limpio de la isla", "sin lodo o polvo", "Parte 2. Limpieza de la isla"),
+(8, "Isla limpia", "sin basura", "Parte 2. Limpieza de la isla"),
+(9, "Franja amarilla isla", "sin lodo o polvo", "Parte 2. Limpieza de la isla"),
+(10, "Contenedor de agua para limpiaparabrisas", "sin lodo o polvo", "Parte 2. Limpieza de la isla"),
+
 INSERT INTO tipo_falta VALUES
 (1, "Todo en orden", "El empleado establecio su entrada correctamente", 0, "RGBA(56,255,136,1)"),
 (2, "Falta justificable", "El empleado tiene justificada su falta", 0, "RGBA(0,157,19,1)"),

@@ -57,7 +57,7 @@ model.findByIdEmpleado = (id) =>
 
 model.findPermisosXEmpleado = (id) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT permiso.*, at.area, acc.user FROM area_trabajo at, permiso LEFT JOIN (SELECT * FROM acceso, user WHERE user.username = acceso.user AND user.idempleado = ?) acc ON permiso.idpermiso = acc.idpermiso WHERE at.idarea_trabajo = permiso.idarea_trabajo AND permiso.idpermiso > 1`;
+    let sql = `SELECT permiso.*, at.area, acc.user FROM area_trabajo at, permiso LEFT JOIN (SELECT acceso.*, user.* FROM acceso, user, empleado emp WHERE user.username = acceso.user AND emp.idempleado = user.idempleado AND emp.idchecador = ?) acc ON permiso.idpermiso = acc.idpermiso WHERE at.idarea_trabajo = permiso.idarea_trabajo AND permiso.idpermiso > 1`;
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());

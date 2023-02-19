@@ -118,8 +118,8 @@ controller.findByIdEmpleado = async (req, res) => {
 
 controller.findPermisosXEmpleado = async (req, res) => {
   try {
-    const { user } = req.params;
-    let response = await auth.findPermisosXEmpleado(user);
+    const { idChecador } = req.params;
+    let response = await auth.findPermisosXEmpleado(idChecador);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
