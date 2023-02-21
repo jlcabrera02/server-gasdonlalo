@@ -8,6 +8,7 @@ import evaluacionUniformeRouter from "./d.evaluacionUniforme.router";
 import pasosDespacharRouter from "./d.pasosDespachar.router";
 import checklistBombaRouter from "./d.checklistBomba.router";
 import montoFaltanteRouter from "./d.montoFaltante.router";
+import oylRouter from "./d.oylIsla.router";
 //administrativo
 import estacionServiceRouter from "./ad.estacionService.router";
 import bombaRouter from "./ad.bomba.router";
@@ -41,6 +42,7 @@ route.use("/monto-faltante-despachador", montoFaltanteRouter);
 route.use("/evaluacion-uniforme", evaluacionUniformeRouter);
 route.use("/pasos-despachar", pasosDespacharRouter);
 route.use("/bomba-check", checklistBombaRouter);
+route.use("/ordenLimpieza", oylRouter);
 //administrativo
 route.use("/estaciones-servicio", estacionServiceRouter);
 route.use("/bomba", bombaRouter);

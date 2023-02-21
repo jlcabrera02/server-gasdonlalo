@@ -251,7 +251,7 @@ INSERT INTO oyl_cumplimiento (idoyl_cumplimiento, cumplimiento, descripcion, par
 (7, "Piso limpio de la isla", "sin lodo o polvo", "Parte 2. Limpieza de la isla"),
 (8, "Isla limpia", "sin basura", "Parte 2. Limpieza de la isla"),
 (9, "Franja amarilla isla", "sin lodo o polvo", "Parte 2. Limpieza de la isla"),
-(10, "Contenedor de agua para limpiaparabrisas", "sin lodo o polvo", "Parte 2. Limpieza de la isla"),
+(10, "Contenedor de agua para limpiaparabrisas", "sin lodo o polvo", "Parte 2. Limpieza de la isla");
 
 INSERT INTO tipo_falta VALUES
 (1, "Todo en orden", "El empleado establecio su entrada correctamente", 0, "RGBA(56,255,136,1)"),
