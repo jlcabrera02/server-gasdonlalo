@@ -3,15 +3,10 @@ import evaluacionUniforme from "../controllers/d.evaluacionUniforme.controller";
 
 const route = router();
 
-route.get("/", evaluacionUniforme.find);
 route.get("/get-pasos", evaluacionUniforme.findPasosEvUniforme);
 route.get(
-  "/periodo-mensual/:year/:month",
-  evaluacionUniforme.findPeriodoMensual
-);
-route.get(
-  "/periodo-mensual/:year/:month/:idEmpleado/",
-  evaluacionUniforme.findPeriodoMensualEmpleados
+  "/:year/:month/:idEmpleado?",
+  evaluacionUniforme.findEvaluacionMensual
 );
 route.get("/buscar/:identificador", evaluacionUniforme.findOne);
 

@@ -1,5 +1,6 @@
 import evaluacionUniformeM from "../models/d.evaluacionUniforme.model";
 import generadorId from "../assets/generadorId";
+import empM from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
 import formatTiempo from "../assets/formatTiempo";
 import sncaM from "../models/s.acumular.model";
@@ -7,21 +8,6 @@ const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 
 const controller = {};
-
-controller.find = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization, 8);
-    if (!user.success) throw user;
-    let response = await evaluacionUniformeM.find();
-    res.status(200).json({ success: true, response });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
 
 controller.findPasosEvUniforme = async (req, res) => {
   try {
@@ -38,82 +24,92 @@ controller.findPasosEvUniforme = async (req, res) => {
   }
 };
 
-controller.findPeriodoMensual = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization, 8);
-    if (!user.success) throw user;
-    const { year, month } = req.params;
-    const fecha = `${year}-${month}-01`;
-    let response = await evaluacionUniformeM.findPeriodoMensual(fecha);
-    res.status(200).json({ success: true, response });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
-
-controller.findPeriodoMensualEmpleado = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization, 8);
-    if (!user.success) throw user;
-    const { year, month, id } = req.params;
-    const fecha = `${year}-${month}-01`;
-    const cuerpo = [id, fecha, fecha];
-    let response = await evaluacionUniformeM.findPeriodoMensualEmpleado(cuerpo);
-    res.status(200).json({ success: true, response });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
-
-controller.findPeriodoMensualEmpleados = async (req, res) => {
+controller.findEvaluacionMensual = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 8);
     if (!user.success) throw user;
     const { year, month, idEmpleado } = req.params;
     const fecha = `${year}-${month}-01`;
-    const cuerpo = [fecha, idEmpleado];
-    const response = [];
-    let quin1 = await evaluacionUniformeM.findPeriodoMensualEmpleadosXquincena([
-      ...cuerpo,
-      1,
-    ]);
-    let quin2 = await evaluacionUniformeM.findPeriodoMensualEmpleadosXquincena([
-      ...cuerpo,
-      2,
-    ]);
-    if (quin1.length > 0) {
+    const cuerpo = [fecha, fecha];
+    const cumplimientos = await evaluacionUniformeM.findPasosEvUniforme();
+    let response = [];
+    const getData = async (empleados, response, cuerpo, cumplimientos) => {
+      const agrupar = {};
+      const cantidad = [];
+      const { nombre, apellido_paterno, apellido_materno } = empleados;
+
+      const data = await evaluacionUniformeM.findEvaluacionMensual(cuerpo);
+
+      if (data.length > 0) {
+        data.forEach((el) => {
+          if (!agrupar.hasOwnProperty(el.identificador)) {
+            agrupar[el.identificador] = [el];
+          } else {
+            agrupar[el.identificador].push(el);
+          }
+        });
+
+        cumplimientos.forEach((el) => {
+          const { cumplimiento, idcumplimiento_uniforme } = el;
+          const cum = data.filter(
+            (da) => da.idcumplimiento_uniforme === idcumplimiento_uniforme
+          );
+
+          const total = cum.length;
+
+          const totalBuena = cum
+            .map((el) => (el.cumple ? 1 : 0))
+            .reduce((a, b) => a + b, 0);
+
+          const totalMalas = total - totalBuena;
+          cantidad.push({
+            idcumplimiento_uniforme,
+            cumplimiento,
+            totalBuena,
+            totalMalas,
+            total,
+          });
+        });
+      }
+
+      let promedio = 0;
+      const enlistar = Object.values(agrupar);
+
+      if (cantidad.length > 0) {
+        const total = cantidad.map((el) => el.total).reduce((a, b) => a + b);
+        const totalBuenas = cantidad
+          .map((el) => el.totalBuena)
+          .reduce((a, b) => a + b);
+        console.log(totalBuenas, total);
+        promedio = (totalBuenas * 100) / total;
+      }
+
       response.push({
-        fecha: quin1[0].fecha,
-        evaluaciones: quin1,
+        nombre,
+        apellido_paterno,
+        apellido_materno,
+        evaluaciones: enlistar,
+        cantidad,
+        promedio,
       });
+    };
+
+    if (!idEmpleado) {
+      const empleados = await empM.findEmpleadosXmesXiddepartamento(1);
+
+      for (let i = 0; i < empleados.length; i++) {
+        let cuerpoNuevo = [...cuerpo, empleados[i].idempleado];
+        await getData(empleados[i], response, cuerpoNuevo, cumplimientos);
+      }
     } else {
-      response.push({
-        fecha: null,
-        evaluaciones: [],
-      });
-    }
-    if (quin2.length > 0) {
-      response.push({
-        fecha: quin2[0].fecha,
-        evaluaciones: quin2,
-      });
-    } else {
-      response.push({
-        fecha: null,
-        evaluaciones: [],
-      });
+      cuerpo.push(idEmpleado);
+      const empleado = await empM.findOne(idEmpleado);
+      await getData(empleado[0], response, cuerpo, cumplimientos);
     }
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -179,7 +175,8 @@ controller.insert = async (req, res) => {
       await sncaM.insert([11, empleado, fecha]);
     }
 
-    await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro
+    //await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro
+
     let response = await evaluacionUniformeM.insert(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
