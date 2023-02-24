@@ -89,6 +89,8 @@ controller.insert = async (req, res) => {
       aceitesCompletos,
       bomba,
       estacionServicio,
+      empleadoSaliente,
+      empleadoAutoriza,
       turno,
       idEmpleado,
     } = req.body;
@@ -100,6 +102,8 @@ controller.insert = async (req, res) => {
       bomba: bomba ? bomba : false,
       turno: turno ? turno : false,
       estacion_servicio: estacionServicio ? estacionServicio : false,
+      empleado_autoriza: empleadoAutoriza ? empleadoAutoriza : false,
+      empleado_saliente: empleadoSaliente ? empleadoSaliente : false,
       idempleado: Number(idEmpleado),
     };
 
@@ -108,6 +112,8 @@ controller.insert = async (req, res) => {
       !cuerpo.aceites_completos ||
       !cuerpo.bomba ||
       !cuerpo.turno ||
+      !cuerpo.estacion_servicio ||
+      !cuerpo.estacion_servicio ||
       !cuerpo.estacion_servicio
     ) {
       await sncaM.insert([3, idEmpleado, fecha]);
@@ -137,7 +143,10 @@ controller.update = async (req, res) => {
       aceitesCompletos,
       bomba,
       turno,
+      empleadoSaliente,
+      empleadoAutoriza,
       idEmpleado,
+
       estacionServicio,
     } = req.body;
 
@@ -148,6 +157,8 @@ controller.update = async (req, res) => {
       bomba: bomba ? bomba : false,
       turno: turno ? turno : false,
       estacion_servicio: estacionServicio ? estacionServicio : false,
+      empleado_autoriza: empleadoAutoriza ? empleadoAutoriza : false,
+      empleado_saliente: empleadoSaliente ? empleadoSaliente : false,
       idempleado: Number(idEmpleado),
     };
 
@@ -161,7 +172,9 @@ controller.update = async (req, res) => {
         cuerpo.aceites_completos &&
         cuerpo.bomba &&
         cuerpo.turno &&
-        cuerpo.estacion_servicio
+        cuerpo.estacion_servicio &&
+        cuerpo.empleado_autoriza &&
+        cuerpo.empleado_saliente
       ) {
         if (snca.length > 0) {
           await sncaM.delete(snca[0].idsncacumuladas);
@@ -175,7 +188,9 @@ controller.update = async (req, res) => {
         !cuerpo.aceites_completos ||
         !cuerpo.bomba ||
         !cuerpo.turno ||
-        !cuerpo.estacion_servicio
+        !cuerpo.estacion_servicio ||
+        cuerpo.empleado_autoriza ||
+        cuerpo.empleado_saliente
       ) {
         await sncaM.insert([3, idEmpleado, fecha]);
       }
