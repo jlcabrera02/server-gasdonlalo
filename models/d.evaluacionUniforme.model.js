@@ -25,7 +25,6 @@ model.findEvaluacionMensual = (data) =>
     }
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       // if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);

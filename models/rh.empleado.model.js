@@ -97,7 +97,6 @@ model.delete = (id) =>
     let sql = "UPDATE empleado SET estatus = 3 WHERE idchecador = ?";
 
     connection.query(sql, id, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

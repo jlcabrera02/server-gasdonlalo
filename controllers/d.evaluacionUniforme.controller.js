@@ -80,7 +80,6 @@ controller.findEvaluacionMensual = async (req, res) => {
         const totalBuenas = cantidad
           .map((el) => el.totalBuena)
           .reduce((a, b) => a + b);
-        console.log(totalBuenas, total);
         promedio = (totalBuenas * 100) / total;
       }
 
