@@ -227,10 +227,10 @@ controller.insert = async (req, res) => {
       idGenerico,
     ]);
 
-    await listaReM.validarNoDuplicadoXQuincena({
-      empleado,
-      fecha,
-    });
+    // await listaReM.validarNoDuplicadoXQuincena({
+    //   empleado,
+    //   fecha,
+    // });
 
     const incorrecto = cuerpo.map((el) => el[4]).includes(0);
     if (incorrecto) {
@@ -308,7 +308,6 @@ controller.delete = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
