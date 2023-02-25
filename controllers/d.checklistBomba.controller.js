@@ -66,14 +66,16 @@ controller.findChecklistXmes = async (req, res) => {
       fecha,
     ]);
 
-    const saliente = await empM.findOne(response[0].idempleado_saliente);
+    for (let i = 0; i < response.length; i++) {
+      const saliente = await empM.findOne(response[i].idempleado_saliente);
+      response[i].empSaliente = saliente[0];
+    }
 
     res.status(200).json({
       success: true,
       response: {
         empleado: empleado[0],
         data: response,
-        empSaliente: saliente[0],
       },
     });
   } catch (err) {
