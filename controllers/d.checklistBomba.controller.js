@@ -66,9 +66,15 @@ controller.findChecklistXmes = async (req, res) => {
       fecha,
     ]);
 
+    const saliente = await empM.findOne(response[0].idempleado_saliente);
+
     res.status(200).json({
       success: true,
-      response: { empleado: empleado[0], data: response },
+      response: {
+        empleado: empleado[0],
+        data: response,
+        empSaliente: saliente[0],
+      },
     });
   } catch (err) {
     if (!err.code) {
@@ -89,8 +95,8 @@ controller.insert = async (req, res) => {
       aceitesCompletos,
       bomba,
       estacionServicio,
-      empleadoSaliente,
-      empleadoAutoriza,
+      idEmpleadoSaliente,
+      empleadoEntrante,
       turno,
       idEmpleado,
     } = req.body;
@@ -102,8 +108,8 @@ controller.insert = async (req, res) => {
       bomba: bomba ? bomba : false,
       turno: turno ? turno : false,
       estacion_servicio: estacionServicio ? estacionServicio : false,
-      empleado_autoriza: empleadoAutoriza ? empleadoAutoriza : false,
-      empleado_saliente: empleadoSaliente ? empleadoSaliente : false,
+      empleado_entrante: empleadoEntrante ? empleadoEntrante : false,
+      idempleado_saliente: idEmpleadoSaliente,
       idempleado: Number(idEmpleado),
     };
 
@@ -113,10 +119,12 @@ controller.insert = async (req, res) => {
       !cuerpo.bomba ||
       !cuerpo.turno ||
       !cuerpo.estacion_servicio ||
-      !cuerpo.estacion_servicio ||
-      !cuerpo.estacion_servicio
+      !cuerpo.empleado_entrante
     ) {
-      await sncaM.insert([3, idEmpleado, fecha]);
+      let data = Object.entries(cuerpo).slice(1, 7);
+      let incumple = data.filter((el) => el[1] === false);
+      let atexto = incumple.map((el) => el[0].replace("_", " ")).join(", ");
+      await sncaM.insert([3, idEmpleado, fecha, `No cumple con ${atexto}`]);
     }
 
     let response = await checklistBombaM.insert(cuerpo);
@@ -143,8 +151,8 @@ controller.update = async (req, res) => {
       aceitesCompletos,
       bomba,
       turno,
-      empleadoSaliente,
-      empleadoAutoriza,
+      idEmpleadoSaliente,
+      empleadoEntrante,
       idEmpleado,
 
       estacionServicio,
@@ -157,8 +165,8 @@ controller.update = async (req, res) => {
       bomba: bomba ? bomba : false,
       turno: turno ? turno : false,
       estacion_servicio: estacionServicio ? estacionServicio : false,
-      empleado_autoriza: empleadoAutoriza ? empleadoAutoriza : false,
-      empleado_saliente: empleadoSaliente ? empleadoSaliente : false,
+      empleado_entrante: empleadoEntrante ? empleadoEntrante : false,
+      idempleado_saliente: idEmpleadoSaliente,
       idempleado: Number(idEmpleado),
     };
 
@@ -173,8 +181,7 @@ controller.update = async (req, res) => {
         cuerpo.bomba &&
         cuerpo.turno &&
         cuerpo.estacion_servicio &&
-        cuerpo.empleado_autoriza &&
-        cuerpo.empleado_saliente
+        cuerpo.empleado_entrante
       ) {
         if (snca.length > 0) {
           await sncaM.delete(snca[0].idsncacumuladas);
@@ -189,8 +196,7 @@ controller.update = async (req, res) => {
         !cuerpo.bomba ||
         !cuerpo.turno ||
         !cuerpo.estacion_servicio ||
-        cuerpo.empleado_autoriza ||
-        cuerpo.empleado_saliente
+        cuerpo.empleado_entrante
       ) {
         await sncaM.insert([3, idEmpleado, fecha]);
       }
