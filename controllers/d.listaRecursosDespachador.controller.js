@@ -234,7 +234,7 @@ controller.insert = async (req, res) => {
 
     const incorrecto = cuerpo.map((el) => el[4]).includes(0);
     if (incorrecto) {
-      await sncaM.insert([7, empleado, fecha]);
+      await sncaM.insert([7, empleado, fecha, `Falta de recursos de despacho`]);
     }
 
     let response = await listaReM.insert(cuerpo);

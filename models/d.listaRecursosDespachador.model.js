@@ -164,6 +164,17 @@ model.findXid = (id) =>
     });
   });
 
+model.findXMesXEmpleadoEv = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT SUM(evaluacion) total FROM recurso_despachador WHERE fecha BETWEEN ? AND ? AND idempleado = ?`;
+
+    connection.query(sql, data, (err, res) => {
+      console.log(err);
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =

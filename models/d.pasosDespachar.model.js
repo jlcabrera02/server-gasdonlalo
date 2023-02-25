@@ -88,6 +88,19 @@ model.findPasos = (id) =>
     });
   });
 
+model.findXMesXEmpleadoEv = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `
+    SELECT AVG(promedio) promedio FROM (SELECT evd.*, ev.identificador FROM (SELECT *, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar) ev, (SELECT *, AVG(evd.pro) * 10 promedio FROM (SELECT SUM(evaluacion) total, AVG(evaluacion) pro, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar WHERE fecha BETWEEN ? AND ? AND idempleado = ? GROUP BY identificador) evd GROUP BY quincena) evd WHERE evd.quincena = ev.quincena AND ev.fecha BETWEEN ? AND ? AND idempleado = ? GROUP BY identificador ORDER BY ev.fecha) pd`;
+
+    data = [...data, ...data];
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =

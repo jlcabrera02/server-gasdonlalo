@@ -102,6 +102,25 @@ model.findXMesXEmpleado = (fecha, idEmpleado) =>
     });
   });
 
+//Utilizado para las evaluaciones quincenales
+model.findXMesXEmpleadoEv = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = mysql.format(
+      `SELECT
+      SUM(cantidad) total
+      FROM
+      monto_faltante
+      WHERE
+      fecha BETWEEN ? AND ? AND idempleado = ? GROUP BY idempleado`,
+      data
+    );
+
+    connection.query(sql, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.findXTiempo = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT mf.idmonto_faltante, emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.iddepartamento,emp.nombre, emp.apellido_paterno, emp.apellido_materno, emp.estatus, mf.fecha, SUM(mf.cantidad) cantidad FROM monto_faltante AS mf, empleado AS emp WHERE mf.idempleado = emp.idempleado AND mf.fecha = ? AND emp.idempleado = ?  GROUP BY emp.idempleado ORDER BY emp.idempleado`;

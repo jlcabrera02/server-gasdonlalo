@@ -198,7 +198,12 @@ controller.insert = async (req, res) => {
         "El empleado no pertenece al departamento de despachadores"
       );
 
-    await sncaM.insert([6, empleado, fecha]);
+    await sncaM.insert([
+      6,
+      empleado,
+      fecha,
+      `Inconformidad por la cantidad de $${cantidad} pesos`,
+    ]);
     let response = await montoFaltanteM.insert(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -216,6 +221,13 @@ controller.update = async (req, res) => {
     if (!user.success) throw user;
     const { id } = req.params;
     const { cantidad, fecha, empleado } = req.body;
+    const snca = await sncaM.validar([empleado, 6, fecha]);
+    await sncaM.update(
+      {
+        descripcion: `Inconformidad por la cantidad de $${cantidad} pesos`,
+      },
+      snca[0].idsncacumuladas
+    );
     const cuerpo = {
       cantidad: Number(cantidad),
       fecha,

@@ -16,6 +16,16 @@ model.findPasosEvUniforme = () =>
     });
   });
 
+model.findXMesXEmpleadoEv = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT SUM(cumple) total FROM evaluacion_uniforme WHERE fecha BETWEEN ? AND ? AND idempleado = ?`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.findEvaluacionMensual = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT ev.*, cu.cumplimiento, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM evaluacion_uniforme ev, cumplimiento_uniforme cu, empleado emp WHERE ev.idcumplimiento_uniforme = cu.idcumplimiento_uniforme AND emp.idempleado = ev.idempleado AND ev.fecha BETWEEN ? AND LAST_DAY(?)`;

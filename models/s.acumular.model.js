@@ -37,11 +37,12 @@ model.validar = (data, capturado = 0) =>
 
 model.insert = (data) =>
   new Promise((resolve, reject) => {
+    let cortarTexto = data[3].substring(0, 47);
+    data[3] = cortarTexto += "...";
     let sql =
-      "INSERT INTO sncacumuladas (idincumplimiento, capturado, idempleado, fecha) VALUES (?, 0, ?, ?)";
+      "INSERT INTO sncacumuladas (idincumplimiento, capturado, idempleado, fecha, descripcion) VALUES (?, 0, ?, ?, ?)";
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
@@ -77,11 +78,11 @@ model.capturarSNC = (data) =>
     });
   });
 
-model.delete = (id) =>
+model.delete = (idSncacumulada) =>
   new Promise((resolve, reject) => {
     let sql = "DELETE FROM sncacumuladas WHERE idsncacumuladas = ?";
 
-    connection.query(sql, id, (err, res) => {
+    connection.query(sql, idSncacumulada, (err, res) => {
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

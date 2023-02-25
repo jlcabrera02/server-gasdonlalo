@@ -2,6 +2,7 @@ import Router from "express";
 //Salidas no conformes
 import salidaNoConformeRouter from "./s.salidaNoConforme.router";
 import incumplimientoRouter from "./s.incumplimiento.router";
+import acumular from "./s.acumular.router";
 //despacho
 import listaRecursosDespachadorRouter from "./d.listaRecursosDespachador.router";
 import evaluacionUniformeRouter from "./d.evaluacionUniforme.router";
@@ -33,9 +34,13 @@ const route = Router();
 //Complementos adicionales
 import com from "./complementos.router";
 
+//Vistas
+// import indexV from "./view.index.router";
+
 //Salidas no conformes
 route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/incumplimiento", incumplimientoRouter);
+route.use("/sncacumuladas", acumular);
 //despacho
 route.use("/lista-recurso-despachador", listaRecursosDespachadorRouter);
 route.use("/monto-faltante-despachador", montoFaltanteRouter);
