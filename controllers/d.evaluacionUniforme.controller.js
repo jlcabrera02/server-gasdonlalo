@@ -36,7 +36,13 @@ controller.findEvaluacionMensual = async (req, res) => {
     const getData = async (empleados, response, cuerpo, cumplimientos) => {
       const agrupar = {};
       const cantidad = [];
-      const { nombre, apellido_paterno, apellido_materno } = empleados;
+      const {
+        nombre,
+        apellido_paterno,
+        apellido_materno,
+        idempleado,
+        idchecador,
+      } = empleados;
 
       const data = await evaluacionUniformeM.findEvaluacionMensual(cuerpo);
 
@@ -84,6 +90,8 @@ controller.findEvaluacionMensual = async (req, res) => {
       }
 
       response.push({
+        idempleado,
+        idchecador,
         nombre,
         apellido_paterno,
         apellido_materno,
@@ -171,7 +179,12 @@ controller.insert = async (req, res) => {
 
     const SNCvalidar = cuerpo.some((el) => el[4] === 0);
     if (SNCvalidar) {
-      await sncaM.insert([11, empleado, fecha]);
+      await sncaM.insert([
+        11,
+        empleado,
+        fecha,
+        `No cumplio completamente con el uniforme`,
+      ]);
     }
 
     //await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro
