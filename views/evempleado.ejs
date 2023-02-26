@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es-mx">
 
 <head>
   <meta charset="UTF-8">
@@ -15,23 +15,27 @@
 
     <div class="p-2">
 
+      <a href="/" class="inline-block bg-cyan-500 p-2 rounded-lg mt-2 mb-1" role=>Regresar</a>
+
       <p class="text-center text-2xl font-medium my-2">Evaluación despachadores</p>
       <div class="flex justify-end gap-2">
-        <p class="font-medium">Mes: <span class=font-normal>Febrero</span></p>
-        <p class="font-medium">Año: <span class=font-normal>2023</span></p>
+        <p class="font-medium">Mes: <span class=font-normal><%- mes %></span></p>
+        <p class="font-medium">Año: <span class=font-normal><%- ano %></span></p>
 
       </div>
-      <table class="table-auto">
+      <table class="table-auto w-full">
         <thead>
           <tr>
-            <th class="border text-left">Empleado</th>
-            <th class="border text-left">Qna</th>
+            <th class="border text-center">Id</th>
+            <th class="border text-center">Nombre completo</th>
+            <th class="border text-left p-2">Qna</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="border text-left">Juan lizcano diaz</td>
-            <td class="border text-center">2</td>
+            <td class="border text-left p-2"><%- idchecador %></td>
+            <td class="border text-left p-2"><%- nombre %></td>
+            <td class="border text-center"><%- qna %></td>
           </tr>
         </tbody>
       </table>
@@ -95,10 +99,24 @@
             <th class="border text-left p-2">Salidas no conformes</th>
             <td class="border text-left text-center">
               Menor o igual a 5</td>
-            <td class="border text-center">15</td>
+            <td class="border text-center"><%- snc %></td>
           </tr>
         </tbody>
       </table>
+      <div class="mt-5 flex">
+        <div class="flex gap-2 m-auto">
+          <a href="<%- select-1 %>" class="bg-slate-500 p-2 rounded-lg <% if(select===1){ %> pointer-events-none <%}%>">
+            < </a>
+              <div class="flex">
+                <div class="border px-2 py-1"><%- select %></div>
+                <span class="px-2 py-1">de</span>
+                <div class="bg-slate-400 border px-2 py-1"><%- nEvaluaciones.length %></div>
+                <a href="<%- select+1 %>"
+                  class="bg-slate-500 p-2 rounded-lg <% if(select===nEvaluaciones.length){ %> pointer-events-none <%}%>">>
+                </a>
+              </div>
+        </div>
+      </div>
     </div>
 </body>
 

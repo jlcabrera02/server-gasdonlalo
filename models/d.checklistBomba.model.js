@@ -41,7 +41,6 @@ model.findXMesXEmpleadoEv = (data) =>
     let sql = `SELECT SUM(cumple) total FROM (SELECT idchecklist_bomba, idempleado, fecha, CASE WHEN SUM(isla_limpia) = COUNT(isla_limpia) AND SUM(aceites_completos) = COUNT(aceites_completos) AND SUM(turno) = COUNT(turno) AND SUM(bomba) = COUNT(bomba) AND SUM(estacion_servicio) = COUNT(estacion_servicio) AND SUM(empleado_entrante) = COUNT(empleado_entrante) THEN TRUE ELSE FALSE END cumple FROM checklist_bomba WHERE fecha BETWEEN ? AND ? AND idempleado = ? GROUP BY idempleado, fecha) cks`;
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       // if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res[0]);

@@ -89,6 +89,18 @@ model.findSalidasXInconformidadXMesXiddepartemento = (data) =>
     });
   });
 
+//Utilizado para las evaluaciones quincenales
+model.findXMesXEmpleadoEv = (data) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT COUNT(*) total FROM salida_noconforme WHERE idincumplimiento NOT IN (?) AND fecha BETWEEN ? AND ? AND idempleado = ?";
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql = "INSERT INTO salida_noconforme SET ?";

@@ -17,7 +17,7 @@ app.set("port", process.env.PORT || 4000);
 app.set("secret_key_jwt", process.env.SECRET_KEY_JWT);
 //Establesco las vistas que mostrara el servidor
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "public/views"));
+app.set("views", path.join(__dirname, "views"));
 
 //Establecer recursos estaticos
 app.use("/static", express.static(path.join(__dirname, "public")));
