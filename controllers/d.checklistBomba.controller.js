@@ -200,7 +200,10 @@ controller.update = async (req, res) => {
         !cuerpo.estacion_servicio ||
         cuerpo.empleado_entrante
       ) {
-        await sncaM.insert([3, idEmpleado, fecha]);
+        let data = Object.entries(cuerpo).slice(1, 7);
+        let incumple = data.filter((el) => el[1] === false);
+        let atexto = incumple.map((el) => el[0].replace("_", " ")).join(", ");
+        await sncaM.insert([3, idEmpleado, fecha, `No cumple con ${atexto}`]);
       }
     }
 
