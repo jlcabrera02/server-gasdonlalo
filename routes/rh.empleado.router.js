@@ -7,5 +7,6 @@ route.get("/", empleado.find);
 route.get("/:id", empleado.findOne);
 route.post("/", empleado.insert);
 route.put("/:idEmpleado", empleado.update);
+route.put("/updateRegistro/:idEmpleado", empleado.updateFechaRegistro);
 
 export default route;

@@ -7,5 +7,6 @@ route.get("/", cd.findTotalDocumentos);
 route.get("/:idEmpleado", cd.findDocumentosXIdempleado);
 route.post("/", cd.insert);
 route.put("/", cd.update);
+route.put("/updateTime/:iddocumento", cd.updateFecha);
 
 export default route;

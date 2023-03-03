@@ -105,23 +105,17 @@ controller.update = async (req, res) => {
   }
 };
 
-/* controller.update = async (req, res) => {
+controller.updateFechaRegistro = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization);
+    let user = verificar(req.headers.authorization, 24);
     if (!user.success) throw user;
-    const { id } = req.params;
-    const { nombre, apellidoPaterno, apellidoMaterno, departamento } = req.body;
+    const { idEmpleado } = req.params;
+    const { fecha } = req.body;
 
-    const cuerpo = {
-      nombre: mayus(nombre),
-      apellido_paterno: mayus(apellidoPaterno),
-      apellido_materno: mayus(apellidoMaterno),
-      iddepartamento: Number(departamento),
-    };
+    const cuerpo = { fecha_registro: fecha };
 
-    const data = [cuerpo, id];
-    let response = await empleadoM.update(data);
-    console.log(response);
+    const response = await empleadoM.update(cuerpo, idEmpleado);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -130,7 +124,7 @@ controller.update = async (req, res) => {
       res.status(err.code).json(err);
     }
   }
-}; */
+};
 
 controller.delete = async (req, res) => {
   try {

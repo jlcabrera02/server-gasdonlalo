@@ -64,6 +64,18 @@ model.update = (data) =>
       if (res) return resolve(res);
     });
   });
-0;
+
+model.updateFecha = (data) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "UPDATE control_documento SET update_time = ? WHERE idcontrol_documento = ?";
+
+    connection.query(sql, data, (err, res) => {
+      console.log(data);
+      if (err) return reject(errorDB());
+      // if (res.affectedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
 
 export default model;

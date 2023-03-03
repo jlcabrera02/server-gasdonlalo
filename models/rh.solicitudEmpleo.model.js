@@ -30,8 +30,7 @@ model.findSolicitud = (id) =>
 
 model.findXEstatus = (id) =>
   new Promise((resolve, reject) => {
-    let sql =
-      "SELECT emp.*, dep.departamento FROM empleado emp, departamento dep WHERE emp.iddepartamento = dep.iddepartamento AND emp.estatus = ?";
+    let sql = `SELECT emp.*, dep.departamento, cd.update_time AS update_time_imss, cd.idcontrol_documento idimss FROM departamento dep, empleado emp LEFT JOIN (SELECT update_time, idempleado, idcontrol_documento FROM control_documento WHERE iddocumento = 8) cd ON cd.idempleado = emp.idempleado WHERE emp.iddepartamento = dep.iddepartamento AND emp.estatus = ?`;
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
@@ -42,8 +41,8 @@ model.findXEstatus = (id) =>
 
 model.findXTrabajando = () =>
   new Promise((resolve, reject) => {
-    let sql =
-      "SELECT emp.*, dep.departamento FROM empleado emp, departamento dep WHERE emp.iddepartamento = dep.iddepartamento AND emp.estatus IN (1, 2) ORDER BY emp.idchecador";
+    let sql = `SELECT emp.*, dep.departamento FROM departamento dep, empleado emp LEFT JOIN (SELECT update_time, idempleado, idcontrol_documento FROM control_documento WHERE iddocumento = 8) cd
+    ON cd.idempleado = emp.idempleado WHERE emp.iddepartamento = dep.iddepartamento AND emp.estatus IN (1, 2) ORDER BY emp.idchecador`;
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
@@ -74,7 +73,6 @@ model.update = (data) =>
       "UPDATE empleado SET `update_time` = CURRENT_TIMESTAMP, ? WHERE idempleado = ?";
 
     connection.query(sql, data, (err, res) => {
-      console.log(data);
       if (err) {
         if (err.errno === 1062)
           return reject(peticionImposible("El id ya esta asignado"));

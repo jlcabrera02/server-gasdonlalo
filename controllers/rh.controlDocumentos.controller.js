@@ -84,4 +84,23 @@ controller.update = async (req, res) => {
   }
 };
 
+controller.updateFecha = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { iddocumento } = req.params;
+    const { fecha } = req.body;
+
+    const cuerpo = [fecha, Number(iddocumento)];
+    let response = await controlDocumentoM.updateFecha(cuerpo);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 export default controller;
