@@ -8,7 +8,7 @@ const model = {};
 model.findEvaluacionXmensual = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT oyl.*, oylc.cumplimiento, emp.idempleado, emp.idchecador, emp.estatus, emp.nombre, emp.apellido_paterno,
-emp.apellido_materno, es.nombre estacion FROM oyl, oyl_cumplimiento oylc, empleado emp, estacion_servicio es 
+emp.apellido_materno, es.nombre estacion, incidentes FROM oyl, oyl_cumplimiento oylc, empleado emp, estacion_servicio es 
 WHERE oyl.idoyl_cumplimiento = oylc.idoyl_cumplimiento AND
 emp.idempleado = oyl.idempleado AND es.idestacion_servicio = oyl.idestacion_servicio AND oyl.fecha BETWEEN ? AND LAST_DAY(?)`;
 
@@ -27,7 +27,7 @@ emp.idempleado = oyl.idempleado AND es.idestacion_servicio = oyl.idestacion_serv
 model.findByIdentificador = (identidicador) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT oyl.*, oylc.cumplimiento, emp.idempleado, emp.idchecador, emp.estatus, emp.nombre, emp.apellido_paterno,
-    emp.apellido_materno, es.nombre estacion FROM oyl, oyl_cumplimiento oylc, empleado emp, estacion_servicio es 
+    emp.apellido_materno, es.nombre estacion, incidentes FROM oyl, oyl_cumplimiento oylc, empleado emp, estacion_servicio es
     WHERE oyl.idoyl_cumplimiento = oylc.idoyl_cumplimiento AND
     emp.idempleado = oyl.idempleado AND es.idestacion_servicio = oyl.idestacion_servicio AND oyl.identificador = ?`;
 
@@ -52,9 +52,10 @@ model.findCumplimientos = () =>
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =
-      "INSERT INTO oyl (fecha, isla, idestacion_servicio, idempleado, idoyl_cumplimiento, identificador, cumple) VALUES ?";
+      "INSERT INTO oyl (fecha, isla, idestacion_servicio, idempleado, idoyl_cumplimiento, identificador, cumple, idturno, incidentes) VALUES ?";
 
     connection.query(sql, [data], (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

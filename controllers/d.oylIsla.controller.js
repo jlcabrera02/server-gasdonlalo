@@ -33,9 +33,9 @@ controller.findEvaluacionXmensual = async (req, res) => {
       data.forEach((el) => {
         if (!agrupar.hasOwnProperty(el.identificador)) {
           agrupar[el.identificador] = [el];
+        } else {
+          agrupar[el.identificador].push(el);
         }
-
-        agrupar[el.identificador].push(el);
       });
 
       agrupar = Object.values(agrupar);
@@ -66,9 +66,9 @@ controller.findEvaluacionXmensual = async (req, res) => {
         data.forEach((el) => {
           if (!agrupar.hasOwnProperty(el.identificador)) {
             agrupar[el.identificador] = [el];
+          } else {
+            agrupar[el.identificador].push(el);
           }
-
-          agrupar[el.identificador].push(el);
         });
 
         agrupar = Object.values(agrupar);
@@ -129,38 +129,44 @@ controller.insert = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 25);
     if (!user.success) throw user;
-    const { idEmpleado, idEstacionServicio, isla, fecha, evaluaciones } =
-      req.body;
-    const idGenerico = generadorId();
-    const cumplimientos = await oylM.findCumplimientos();
-
-    const insertCumplimientos = cumplimientos.map((el) => ({
-      idcumplimiento: el.idoyl_cumplimiento,
-      cumple: 0,
-    }));
-
-    evaluaciones.forEach((el) => {
-      let indexRemplazar = insertCumplimientos.findIndex(
-        (pa) => pa.idcumplimiento === Number(el.idcumplimiento)
-      );
-
-      insertCumplimientos[indexRemplazar] = el;
-    });
-
-    const cuerpo = insertCumplimientos.map((el) => [
-      fecha,
-      isla,
-      idEstacionServicio,
+    const {
       idEmpleado,
-      el.idcumplimiento,
+      idEstacionServicio,
+      isla,
+      fecha,
+      idTurno,
+      evaluaciones,
+      incidentes,
+    } = req.body;
+    const idGenerico = generadorId();
+
+    if (
+      evaluaciones.length === 9 &&
+      evaluaciones.some((el) => el.idcumplimiento === 5)
+    )
+      throw {
+        code: 400,
+        msg: "Datos incompletos procura rellenar bien los puntos del formulario.",
+        success: false,
+      };
+
+    const cuerpo = evaluaciones.map((el) => [
+      fecha,
+      Number(isla),
+      Number(idEstacionServicio),
+      Number(idEmpleado),
+      Number(el.idcumplimiento),
       idGenerico,
-      el.cumple,
+      Number(el.cumple),
+      Number(idTurno),
+      incidentes ? incidentes : null,
     ]);
 
     const response = await oylM.insert(cuerpo);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res
         .status(400)
