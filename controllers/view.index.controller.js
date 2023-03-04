@@ -89,8 +89,6 @@ controller.empleado = async (req, res) => {
     let pagina = Number(page - 1);
     const { year, month, qna } = nEvaluaciones[pagina];
 
-    console.log(nEvaluaciones);
-
     const dias = new Date(year, month, 0).getDate();
     let fechaI, fechaF;
     if (qna < 2) {
@@ -113,6 +111,12 @@ controller.empleado = async (req, res) => {
       fechaF,
       idEmpleado,
     ]);
+    const sncTotales = await sncM.findXMesXEmpleadoEv([
+      [0],
+      fechaI,
+      fechaF,
+      idEmpleado,
+    ]);
     const fn = (n) => Number(n.toFixed(2));
 
     const ev = {
@@ -123,6 +127,7 @@ controller.empleado = async (req, res) => {
       rd: rd.total,
       oyl: oyl.total,
       snc: snc.total,
+      sncTotales: sncTotales.total,
       nombre: `${empleado[0].nombre} ${empleado[0].apellido_paterno} ${empleado[0].apellido_materno}`,
       idchecador: empleado[0].idchecador,
       nEvaluaciones: nEvaluaciones,
@@ -147,12 +152,10 @@ controller.empleado = async (req, res) => {
       (ev.mfp + ev.ckp + ev.evp + ev.rdp + ev.oylp + ev.sncp + ev.pd) / 7
     );
 
-    console.log(ev);
-
-    ev.ev = res.render("evempleado", ev);
+    res.render("evempleado", ev);
   } catch (error) {
-    console.log(error);
-    res.render("error");
+    // console.log(error);
+    res.render("evempleadoerror");
   }
 };
 

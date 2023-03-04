@@ -1,9 +1,10 @@
 import oylM from "../models/d.oylIsla.model";
 import generadorId from "../assets/generadorId";
 import auth from "../models/auth.model";
-// import formatTiempo from "../assets/formatTiempo";
-// import sncaM from "../models/s.acumular.model";
+import sncaM from "../models/s.acumular.model";
 import empM from "../models/rh.empleado.model";
+import formatTiempo from "../assets/formatTiempo";
+const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 
 const controller = {};
@@ -133,7 +134,6 @@ controller.findHistorial = async (req, res) => {
     const response = await oylM.findHistorial(idEmpleado);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -179,11 +179,21 @@ controller.insert = async (req, res) => {
       incidentes ? incidentes : null,
     ]);
 
+    let buscarInconformidad = evaluaciones.some((el) => el.cumple === 0);
+
+    if (buscarInconformidad) {
+      await sncaM.insert([
+        1,
+        idEmpleado,
+        fecha,
+        `Le faltaron puntos en orden y limpieza`,
+      ]);
+    }
+
     const response = await oylM.insert(cuerpo);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res
         .status(400)
@@ -205,7 +215,6 @@ controller.update = async (req, res) => {
     let response = await oylM.update(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -220,8 +229,16 @@ controller.delete = async (req, res) => {
     if (!user.success) throw user;
     const { identificador } = req.params;
 
-    let response = await oylM.delete(identificador);
+    const viejo = await oylM.findByIdentificador(identificador);
 
+    const snca = await sncaM.validar([
+      viejo[0].idempleado,
+      1,
+      tiempoDB(viejo[0].fecha),
+    ]);
+    if (snca.length > 0) await sncaM.delete(snca[0].idsncacumuladas);
+
+    let response = await oylM.delete(identificador);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

@@ -103,11 +103,18 @@
               <td class="border text-center"><%- rdp %></td>
             </tr>
             <tr>
-              <th class="border text-left p-2">Salidas no conformes</th>
+              <th class="border text-left p-2">Otras Salidas no conformes</th>
               <td class="border text-left text-center">
                 Menor o igual a 5 salidas no conformes</td>
               <td class="border text-center <% if(snc >5){ %> bg-red-600 <%}else{%>bg-lime-600<%}%>"><%- snc %></td>
               <td class="border text-center"><%- sncp %></td>
+            </tr>
+            <tr>
+              <th class="border text-left p-2">Salidas no conformes totales </th>
+              <td class="border text-left text-center">
+                --- </td>
+              <td class="border text-center" colspan="2"><%- sncTotales %>
+              </td>
             </tr>
           </tbody>
         </table>
