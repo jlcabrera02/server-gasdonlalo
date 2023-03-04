@@ -15,6 +15,15 @@ controller.index = async (req, res) => {
   try {
     const despachadores = await empM.findEmpleadosXmesXiddepartamento(1);
     const hoy = new Date();
+    function qnas(a, b) {
+      let an = new Date(a).getTime();
+      let ne = new Date(b).getTime();
+
+      let diff = an - ne;
+      let dias = diff / (60 * 60 * 24 * 1000);
+      let quincenas = dias / 15;
+      return Math.round(quincenas);
+    }
     const ordenar = despachadores.sort((a, b) => {
       if (a.idchecador > b.idchecador) {
         return 1;
@@ -25,10 +34,8 @@ controller.index = async (req, res) => {
     //Obtiene cuantas paginas debe tener el empleado
     for (let i = 0; i < ordenar.length; i++) {
       const { fecha_registro, idempleado } = ordenar[i];
-      let paginas = new Date(
-        hoy.getTime() - new Date(tiempoDB(fecha_registro)).getTime()
-      ).getMonth();
-      paginas = paginas * 2;
+      console.log(hoy, tiempoDB(fecha_registro));
+      let paginas = qnas(hoy, tiempoDB(fecha_registro));
       if (hoy.getDate() > 15) paginas += 1;
       ordenar[i].page = paginas;
       ordenar[i].link = `/${idempleado}/page/${paginas}`;
@@ -48,41 +55,55 @@ controller.empleado = async (req, res) => {
     const empleado = await empM.findOne(idEmpleado);
     const hoy = new Date();
     const meses = new Date(
-      hoy.getTime() - new Date(tiempoDB(empleado[0].fecha_registro))
+      hoy.getTime() - new Date(tiempoDB(empleado[0].fecha_registro)).getTime()
     ).getMonth();
+
+    function qnas(a, b) {
+      let an = new Date(a).getTime();
+      let ne = new Date(b).getTime();
+
+      let diff = an - ne;
+      let dias = diff / (60 * 60 * 24 * 1000);
+      let quincenas = dias / 15;
+      return Math.round(quincenas);
+    }
+
+    let cantidad = qnas(hoy, tiempoDB(empleado[0].fecha_registro));
 
     const nEvaluaciones = [];
 
-    let im = hoy.getMonth(),
-      iy = Number(hoy.getFullYear());
+    let dia = new Date().getDate();
+    let mes = new Date().getMonth() + 1;
+    let anio = Number(new Date().getFullYear());
 
-    if (new Date().getDate() > 15) {
-      nEvaluaciones.push({
-        qna: 1,
-        year: Number(hoy.getFullYear()),
-        month: im + 1,
-      });
-    }
-
-    for (let i = 0; i < meses; i++) {
-      if (im === 0) {
-        im = 12;
-        iy -= 1;
+    for (let i = 0; i < cantidad; i++) {
+      let qn = 15 * (i + 1);
+      let today = new Date(new Date().setDate(hoy.getDate() - qn));
+      dia = today.getDate();
+      mes = today.getMonth() + 1;
+      anio = Number(today.getFullYear());
+      console.log(anio, mes, dia);
+      let ulDia = new Date(anio, mes, 0).getDate();
+      if (dia > 15) {
+        nEvaluaciones.push({
+          qna: 2,
+          year: anio,
+          month: mes,
+          fechaI: `${anio}-${mes}-01`,
+          fechaF: `${anio}-${mes}-15`,
+        });
+      } else {
+        nEvaluaciones.push({
+          qna: 1,
+          year: anio,
+          month: mes,
+          fechaI: `${anio}-${mes}-16`,
+          fechaF: `${anio}-${mes}-${ulDia}`,
+        });
       }
-
-      nEvaluaciones.push({
-        qna: 2,
-        year: iy,
-        month: im,
-      });
-      nEvaluaciones.push({
-        qna: 1,
-        year: iy,
-        month: im,
-      });
-
-      im -= 1;
     }
+
+    console.log(nEvaluaciones);
     //Array en reversa
     nEvaluaciones.reverse();
 
@@ -131,6 +152,7 @@ controller.empleado = async (req, res) => {
       nombre: `${empleado[0].nombre} ${empleado[0].apellido_paterno} ${empleado[0].apellido_materno}`,
       idchecador: empleado[0].idchecador,
       nEvaluaciones: nEvaluaciones,
+      qnas: cantidad,
       qna: qna,
       mes: formatMes(fechaI),
       ano: year,
@@ -154,7 +176,7 @@ controller.empleado = async (req, res) => {
 
     res.render("evempleado", ev);
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     res.render("evempleadoerror");
   }
 };
