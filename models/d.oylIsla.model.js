@@ -49,13 +49,34 @@ model.findCumplimientos = () =>
     });
   });
 
+model.findHistorial = (idEmpleado) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT o.*, es.nombre estacionServicio, t.turno, SUM(o.cumple) total, emp.* FROM oyl o, oyl_cumplimiento oc, estacion_servicio es, turno t, empleado emp WHERE oc.idoyl_cumplimiento = o.idoyl_cumplimiento AND o.idestacion_servicio = es.idestacion_servicio AND o.idturno = t.idturno AND emp.idempleado = o.idempleado AND o.idempleado = ? GROUP BY identificador ORDER BY fecha DESC`;
+
+    connection.query(sql, idEmpleado, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findXMesXEmpleadoEv = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT SUM(cumple) total, COUNT(*) todo FROM oyl WHERE fecha BETWEEN ? AND ? AND idempleado = ?`;
+
+    connection.query(sql, data, (err, res) => {
+      console.log(data);
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql =
       "INSERT INTO oyl (fecha, isla, idestacion_servicio, idempleado, idoyl_cumplimiento, identificador, cumple, idturno, incidentes) VALUES ?";
 
     connection.query(sql, [data], (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
@@ -74,7 +95,6 @@ model.update = (data) =>
     });
 
     connection.query(sql, (err, res) => {
-      console.log(res);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

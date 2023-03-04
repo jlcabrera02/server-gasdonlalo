@@ -149,6 +149,9 @@ controller.findXTiempo = async (req, res) => {
         .tiempoLocal(fechaInicio)
         .setDate(formatTiempo.tiempoLocal(fechaInicio).getDate() - 1)
     );
+
+    dias += 1;
+
     for (let i = 0; i < dias; i++) {
       fi.setDate(fi.getDate() + 1);
       let fecha = formatTiempo.tiempoDB(fi);

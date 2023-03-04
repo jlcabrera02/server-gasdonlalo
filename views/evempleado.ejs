@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, user-scalable=no, maximum-scale=1">
   <title>GASOLINERÍA DON LALO</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -23,7 +23,7 @@
         <p class="font-medium">Año: <span class=font-normal><%- ano %></span></p>
 
       </div>
-      <table class="table-auto w-full">
+      <table class="table-auto sm:w-auto m-auto w-full">
         <thead>
           <tr>
             <th class="border text-center">Id</th>
@@ -50,59 +50,71 @@
           Aceptable
         </div>
       </div>
+      <div class="mx-auto">
 
-      <table class="table-auto">
-        <thead>
-          <tr>
-            <th class="border text-left text-center p-2 bg-neutral-400">Incumplimiento</th>
-            <th class="border text-left text-center p-2 bg-neutral-400">Resultado Esperado</th>
-            <th class="border text-left text-center p-2 bg-neutral-400">Resultado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th class="border text-left p-2">Monto Faltante</th>
-            <td class="border text-left text-center">$0.00</td>
-            <td class="border text-center">$<%- mf %></td>
-          </tr>
-          <tr>
-            <th class="border text-left p-2">Checklist Bomba</th>
-            <td class="border text-left text-center">
-              Mayor o igual a 12</td>
-            <td class="border text-center"><%- ck %></td>
-          </tr>
-          <tr>
-            <th class="border text-left p-2">Evaluación uniforme</th>
-            <td class="border text-left text-center">
-              Mayor o igual a 6</td>
-            <td class="border text-center"><%- ev %></td>
-          </tr>
-          <tr>
-            <th class="border text-left p-2">Orden y limpieza de isla</th>
-            <td class="border text-left text-center">
-              ---</td>
-            <td class="border text-center">--</td>
-          </tr>
-          <tr>
-            <th class="border text-left p-2">Pasos para despachar</th>
-            <td class="border text-left text-center">
-              Mayor o igual a 8</td>
-            <td class="border text-center"><%- pd %></td>
-          </tr>
-          <tr>
-            <th class="border text-left p-2">Recursos de despachador</th>
-            <td class="border text-left text-center">
-              Mayor o igual a 18</td>
-            <td class="border text-center"><%- rd %></td>
-          </tr>
-          <tr>
-            <th class="border text-left p-2">Salidas no conformes</th>
-            <td class="border text-left text-center">
-              Menor o igual a 5</td>
-            <td class="border text-center"><%- snc %></td>
-          </tr>
-        </tbody>
-      </table>
+        <table class="table-auto mx-auto">
+          <thead>
+            <tr>
+              <th class="border text-left text-center p-2 bg-neutral-400">Reglamento</th>
+              <th class="border text-left text-center p-2 bg-neutral-400">Resultado Esperado</th>
+              <th class="border text-left text-center p-2 bg-neutral-400">Resultado</th>
+              <th class="border text-left text-center p-2 bg-neutral-400">Promedio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th class="border text-left p-2">Monto Faltante</th>
+              <td class="border text-left text-center">Igual a $0.00</td>
+              <td class="border text-center <% if(mf>0){ %> bg-red-600 <%}else{%>bg-lime-600<%}%>">$<%- mf %></td>
+              <td class="border text-center "><%- mfp %></td>
+            </tr>
+            <tr>
+              <th class="border text-left p-2">Checklist Bomba</th>
+              <td class="border text-left text-center">
+                Mayor o igual a 12 checklist correctos</td>
+              <td class="border text-center <% if(ck >11){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- ck %></td>
+              <td class="border text-center"><%- ckp %></td>
+            </tr>
+            <tr>
+              <th class="border text-left p-2">Evaluación uniforme</th>
+              <td class="border text-left text-center">
+                Mayor o igual a 6 puntos</td>
+              <td class="border text-center <% if(ev > 5){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- ev %></td>
+              <td class="border text-center"><%- evp %></td>
+            </tr>
+            <tr>
+              <th class="border text-left p-2">Orden y limpieza de isla</th>
+              <td class="border text-left text-center">Mayor o igual a 8 puntos</td>
+              <td class="border text-center <% if(oyl >7){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- oyl %></td>
+              <td class="border text-center"><%- oylp %></td>
+            </tr>
+            <tr>
+              <th class="border text-left p-2">Pasos para despachar</th>
+              <td class="border text-left text-center">
+                Mayor o igual a 8 de promedio</td>
+              <td class="border text-center <% if(pd >= 8){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- pd %></td>
+              <td class="border text-center"><%- pd %></td>
+            </tr>
+            <tr>
+              <th class="border text-left p-2">Recursos de despachador</th>
+              <td class="border text-left text-center">
+                Mayor o igual a 18 puntos</td>
+              <td class="border text-center <% if(rd >17){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- rd %></td>
+              <td class="border text-center"><%- rdp %></td>
+            </tr>
+            <tr>
+              <th class="border text-left p-2">Salidas no conformes</th>
+              <td class="border text-left text-center">
+                Menor o igual a 5 salidas no conformes</td>
+              <td class="border text-center <% if(snc >5){ %> bg-red-600 <%}else{%>bg-lime-600<%}%>"><%- snc %></td>
+              <td class="border text-center"><%- sncp %></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h4 class="text-3xl text-center my-2 font-semibold">Promedio: <%- promedio%></h4>
+      </div>
       <div class="mt-5 flex">
         <div class="flex gap-2 m-auto">
           <a href="<%- select-1 %>" class="bg-slate-500 p-2 rounded-lg <% if(select===1){ %> pointer-events-none <%}%>">

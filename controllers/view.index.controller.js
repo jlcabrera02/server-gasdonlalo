@@ -5,6 +5,7 @@ import ckBM from "../models/d.checklistBomba.model";
 import evUM from "../models/d.evaluacionUniforme.model";
 import pdM from "../models/d.pasosDespachar.model";
 import rdM from "../models/d.listaRecursosDespachador.model";
+import oyLM from "../models/d.oylIsla.model";
 import sncM from "../models/s.salidaNoConforme.model";
 import formatTiempo from "../assets/formatTiempo";
 const { tiempoDB, formatMes } = formatTiempo;
@@ -88,6 +89,8 @@ controller.empleado = async (req, res) => {
     let pagina = Number(page - 1);
     const { year, month, qna } = nEvaluaciones[pagina];
 
+    console.log(nEvaluaciones);
+
     const dias = new Date(year, month, 0).getDate();
     let fechaI, fechaF;
     if (qna < 2) {
@@ -103,19 +106,22 @@ controller.empleado = async (req, res) => {
     const evu = await evUM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
     const pd = await pdM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
     const rd = await rdM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
+    const oyl = await oyLM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
     const snc = await sncM.findXMesXEmpleadoEv([
       [1, 3, 6, 7, 11],
       fechaI,
       fechaF,
       idEmpleado,
     ]);
+    const fn = (n) => Number(n.toFixed(2));
 
     const ev = {
       mf: mf ? mf.total : 0,
       ck: ck.total,
       ev: evu.total,
-      pd: pd ? pd.promedio.toFixed(2) : 0,
+      pd: pd ? fn(pd.promedio) : 0,
       rd: rd.total,
+      oyl: oyl.total,
       snc: snc.total,
       nombre: `${empleado[0].nombre} ${empleado[0].apellido_paterno} ${empleado[0].apellido_materno}`,
       idchecador: empleado[0].idchecador,
@@ -126,7 +132,24 @@ controller.empleado = async (req, res) => {
       select: pagina + 1,
     };
 
-    res.render("evempleado", ev);
+    //Promedio
+
+    let diasDiff = new Date(fechaF).getDate() - new Date(fechaI).getDate() + 1;
+
+    ev.mfp = ev.mf > 0 ? 0.0 : 10.0;
+    ev.ckp = fn((ev.ck / diasDiff) * 10);
+    ev.evp = fn((ev.ev / evu.todo) * 10) || 0;
+    ev.rdp = fn((ev.rd / rd.todo) * 10) || 0;
+    ev.oylp = fn((ev.oyl / oyl.todo) * 10) || 0;
+    ev.sncp = ev.snc > 5 ? 0 : fn(Math.abs((ev.snc * 5) / 25 - 1) * 10);
+
+    ev.promedio = fn(
+      (ev.mfp + ev.ckp + ev.evp + ev.rdp + ev.oylp + ev.sncp + ev.pd) / 7
+    );
+
+    console.log(ev);
+
+    ev.ev = res.render("evempleado", ev);
   } catch (error) {
     console.log(error);
     res.render("error");

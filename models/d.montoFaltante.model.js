@@ -126,6 +126,7 @@ model.findXTiempo = (data) =>
     let sql = `SELECT mf.idmonto_faltante, emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.iddepartamento,emp.nombre, emp.apellido_paterno, emp.apellido_materno, emp.estatus, mf.fecha, SUM(mf.cantidad) cantidad FROM monto_faltante AS mf, empleado AS emp WHERE mf.idempleado = emp.idempleado AND mf.fecha = ? AND emp.idempleado = ?  GROUP BY emp.idempleado ORDER BY emp.idempleado`;
 
     connection.query(sql, data, (err, res) => {
+      console.log(data);
       if (err) return reject(errorDB());
       if (res) return resolve(res);
     });

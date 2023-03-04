@@ -18,7 +18,7 @@ model.findPasosEvUniforme = () =>
 
 model.findXMesXEmpleadoEv = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT SUM(cumple) total FROM evaluacion_uniforme WHERE fecha BETWEEN ? AND ? AND idempleado = ?`;
+    let sql = `SELECT SUM(cumple) total, COUNT(*) todo FROM evaluacion_uniforme WHERE fecha BETWEEN ? AND ? AND idempleado = ?`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());

@@ -1,8 +1,8 @@
 import oylM from "../models/d.oylIsla.model";
 import generadorId from "../assets/generadorId";
 import auth from "../models/auth.model";
-import formatTiempo from "../assets/formatTiempo";
-import sncaM from "../models/s.acumular.model";
+// import formatTiempo from "../assets/formatTiempo";
+// import sncaM from "../models/s.acumular.model";
 import empM from "../models/rh.empleado.model";
 const { verificar } = auth;
 
@@ -117,6 +117,23 @@ controller.findCumplimientos = async (req, res) => {
     let response = await oylM.findCumplimientos();
     res.status(200).json({ success: true, response });
   } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findHistorial = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 25);
+    if (!user.success) throw user;
+    const { idEmpleado } = req.params;
+    const response = await oylM.findHistorial(idEmpleado);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

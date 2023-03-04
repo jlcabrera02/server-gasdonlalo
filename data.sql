@@ -246,7 +246,7 @@ INSERT INTO oyl_cumplimiento (idoyl_cumplimiento, cumplimiento, descripcion, par
 (2, "Contenedor limpiaparabrisas", "sin roturas", "Parte 1. Elementos de la isla"),
 (3, "Manguera de la bomba", "enrrolladas sin tocar el piso", "Parte 1. Elementos de la isla"),
 (4, "Manguera despachadora de agua y aire", "enrrolladas sin tocar el piso", "Parte 1. Elementos de la isla"),
-(5, "Maseteros, solo aplica a isla 1 y 2 de GDL1", "sin basura", "Parte 1. Elementos de la isla"),
+(5, "Maseteros", "sin basura", "Parte 1. Elementos de la isla"),
 (6, "Bomba limpia", "sin lodo o polvo", "Parte 2. Limpieza de la isla"),
 (7, "Piso limpio de la isla", "sin lodo o polvo", "Parte 2. Limpieza de la isla"),
 (8, "Isla limpia", "sin basura", "Parte 2. Limpieza de la isla"),

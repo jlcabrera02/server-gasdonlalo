@@ -166,7 +166,7 @@ model.findXid = (id) =>
 
 model.findXMesXEmpleadoEv = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT SUM(evaluacion) total FROM recurso_despachador WHERE fecha BETWEEN ? AND ? AND idempleado = ?`;
+    let sql = `SELECT SUM(evaluacion) total, COUNT(*) todo FROM recurso_despachador WHERE fecha BETWEEN ? AND ? AND idempleado = ?`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
