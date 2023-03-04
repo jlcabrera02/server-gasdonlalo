@@ -294,6 +294,8 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 (9, "Actualizar", "Evaluación Uniforme", 2, "Das permiso de que el usuario pueda actualizar"),
 (10, "Eliminar", "Evaluación Uniforme", 2, "Das permiso de que el usuario pueda eliminar"),
 (11, "Administrar Incumplimientos", "Salidas No Conformes", 3, "Das permiso de que el usuario pueda manipular los incumplimientos para las salidas no conformes"),
+(12, "Actualizar datos", "Orden y limpieza", 2, "Das permiso de que el usuario pueda ver y actualizar datos en orden y limpieza"),
+(13, "Eliminar datos", "Orden y limpieza", 2, "Das permiso de que el usuario pueda eliminar datos"),
 (14, "Obtener y capturar datos", "Pasos Para Despachar", 2, "Das permiso de que el usuario pueda ver y capturar datos"),
 (15, "Actualizar", "Pasos Para Despachar", 2, "Das permiso de que el usuario pueda actualizar"),
 (16, "Eliminar", "Pasos Para Despachar", 2, "Das permiso de que el usuario pueda eliminar"),
@@ -305,6 +307,7 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 (22, "Eliminar", "Salidas No Conformes", 3, "Das permiso de que el usuario pueda eliminar"),
 (23, "Autorizar", "Salidas No Conformes", 3, "Das permiso de que el usuario pueda dar una solución a las salidas no conformes"),
 (24, "Administrar", "Recursos Humanos", 7, "Das permiso de que el usuario pueda administrar el área de recursos humanos"),
+(25, "Obtener y capturar", "Orden y limpieza", 2, "Das permiso de que el usuario pueda obtener y crear nuevos datos en el área de orden y limpieza"),
 (48, "Visualizar usuarios", "Permisos", 8, "Das permiso de que el usuario pueda ver enlistada a los empleados y usuarios"),
 (49, "Establecer usuario", "Permisos", 8, "Das permiso de que el usuario pueda crear un usuario a un empleado"),
 (50, "Establecer permisos", "Permisos", 8, "Das permiso de que el usuario establecer permisos a los demas usuarios");
