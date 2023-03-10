@@ -26,101 +26,107 @@
       <table class="table-auto sm:w-auto m-auto w-full">
         <thead>
           <tr>
-            <th class="border text-center">Id</th>
-            <th class="border text-center">Nombre completo</th>
-            <th class="border text-left p-2">Qna</th>
+            <th class="border border-black text-center">ID EMPLEADO</th>
+            <td class="border border-black text-center px-2"><%- idchecador%></td>
+
+            <th class="border border-black text-center p-2">QUINCENA</th>
+            <td class="border border-black text-center p-2"><%- qna%></td>
+          </tr>
+          <tr>
+            <th class="border border-black text-center">NOMBRE</th>
+            <td class="border border-black p-1" colspan="3"><%- nombre %></td>
+
+          </tr>
+          <tr>
+            <th class="border border-black text-center">PUESTO</th>
+            <td class="border border-black" colspan="3"><%- departamento %></td>
+
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td class="border text-left p-2"><%- idchecador %></td>
-            <td class="border text-left p-2"><%- nombre %></td>
-            <td class="border text-center"><%- qna %></td>
-          </tr>
-        </tbody>
       </table>
       <!-- Colores de evaluacion -->
       <div class="flex gap-2 justify-center">
         <div class="flex items-center gap-2">
           <div class="w-2 h-2 bg-red-500"></div>
-          No aceptable
+          No conforme
         </div>
         <div class="flex items-center gap-2">
           <div class="w-2 h-2 bg-lime-600"></div>
-          Aceptable
+          Conforme
         </div>
       </div>
       <div class="mx-auto">
 
-        <table class="table-auto mx-auto">
+        <table class="table-auto border border-black mx-auto">
           <thead>
             <tr>
               <th class="border text-left text-center p-2 bg-neutral-400">Reglamento</th>
               <th class="border text-left text-center p-2 bg-neutral-400">Resultado Esperado</th>
-              <th class="border text-left text-center p-2 bg-neutral-400">Resultado</th>
-              <th class="border text-left text-center p-2 bg-neutral-400">Promedio</th>
+              <th class="border text-left text-center p-2 bg-neutral-400">Resultado Obtenido</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <th class="border text-left p-2">Monto Faltante</th>
               <td class="border text-left text-center">Igual a $0.00</td>
-              <td class="border text-center <% if(mf>0){ %> bg-red-600 <%}else{%>bg-lime-600<%}%>">$<%- mf %></td>
-              <td class="border text-center "><%- mfp %></td>
+              <td class="border text-center <% if(mf>0){ %> bg-red-600 text-white<%}else{%>bg-lime-600<%}%> p-2">$<%- mf
+                  %>
+              </td>
             </tr>
             <tr>
               <th class="border text-left p-2">Checklist Bomba</th>
               <td class="border text-left text-center">
-                Mayor o igual a 12 checklist correctos</td>
-              <td class="border text-center <% if(ck >11){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- ck %></td>
-              <td class="border text-center"><%- ckp %></td>
+                12 Registros</td>
+              <td class="border text-center <% if(ck >11){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- ckp %></td>
             </tr>
             <tr>
               <th class="border text-left p-2">Evaluación uniforme</th>
               <td class="border text-left text-center">
-                Mayor o igual a 6 puntos</td>
-              <td class="border text-center <% if(ev > 5){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- ev %></td>
-              <td class="border text-center"><%- evp %></td>
+                Promedio mayor o igual a 8 </td>
+              <td class="border text-center <% if(evp >= 8){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- evp %></td>
             </tr>
             <tr>
               <th class="border text-left p-2">Orden y limpieza de isla</th>
-              <td class="border text-left text-center">Mayor o igual a 8 puntos</td>
-              <td class="border text-center <% if(oyl >7){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- oyl %></td>
-              <td class="border text-center"><%- oylp %></td>
+              <td class="border text-left text-center">Promedio mayor o igual a 9</td>
+              <td class="border text-center <% if(oylp >= 9){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- oylp %></td>
             </tr>
             <tr>
               <th class="border text-left p-2">Pasos para despachar</th>
               <td class="border text-left text-center">
-                Mayor o igual a 8 de promedio</td>
+                Promedio mayor o igual a 8</td>
               <td class="border text-center <% if(pd >= 8){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- pd %></td>
-              <td class="border text-center"><%- pd %></td>
             </tr>
             <tr>
               <th class="border text-left p-2">Recursos de despachador</th>
               <td class="border text-left text-center">
-                Mayor o igual a 18 puntos</td>
-              <td class="border text-center <% if(rd >17){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- rd %></td>
-              <td class="border text-center"><%- rdp %></td>
+                Promedio mayor o igual a 9</td>
+              <td class="border text-center <% if(rdp >= 9){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- rdp %></td>
             </tr>
             <tr>
-              <th class="border text-left p-2">Otras Salidas no conformes</th>
+              <th class="border text-left p-2">SNC otras</th>
               <td class="border text-left text-center">
-                Menor o igual a 5 salidas no conformes</td>
-              <td class="border text-center <% if(snc >5){ %> bg-red-600 <%}else{%>bg-lime-600<%}%>"><%- snc %></td>
-              <td class="border text-center"><%- sncp %></td>
+                menor o igual a 3</td>
+              <td class="border text-center <% if(sncp <= 3 ){ %> bg-lime-600 <%}else{%>bg-red-600<%}%>"><%- sncp %>
+              </td>
             </tr>
             <tr>
-              <th class="border text-left p-2">Salidas no conformes totales </th>
+              <th class="border text-left p-2">SNC por evaluación</th>
               <td class="border text-left text-center">
+                menor o igual a 3</td>
+              <td
+                class="border text-center <% if(sncTotales <= 3 ){ %> bg-lime-600 <%}else{%>bg-red-600 text-white<%}%>">
+                <%- sncTotales - sncp %>
+              </td>
+            </tr>
+            <tr>
+              <th class="border text-left p-2">Total SNC </th>
+              <td class="border text-center">
                 --- </td>
-              <td class="border text-center" colspan="2"><%- sncTotales %>
+              <td class="text-center border" colspan="2"><%- sncTotales %>
               </td>
             </tr>
           </tbody>
         </table>
-      </div>
-      <div>
-        <h4 class="text-3xl text-center my-2 font-semibold">Promedio: <%- promedio%></h4>
       </div>
       <div class="mt-5 flex">
         <div class="flex gap-2 m-auto">

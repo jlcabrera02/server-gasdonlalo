@@ -35,7 +35,7 @@ const route = Router();
 import com from "./complementos.router";
 
 //Vistas
-// import indexV from "./view.index.router";
+import indexV from "./view.index.router";
 
 //Salidas no conformes
 route.use("/salida-no-conforme", salidaNoConformeRouter);
@@ -69,5 +69,7 @@ route.use("/auth", auth);
 route.use("/com", com);
 //exceles
 route.use("/excel", excel);
+// Vistas
+route.use("/view", indexV);
 
 export default route;

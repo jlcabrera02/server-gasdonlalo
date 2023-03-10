@@ -8,6 +8,7 @@ import rdM from "../models/d.listaRecursosDespachador.model";
 import oyLM from "../models/d.oylIsla.model";
 import sncM from "../models/s.salidaNoConforme.model";
 import formatTiempo from "../assets/formatTiempo";
+import { format } from "mysql2";
 const { tiempoDB, formatMes } = formatTiempo;
 // import view from "../public/view/index.ejs";
 
@@ -34,7 +35,6 @@ controller.index = async (req, res) => {
     //Obtiene cuantas paginas debe tener el empleado
     for (let i = 0; i < ordenar.length; i++) {
       const { fecha_registro, idempleado } = ordenar[i];
-      console.log(hoy, tiempoDB(fecha_registro));
       let paginas = qnas(hoy, tiempoDB(fecha_registro));
       if (hoy.getDate() > 15) paginas += 1;
       ordenar[i].page = paginas;
@@ -82,7 +82,6 @@ controller.empleado = async (req, res) => {
       dia = today.getDate();
       mes = today.getMonth() + 1;
       anio = Number(today.getFullYear());
-      console.log(anio, mes, dia);
       let ulDia = new Date(anio, mes, 0).getDate();
       if (dia > 15) {
         nEvaluaciones.push({
@@ -103,7 +102,6 @@ controller.empleado = async (req, res) => {
       }
     }
 
-    console.log(nEvaluaciones);
     //Array en reversa
     nEvaluaciones.reverse();
 
@@ -156,15 +154,16 @@ controller.empleado = async (req, res) => {
       qna: qna,
       mes: formatMes(fechaI),
       ano: year,
+      departamento: empleado[0].departamento,
       select: pagina + 1,
     };
 
     //Promedio
 
-    let diasDiff = new Date(fechaF).getDate() - new Date(fechaI).getDate() + 1;
+    // let diasDiff = new Date(fechaF).getDate() - new Date(fechaI).getDate() + 1;
 
     ev.mfp = ev.mf > 0 ? 0.0 : 10.0;
-    ev.ckp = fn((ev.ck / diasDiff) * 10);
+    ev.ckp = fn((ev.ck / 12) * 10) > 10 ? 10 : fn((ev.ck / 12) * 10);
     ev.evp = fn((ev.ev / evu.todo) * 10) || 0;
     ev.rdp = fn((ev.rd / rd.todo) * 10) || 0;
     ev.oylp = fn((ev.oyl / oyl.todo) * 10) || 0;
@@ -180,5 +179,202 @@ controller.empleado = async (req, res) => {
     res.render("evempleadoerror");
   }
 };
+
+//Lo mismo que index pero para la interfaz
+controller.evaQnaJson = async (req, res) => {
+  try {
+    const { qna, mes, ano } = req.query;
+    const { idEmpleado } = req.params;
+    const empleado = await empM.findOne(idEmpleado);
+    const hoy = new Date();
+    let qnaD = qna ? qna : hoy.getDate() > 15 ? 2 : 1;
+    let mesD = mes ? mes : hoy.getMonth() + 1;
+    let anoD = ano ? ano : hoy.getFullYear();
+    const { anoA, mesA, qnaA } = calcularQnaAn(
+      qnaD,
+      mesD,
+      anoD,
+      tiempoDB(empleado[0].fecha_registro)
+    );
+
+    const { anoS, mesS, qnaS } = calcularQnaSi(qnaD, mesD, anoD, tiempoDB(hoy));
+    let diasMes = new Date(ano, mes, 0).getDate();
+    let fechaInicio = `${anoD}-${mesD}-${qnaD >= 2 ? "16" : "01"}`;
+    let fechaFinal = `${anoD}-${mesD}-${qnaD < 2 ? "15" : diasMes}`;
+
+    const ev = await findEvaluaciones(
+      fechaInicio,
+      fechaFinal,
+      empleado[0].idempleado,
+      empleado,
+      hoy
+    );
+
+    res.status(200).json({
+      success: true,
+      response: ev,
+      periodoSiguiente: {
+        qna: qnaS,
+        mes: mesS,
+        ano: anoS,
+      },
+      periodoAnterior: {
+        qna: qnaA,
+        mes: mesA,
+        ano: anoA,
+      },
+      periodoConsultado: {
+        inicio: fechaInicio,
+        final: fechaFinal,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+function calcularQnaSi(qna, mes, ano, date) {
+  const limit = new Date(date);
+  let mesLimit = limit.getMonth() + 1,
+    anoLimit = limit.getFullYear(),
+    qnaLimit = limit.getDate() > 15 ? 2 : 1;
+
+  let anoN = Number(ano),
+    mesN = Number(mes),
+    qnaN = Number(qna),
+    qnaS = qnaN <= 1 ? 2 : 1,
+    mesS = qnaS > qnaN ? mesN : mesN + 1 > 12 ? 1 : mesN + 1,
+    anoS = mesN >= 12 ? anoN + 1 : anoN;
+
+  if (mesLimit <= mesS && anoLimit <= anoS && qnaLimit <= qnaS) {
+    return {
+      qnaS: null,
+      mesS: null,
+      anoS: null,
+    };
+  } else {
+    return {
+      qnaS,
+      mesS,
+      anoS,
+    };
+  }
+}
+
+function calcularQnaAn(qna, mes, ano, date) {
+  const limit = new Date(date);
+  let mesLimit = limit.getMonth() + 1,
+    anoLimit = limit.getFullYear(),
+    qnaLimit = limit.getDate() > 15 ? 2 : 1;
+
+  let anoN = Number(ano),
+    mesN = Number(mes),
+    qnaN = Number(qna),
+    qnaA = qnaN <= 1 ? 2 : 1,
+    mesA = qnaA > qnaN ? (mesN - 1 <= 1 ? 12 : mesN - 1) : mesN,
+    anoA = mesN <= 1 ? anoN - 1 : anoN;
+
+  if (mesLimit >= mesA && anoLimit >= anoA && qnaLimit >= qnaA) {
+    return {
+      qnaA: null,
+      mesA: null,
+      anoA: null,
+    };
+  } else {
+    return {
+      qnaA,
+      mesA,
+      anoA,
+    };
+  }
+}
+
+async function findEvaluaciones(fechaI, fechaF, idEmpleado, empleado, hoy) {
+  function qnas(a, b) {
+    let an = new Date(a).getTime();
+    let ne = new Date(b).getTime();
+
+    let diff = an - ne;
+    let dias = diff / (60 * 60 * 24 * 1000);
+    let quincenas = dias / 15;
+    return Math.round(quincenas);
+  }
+
+  let cantidad = qnas(hoy, tiempoDB(empleado[0].fecha_registro));
+
+  const nEvaluaciones = [];
+
+  let dia = new Date().getDate();
+  let mes = new Date().getMonth() + 1;
+  let anio = Number(new Date().getFullYear());
+
+  for (let i = 0; i < cantidad; i++) {
+    let qn = 15 * (i + 1);
+    let today = new Date(new Date().setDate(hoy.getDate() - qn));
+    dia = today.getDate();
+    mes = today.getMonth() + 1;
+    anio = Number(today.getFullYear());
+    let ulDia = new Date(anio, mes, 0).getDate();
+    if (dia > 15) {
+      nEvaluaciones.push({
+        qna: 2,
+        year: anio,
+        month: mes,
+        fechaI: `${anio}-${mes}-01`,
+        fechaF: `${anio}-${mes}-15`,
+      });
+    } else {
+      nEvaluaciones.push({
+        qna: 1,
+        year: anio,
+        month: mes,
+        fechaI: `${anio}-${mes}-16`,
+        fechaF: `${anio}-${mes}-${ulDia}`,
+      });
+    }
+  }
+
+  const mf = await mfM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
+  const ck = await ckBM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
+  const evu = await evUM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
+  const pd = await pdM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
+  const rd = await rdM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
+  const oyl = await oyLM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
+  const snc = await sncM.findXMesXEmpleadoEv([
+    [1, 3, 6, 7, 11],
+    fechaI,
+    fechaF,
+    idEmpleado,
+  ]);
+  const sncTotales = await sncM.findXMesXEmpleadoEv([
+    [0],
+    fechaI,
+    fechaF,
+    idEmpleado,
+  ]);
+
+  const fn = (n) => Number(n.toFixed(2));
+
+  return {
+    mf: mf ? mf.total : 0,
+    ck: ck.total,
+    ev: evu.total,
+    pd: pd ? fn(pd.promedio) : 0,
+    rd: rd.total,
+    oyl: oyl.total,
+    sncOtras: snc.total,
+    sncEvaluacion: snc.total - sncTotales.total,
+    sncTotales: sncTotales.total,
+    nombre: `${empleado[0].nombre} ${empleado[0].apellido_paterno} ${empleado[0].apellido_materno}`,
+    idchecador: empleado[0].idchecador,
+    NumQnasTotales: nEvaluaciones.length,
+    departamento: empleado[0].departamento,
+  };
+}
 
 export default controller;

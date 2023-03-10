@@ -3,8 +3,15 @@ import empleadoM from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
 import fTiempo from "../assets/formatTiempo";
+import respErro from "../respuestas/error.respuestas";
+const { peticionImposible } = respErro;
 const { tiempoDB } = fTiempo;
 const { verificar } = auth;
+
+const validar = (text) => {
+  const validarNoVacio = /^\s*$/g;
+  return validarNoVacio.test(text);
+};
 
 const controller = {};
 
@@ -282,6 +289,14 @@ controller.insert = async (req, res) => {
       idIncumplimiento,
     } = req.body;
 
+    if (
+      validar(accionesCorregir) ||
+      validar(descripcionFalla) ||
+      validar(concesiones)
+    ) {
+      throw peticionImposible("No puedes mandar vacio el elemento");
+    }
+
     const cuerpo = {
       fecha,
       descripcion_falla: descripcionFalla,
@@ -329,6 +344,14 @@ controller.update = async (req, res) => {
       idIncumplimiento,
       // idDepartamento,
     } = req.body;
+
+    if (
+      validar(accionesCorregir) ||
+      validar(descripcionFalla) ||
+      validar(concesiones)
+    ) {
+      throw peticionImposible("No puedes mandar vacio el elemento");
+    }
 
     const viejo = await salidaNoCM.findOne(idSalidaNoConforme);
     const validarViejo = await sncaM.validar(
