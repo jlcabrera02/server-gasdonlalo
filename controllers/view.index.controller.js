@@ -376,11 +376,11 @@ async function findEvaluaciones(fechaI, fechaF, idEmpleado, empleado, hoy) {
     departamento: empleado[0].departamento,
   };
 
-  ev.mfp = ev.mf > 0 ? 0.0 : 10.0;
-  ev.ckp = fn((ev.ck / 12) * 10) > 10 ? 10 : fn((ev.ck / 12) * 10);
-  ev.evp = fn((ev.ev / evu.todo) * 10) || 0;
-  ev.rdp = fn((ev.rd / rd.todo) * 10) || 0;
-  ev.oylp = fn((ev.oyl / oyl.todo) * 10) || 0;
+  // ev.mfp = ev.mf > 0 ? 0.0 : 10.0;
+  ev.ck = fn((ev.ck / 12) * 10) > 10 ? 10 : fn((ev.ck / 12) * 10);
+  ev.ev = fn((ev.ev / evu.todo) * 10) || 0;
+  ev.rd = fn((ev.rd / rd.todo) * 10) || 0;
+  ev.oyl = fn((ev.oyl / oyl.todo) * 10) || 0;
 
   return ev;
 }
