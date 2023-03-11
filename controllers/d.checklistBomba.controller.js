@@ -173,7 +173,6 @@ controller.update = async (req, res) => {
     };
 
     const snca = await sncaM.validar([cuerpo.idempleado, 3, cuerpo.fecha]);
-    console.log(snca);
 
     //Elimina la snc pendiente si todo esta bien
     if (viejo.cumple === 0) {

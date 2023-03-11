@@ -186,7 +186,7 @@ controller.insert = async (req, res) => {
         1,
         idEmpleado,
         fecha,
-        `Le faltaron puntos en orden y limpieza`,
+        `Falta de puntos en orden y limpieza`,
       ]);
     }
 
@@ -209,8 +209,29 @@ controller.update = async (req, res) => {
     let user = verificar(req.headers.authorization, 12);
     if (!user.success) throw user;
     const { idEmpleado, evaluaciones } = req.body;
+    const getIdentificador = await oylM.findOne(evaluaciones[0].idoyl);
+    const viejo = await oylM.findByIdentificador(
+      getIdentificador.identificador
+    );
 
+    const viejoIncorrecto = viejo.some((el) => el.cumple === false);
+
+    const fecha = tiempoDB(viejo[0].fecha);
+    const snca = await sncaM.validar([idEmpleado, 7, fecha]);
     const cuerpo = evaluaciones.map((el) => [el.cumple, el.idoyl, idEmpleado]);
+    const incorrecto = cuerpo.some((el) => el.cumple === 0);
+    if (!viejoIncorrecto && incorrecto) {
+      sncaM.insert([
+        1,
+        idEmpleado,
+        fecha,
+        `Falta de puntos en orden y limpieza`,
+      ]);
+    }
+
+    if (snca.length > 0 && incorrecto) {
+      await sncaM.delete(snca[0].idsncacumuladas);
+    }
 
     let response = await oylM.update(cuerpo);
     res.status(200).json({ success: true, response });
@@ -236,6 +257,7 @@ controller.delete = async (req, res) => {
       1,
       tiempoDB(viejo[0].fecha),
     ]);
+
     if (snca.length > 0) await sncaM.delete(snca[0].idsncacumuladas);
 
     let response = await oylM.delete(identificador);

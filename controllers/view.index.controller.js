@@ -167,11 +167,11 @@ controller.empleado = async (req, res) => {
     ev.evp = fn((ev.ev / evu.todo) * 10) || 0;
     ev.rdp = fn((ev.rd / rd.todo) * 10) || 0;
     ev.oylp = fn((ev.oyl / oyl.todo) * 10) || 0;
-    ev.sncp = ev.snc > 5 ? 0 : fn(Math.abs((ev.snc * 5) / 25 - 1) * 10);
+    // ev.sncp = ev.snc > 5 ? 0 : fn(Math.abs((ev.snc * 5) / 25 - 1) * 10);
 
-    ev.promedio = fn(
+    /* ev.promedio = fn(
       (ev.mfp + ev.ckp + ev.evp + ev.rdp + ev.oylp + ev.sncp + ev.pd) / 7
-    );
+    ); */
 
     res.render("evempleado", ev);
   } catch (error) {
@@ -360,7 +360,7 @@ async function findEvaluaciones(fechaI, fechaF, idEmpleado, empleado, hoy) {
 
   const fn = (n) => Number(n.toFixed(2));
 
-  return {
+  const ev = {
     mf: mf ? mf.total : 0,
     ck: ck.total,
     ev: evu.total,
@@ -375,6 +375,14 @@ async function findEvaluaciones(fechaI, fechaF, idEmpleado, empleado, hoy) {
     NumQnasTotales: nEvaluaciones.length,
     departamento: empleado[0].departamento,
   };
+
+  ev.mfp = ev.mf > 0 ? 0.0 : 10.0;
+  ev.ckp = fn((ev.ck / 12) * 10) > 10 ? 10 : fn((ev.ck / 12) * 10);
+  ev.evp = fn((ev.ev / evu.todo) * 10) || 0;
+  ev.rdp = fn((ev.rd / rd.todo) * 10) || 0;
+  ev.oylp = fn((ev.oyl / oyl.todo) * 10) || 0;
+
+  return ev;
 }
 
 export default controller;

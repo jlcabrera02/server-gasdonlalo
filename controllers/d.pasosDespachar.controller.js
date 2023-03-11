@@ -180,7 +180,12 @@ controller.update = async (req, res) => {
       .includes(false);
 
     if (!viejoIncorrecto && incorrecto) {
-      await sncaM.insert([1, idEmpleado, fecha]);
+      await sncaM.insert([
+        1,
+        idEmpleado,
+        fecha,
+        `No cumplio con algunos pasos`,
+      ]);
     }
 
     if (snca.length > 0 && !incorrecto) {

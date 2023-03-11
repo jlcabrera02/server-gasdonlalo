@@ -227,7 +227,12 @@ controller.update = async (req, res) => {
 
     if (!correcto) {
       if (snca.length === 0) {
-        await sncaM.insert([11, empleado, fecha]);
+        await sncaM.insert([
+          11,
+          empleado,
+          fecha,
+          `No cumplio completamente con el uniforme`,
+        ]);
       }
     } else {
       const SNCvalidar = cuerpo.map((el) => el[0]).includes(0);

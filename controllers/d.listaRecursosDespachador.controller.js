@@ -272,7 +272,12 @@ controller.update = async (req, res) => {
       .includes(false);
 
     if (!viejoIncorrecto && incorrecto) {
-      await sncaM.insert([7, idEmpleado, fecha]);
+      await sncaM.insert([
+        7,
+        idEmpleado,
+        fecha,
+        `Falta de recursos de despacho`,
+      ]);
     }
 
     if (snca.length > 0 && !incorrecto) {

@@ -24,14 +24,14 @@ emp.idempleado = oyl.idempleado AND es.idestacion_servicio = oyl.idestacion_serv
     });
   });
 
-model.findByIdentificador = (identidicador) =>
+model.findByIdentificador = (identificador) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT oyl.*, oylc.cumplimiento, emp.idempleado, emp.idchecador, emp.estatus, emp.nombre, emp.apellido_paterno,
     emp.apellido_materno, es.nombre estacion, incidentes FROM oyl, oyl_cumplimiento oylc, empleado emp, estacion_servicio es
     WHERE oyl.idoyl_cumplimiento = oylc.idoyl_cumplimiento AND
     emp.idempleado = oyl.idempleado AND es.idestacion_servicio = oyl.idestacion_servicio AND oyl.identificador = ?`;
 
-    connection.query(sql, identidicador, (err, res) => {
+    connection.query(sql, identificador, (err, res) => {
       if (err) return reject(errorDB());
       // if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -65,7 +65,16 @@ model.findXMesXEmpleadoEv = (data) =>
     let sql = `SELECT SUM(cumple) total, COUNT(*) todo FROM oyl WHERE fecha BETWEEN ? AND ? AND idempleado = ?`;
 
     connection.query(sql, data, (err, res) => {
-      console.log(data);
+      if (err) return reject(errorDB());
+      if (res) return resolve(res[0]);
+    });
+  });
+
+model.findOne = (id) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM oyl WHERE idoyl = ?`;
+
+    connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
       if (res) return resolve(res[0]);
     });

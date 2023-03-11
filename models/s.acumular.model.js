@@ -55,6 +55,7 @@ model.update = (data) =>
     let sql = "UPDATE sncacumuladas SET ? WHERE idsncacumuladas = ?";
 
     connection.query(sql, data, (err, res) => {
+      console.log(err, data);
       if (err) {
         return reject(errorDB());
       }

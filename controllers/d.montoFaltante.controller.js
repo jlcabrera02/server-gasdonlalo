@@ -225,12 +225,15 @@ controller.update = async (req, res) => {
     const { id } = req.params;
     const { cantidad, fecha, empleado } = req.body;
     const snca = await sncaM.validar([empleado, 6, fecha]);
-    await sncaM.update(
-      {
-        descripcion: `Inconformidad por la cantidad de $${cantidad} pesos`,
-      },
-      snca[0].idsncacumuladas
-    );
+    if (snca.length > 0) {
+      await sncaM.update([
+        {
+          descripcion: `Inconformidad por la cantidad de $${cantidad} pesos`,
+        },
+        snca[0].idsncacumuladas,
+      ]);
+    }
+
     const cuerpo = {
       cantidad: Number(cantidad),
       fecha,
@@ -241,6 +244,7 @@ controller.update = async (req, res) => {
     let response = await montoFaltanteM.update(data);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -256,7 +260,7 @@ controller.delete = async (req, res) => {
     const { id } = req.params;
     const viejo = await montoFaltanteM.findOne(id);
     const snca = await sncaM.validar([viejo.idempleado, 6, viejo.fecha]);
-    await sncaM.delete(snca[0].idsncacumuladas);
+    if (snca.length > 0) await sncaM.delete(snca[0].idsncacumuladas);
     let response = await montoFaltanteM.delete(id);
     res.status(200).json({ success: true, response });
   } catch (err) {
