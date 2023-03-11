@@ -4,6 +4,7 @@ import salidaNoConforme from "../controllers/s.salidaNoConforme.controller";
 const route = router();
 
 route.get("/pendientes/:idDepartamento?", salidaNoConforme.findSNCPorCapturar);
+route.get("/detalleEmpleado/:idChecador", salidaNoConforme.findByEmpleado);
 
 route.get(
   "/inconformidad/:year/:month/:iddepartamento",

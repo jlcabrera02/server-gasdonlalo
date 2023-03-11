@@ -8,7 +8,7 @@ const { peticionImposible } = respErro;
 const { tiempoDB } = fTiempo;
 const { verificar } = auth;
 
-const validar = (text) => {
+const validarText = (text) => {
   const validarNoVacio = /^\s*$/g;
   return validarNoVacio.test(text);
 };
@@ -260,6 +260,34 @@ controller.findSalidasXSemana = async (req, res) => {
   }
 };
 
+controller.findByEmpleado = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 20);
+    if (!user.success) throw user;
+    const { idChecador } = req.params;
+    const empleado = await empleadoM.findByIdChecador(idChecador);
+    const sncs = await salidaNoCM.findByEmpleado(empleado.idempleado);
+    for (let i = 0; i < sncs.length; i++) {
+      const { idempleado_autoriza, concesiones, acciones_corregir } = sncs[i];
+      sncs[i].empleado = empleado;
+      if (!concesiones && !acciones_corregir) {
+        sncs[i].empleadoAutoriza = null;
+      } else {
+        const empleadoAutoriza = await empleadoM.findOne(idempleado_autoriza);
+        sncs[i].empleadoAutoriza = empleadoAutoriza[0];
+      }
+    }
+
+    res.status(200).json({ success: true, response: sncs });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.findOne = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 20);
@@ -290,9 +318,9 @@ controller.insert = async (req, res) => {
     } = req.body;
 
     if (
-      validar(accionesCorregir) ||
-      validar(descripcionFalla) ||
-      validar(concesiones)
+      validarText(accionesCorregir) ||
+      validarText(descripcionFalla) ||
+      validarText(concesiones)
     ) {
       throw peticionImposible("No puedes mandar vacio el elemento");
     }
@@ -331,7 +359,7 @@ controller.insert = async (req, res) => {
 
 controller.update = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization, 21);
+    let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
     const { idSalidaNoConforme } = req.params;
 
@@ -346,9 +374,9 @@ controller.update = async (req, res) => {
     } = req.body;
 
     if (
-      validar(accionesCorregir) ||
-      validar(descripcionFalla) ||
-      validar(concesiones)
+      validarText(accionesCorregir) ||
+      validarText(descripcionFalla) ||
+      validarText(concesiones)
     ) {
       throw peticionImposible("No puedes mandar vacio el elemento");
     }
@@ -382,7 +410,6 @@ controller.update = async (req, res) => {
           validarViejo[0].idincumplimiento !== idIncumplimiento ||
           validarViejo[0].fecha !== fecha
         ) {
-          console.log("cumple");
           await sncaM.update([
             { capturado: 0 },
             validarViejo[0].idsncacumuladas,

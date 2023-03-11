@@ -31,6 +31,18 @@ model.findOne = (idEmpleado) =>
     });
   });
 
+model.findByIdChecador = (idChecador) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND empleado.idchecador = ?";
+
+    connection.query(sql, idChecador, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.findEmpleadosXmesXiddepartamento = (idDepartamento) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT *, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo FROM empleado emp WHERE emp.iddepartamento = ? AND emp.estatus IN (1,2) ORDER BY nombre_completo`;
