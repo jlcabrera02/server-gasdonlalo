@@ -6,7 +6,7 @@ const model = {};
 
 model.find = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT idchecklist_bomba, idempleado_saliente, idempleado, fecha, CASE WHEN SUM(isla_limpia) = COUNT(isla_limpia) AND SUM(aceites_completos) = COUNT(aceites_completos) AND SUM(turno) = COUNT(turno) AND SUM(bomba) = COUNT(bomba) AND SUM(estacion_servicio) = COUNT(estacion_servicio) AND SUM(empleado_entrante) = COUNT(empleado_entrante) THEN TRUE ELSE FALSE END cumple FROM checklist_bomba WHERE idempleado = ? AND fecha = ? GROUP BY idempleado, fecha`;
+    let sql = `SELECT idchecklist_bomba, idempleado_saliente, idempleado, fecha, CASE WHEN SUM(isla_limpia) = COUNT(isla_limpia) AND SUM(aceites_completos) = COUNT(aceites_completos) AND SUM(turno) = COUNT(turno) AND SUM(bomba) = COUNT(bomba) AND SUM(estacion_servicio) = COUNT(estacion_servicio) AND SUM(empleado_entrante) = COUNT(empleado_entrante) AND SUM(empleado_saliente) = COUNT(empleado_saliente) AND SUM(fechac) = COUNT(fechac) THEN TRUE ELSE FALSE END cumple FROM checklist_bomba WHERE idempleado = ? AND fecha = ? GROUP BY idempleado, fecha`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -38,7 +38,7 @@ model.findChecklistXmes = (data) =>
 
 model.findXMesXEmpleadoEv = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT SUM(cumple) total FROM (SELECT idchecklist_bomba, idempleado, fecha, CASE WHEN SUM(isla_limpia) = COUNT(isla_limpia) AND SUM(aceites_completos) = COUNT(aceites_completos) AND SUM(turno) = COUNT(turno) AND SUM(bomba) = COUNT(bomba) AND SUM(estacion_servicio) = COUNT(estacion_servicio) AND SUM(empleado_entrante) = COUNT(empleado_entrante) THEN TRUE ELSE FALSE END cumple FROM checklist_bomba WHERE fecha BETWEEN ? AND ? AND idempleado = ? GROUP BY idempleado, fecha) cks`;
+    let sql = `SELECT SUM(cumple) total FROM (SELECT idchecklist_bomba, idempleado, fecha, CASE WHEN SUM(isla_limpia) = COUNT(isla_limpia) AND SUM(aceites_completos) = COUNT(aceites_completos) AND SUM(turno) = COUNT(turno) AND SUM(bomba) = COUNT(bomba) AND SUM(estacion_servicio) = COUNT(estacion_servicio) AND SUM(empleado_entrante) = COUNT(empleado_entrante) AND SUM(empleado_saliente) = COUNT(empleado_saliente) AND SUM(fechac) = COUNT(fechac) THEN TRUE ELSE FALSE END cumple FROM checklist_bomba WHERE fecha BETWEEN ? AND ? AND idempleado = ? GROUP BY idempleado, fecha) cks`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());

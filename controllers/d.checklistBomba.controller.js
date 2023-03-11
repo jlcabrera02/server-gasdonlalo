@@ -100,6 +100,8 @@ controller.insert = async (req, res) => {
       idEmpleadoSaliente,
       empleadoEntrante,
       turno,
+      fechac,
+      empleadoSaliente,
       idEmpleado,
     } = req.body;
 
@@ -111,6 +113,8 @@ controller.insert = async (req, res) => {
       turno: turno ? turno : false,
       estacion_servicio: estacionServicio ? estacionServicio : false,
       empleado_entrante: empleadoEntrante ? empleadoEntrante : false,
+      fechac: fechac ? fechac : false,
+      empleado_saliente: empleadoSaliente ? empleadoSaliente : false,
       idempleado_saliente: idEmpleadoSaliente,
       idempleado: Number(idEmpleado),
     };
@@ -121,9 +125,11 @@ controller.insert = async (req, res) => {
       !cuerpo.bomba ||
       !cuerpo.turno ||
       !cuerpo.estacion_servicio ||
-      !cuerpo.empleado_entrante
+      !cuerpo.empleado_entrante ||
+      !cuerpo.fechac ||
+      !cuerpo.empleado_saliente
     ) {
-      let data = Object.entries(cuerpo).slice(1, 7);
+      let data = Object.entries(cuerpo).slice(1, 9);
       let incumple = data.filter((el) => el[1] === false);
       let atexto = incumple.map((el) => el[0].replace("_", " ")).join(", ");
       await sncaM.insert([3, idEmpleado, fecha, `No cumple con ${atexto}`]);
@@ -156,7 +162,8 @@ controller.update = async (req, res) => {
       idEmpleadoSaliente,
       empleadoEntrante,
       idEmpleado,
-
+      fechac,
+      empleadoSaliente,
       estacionServicio,
     } = req.body;
 
@@ -168,6 +175,8 @@ controller.update = async (req, res) => {
       turno: turno ? turno : false,
       estacion_servicio: estacionServicio ? estacionServicio : false,
       empleado_entrante: empleadoEntrante ? empleadoEntrante : false,
+      empleado_saliente: empleadoSaliente ? empleadoSaliente : false,
+      fechac: fechac ? fechac : false,
       idempleado_saliente: idEmpleadoSaliente,
       idempleado: Number(idEmpleado),
     };
@@ -182,7 +191,9 @@ controller.update = async (req, res) => {
         cuerpo.bomba &&
         cuerpo.turno &&
         cuerpo.estacion_servicio &&
-        cuerpo.empleado_entrante
+        cuerpo.empleado_entrante &&
+        cuerpo.empleado_saliente &&
+        cuerpo.fechac
       ) {
         if (snca.length > 0) {
           await sncaM.delete(snca[0].idsncacumuladas);
@@ -197,9 +208,11 @@ controller.update = async (req, res) => {
         !cuerpo.bomba ||
         !cuerpo.turno ||
         !cuerpo.estacion_servicio ||
-        cuerpo.empleado_entrante
+        !cuerpo.empleado_entrante ||
+        !cuerpo.empleado_saliente ||
+        !cuerpo.fechac
       ) {
-        let data = Object.entries(cuerpo).slice(1, 7);
+        let data = Object.entries(cuerpo).slice(1, 9);
         let incumple = data.filter((el) => el[1] === false);
         let atexto = incumple.map((el) => el[0].replace("_", " ")).join(", ");
         await sncaM.insert([3, idEmpleado, fecha, `No cumple con ${atexto}`]);

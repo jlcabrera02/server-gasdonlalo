@@ -9,12 +9,12 @@ model.find = (idDepartamento) =>
     let sql;
     if (idDepartamento) {
       sql = mysql.format(
-        "SELECT snc.*, inc.incumplimiento, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM sncacumuladas snc, empleado emp, incumplimiento inc WHERE snc.idempleado = emp.idempleado AND snc.idincumplimiento = inc.idincumplimiento AND snc.capturado = 0 AND emp.iddepartamento = 1 ORDER BY snc.fecha DESC",
+        "SELECT snc.*, inc.incumplimiento, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM sncacumuladas snc, empleado emp, incumplimiento inc WHERE snc.idempleado = emp.idempleado AND snc.idincumplimiento = inc.idincumplimiento AND snc.capturado = 0 AND emp.iddepartamento = 1 ORDER BY snc.fecha DESC, snc.idsncacumuladas DESC",
         idDepartamento
       );
     } else {
       sql = mysql.format(
-        "SELECT snc.*, inc.incumplimiento, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM sncacumuladas snc, empleado emp, incumplimiento inc WHERE snc.idempleado = emp.idempleado AND snc.idincumplimiento = inc.idincumplimiento AND snc.capturado = 0 ORDER BY snc.fecha DESC"
+        "SELECT snc.*, inc.incumplimiento, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM sncacumuladas snc, empleado emp, incumplimiento inc WHERE snc.idempleado = emp.idempleado AND snc.idincumplimiento = inc.idincumplimiento AND snc.capturado = 0 ORDER BY snc.fecha DESC, snc.idsncacumuladas DESC"
       );
     }
 
