@@ -142,9 +142,13 @@ controller.validarTiempoSesion = async (req, res) => {
 
 controller.changePass = async (req, res) => {
   try {
-    const { user, newPassword } = req.body;
+    const { user, newPassword, password } = req.body;
 
-    const cuerpo = [mysql.raw(`MD5('${newPassword}')`), user];
+    const cuerpo = [
+      mysql.raw(`MD5('${newPassword}')`),
+      mysql.raw(`MD5('${password}')`),
+      user,
+    ];
     let response = await auth.changePass(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {

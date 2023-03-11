@@ -127,9 +127,9 @@ model.register = (data) =>
 
 model.changePass = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `UPDATE user SET password = ? WHERE username = ?`;
+    let sql = `UPDATE user SET password = ? WHERE password = ? AND username = ?`;
     connection.query(sql, data, (err, res) => {
-      if (err) return reject(errorDB());
+      if (err) return reject(errorDB("La contraseña no coindice"));
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
