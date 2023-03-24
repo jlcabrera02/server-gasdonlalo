@@ -37,6 +37,9 @@ import com from "./complementos.router";
 //Vistas
 import indexV from "./view.index.router";
 
+//Liquidacion
+import islas from "./l.islas.router"
+
 //Salidas no conformes
 route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/incumplimiento", incumplimientoRouter);
@@ -71,5 +74,7 @@ route.use("/com", com);
 route.use("/excel", excel);
 // Vistas
 route.use("/view", indexV);
+//Lisquidacion
+route.use("/liquidacion", islas);
 
 export default route;

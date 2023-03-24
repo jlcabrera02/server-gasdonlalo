@@ -314,3 +314,39 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 
 INSERT INTO acceso (user, idpermiso) VALUES 
 ("sralcocer", 1);
+
+INSERT INTO gas VALUES ("M", "MAGNA"), ("P", "PREMIUM"), ("D", "DISIEL");
+
+INSERT INTO islas VALUES 
+(null, 1, "I", 1), 
+(null, 1, "D", 1), 
+(null, 2, "I", 1), 
+(null, 2, "D", 1), 
+(null, 3, "I", 1), 
+(null, 3, "D", 1), 
+(null, 1, "I", 2), 
+(null, 1, "D", 2), 
+(null, 2, "I", 2), 
+(null, 2, "D", 2), 
+(null, 3, "I", 2), 
+(null, 3, "D", 2);
+
+INSERT INTO islas_has_gas (id, idisla, idgas, tiene) VALUES
+(null, 1, "M", 1),
+(null, 1, "P", 1),
+(null, 1, "D", 1),
+(null, 2, "M", 1),
+(null, 2, "P", 1),
+(null, 2, "D", 1),
+(null, 3, "M", 1),
+(null, 3, "P", 1),
+(null, 3, "D", 1),
+(null, 4, "M", 1),
+(null, 4, "P", 1),
+(null, 4, "D", 1),
+(null, 5, "M", 1),
+(null, 5, "P", 1),
+(null, 5, "D", 1),
+(null, 6, "M", 1),
+(null, 6, "P", 1),
+(null, 6, "D", 1);

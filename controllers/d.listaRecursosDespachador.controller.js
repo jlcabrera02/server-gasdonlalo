@@ -15,83 +15,31 @@ controller.findListRecursosXmes = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 17);
     if (!user.success) throw user;
-    const { year, month } = req.params;
-    let fecha = `${year}-${month}-01`;
-    const response = await listaReM.findListRecursosXmes(fecha);
-    res.status(200).json({ success: true, response });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
-
-controller.findListRecursosXmesXidEmpleado = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization, 17);
-    if (!user.success) throw user;
-    const { year, month, idEmpleado } = req.params;
+    const { year, month, quincena } = req.params;
     const fecha = `${year}-${month}-01`;
-    const response = [];
-    const quin1 = await listaReM.findListRecursosXmesXidEmpleadoXquincena([
-      idEmpleado,
+    const almacenar = [];
+
+    const puntajeMinimo = await listaReM.findPuntajeMinimo(3);
+    const empleados = await empleado.findEmpleadosXmesXiddepartamento([
       1,
       fecha,
     ]);
-    const quin2 = await listaReM.findListRecursosXmesXidEmpleadoXquincena([
-      idEmpleado,
-      2,
-      fecha,
-    ]);
 
-    if (quin1.length > 0) {
-      response.push({
-        fecha: quin1[0].fecha,
-        evaluaciones: quin1,
-      });
-    } else {
-      response.push({
-        fecha: null,
-        evaluaciones: [],
+    for (let i = 0; i < empleados.length; i++) {
+      let response = await listaReM.findAllXQuicena([
+        fecha,
+        fecha,
+        empleados[i].idempleado,
+        quincena,
+      ]);
+      almacenar.push({
+        idempleado: empleados[i].idempleado,
+        nombre_completo: empleados[i].nombre_completo,
+        puntaje_minimo: puntajeMinimo.puntaje,
+        recursos: response,
       });
     }
-    if (quin2.length > 0) {
-      response.push({
-        fecha: quin2[0].fecha,
-        evaluaciones: quin2,
-      });
-    } else {
-      response.push({
-        fecha: null,
-        evaluaciones: [],
-      });
-    }
-
-    res.status(200).json({ success: true, response });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
-
-controller.findListRecursosXmesXidEmpleadoXquincena = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization, 17);
-    if (!user.success) throw user;
-    const { year, month, idEmpleado, quincena } = req.params;
-    const fecha = `${year}-${month}-01`;
-    const response = await listaReM.findListRecursosXmesXidEmpleadoXquincena([
-      idEmpleado,
-      quincena,
-      fecha,
-    ]);
-    if (response.length < 1) throw sinRegistro();
-
+    res.status(200).json({ success: true, response: almacenar });
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -117,7 +65,7 @@ controller.findAllXQuicena = async (req, res) => {
     ]);
 
     for (let i = 0; i < empleados.length; i++) {
-      const response = await listaReM.findAllXQuicena([
+      let response = await listaReM.findAllXQuicena([
         fecha,
         fecha,
         empleados[i].idempleado,
@@ -132,6 +80,7 @@ controller.findAllXQuicena = async (req, res) => {
     }
     res.status(200).json({ success: true, response: almacenar });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

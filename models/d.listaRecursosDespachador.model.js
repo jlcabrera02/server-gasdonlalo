@@ -31,7 +31,7 @@ model.findOne = (idRecursoDespachador) =>
       if (res) return resolve(res);
     });
   });
-
+/* 
 //Obtiene todas las evaluaciones del empleado por el periodo de tiempo que le asignemos
 model.findListRecursosXmes = (fecha) =>
   new Promise((resolve, reject) => {
@@ -43,10 +43,10 @@ model.findListRecursosXmes = (fecha) =>
       if (res) return resolve(res);
     });
   });
-
+ */
 model.findListRecursosXmesXidEmpleado = (id, fecha) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT rd.idrecurso_despachador, rd.fecha, emp.idempleado, rd.idrecurso, r.recurso, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, rd.evaluacion FROM recurso_despachador rd, empleado emp, puntaje_minimo pm, recurso r WHERE emp.idempleado = rd.idempleado AND rd.idrecurso_minimo = pm.idpuntaje_minimo AND r.idrecurso = rd.idrecurso AND emp.idempleado = ? AND rd.fecha BETWEEN ? AND LAST_DAY(?)`;
+    let sql = `SELECT *, AVG(rd.evaluacion) promedio, COUNT(*) totalEv FROM (SELECT * FROM recurso r, empleado emp) r LEFT JOIN recurso_despachador rd ON rd.idrecurso = r.idrecurso AND rd.idempleado = r.idempleado WHERE r.idempleado = ? AND rd.fehca = ? GROUP BY r.idrecurso`;
 
     connection.query(sql, [id, fecha, fecha], (err, res) => {
       if (err) return reject(errorDB());
@@ -55,19 +55,19 @@ model.findListRecursosXmesXidEmpleado = (id, fecha) =>
     });
   });
 
-model.findListRecursosXmesXidEmpleadoXquincena = (data) =>
+/* model.findListRecursosXmesXidEmpleadoXquincena = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT rd.*, r.recurso, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.nombre, emp.apellido_paterno, apellido_materno FROM (SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM recurso_despachador) AS rd, empleado emp, recurso r WHERE rd.idempleado = emp.idempleado AND r.idrecurso = rd.idrecurso AND rd.idempleado = ? AND rd.quincena = ? AND rd.fecha between ? AND LAST_DAY(?)`;
     connection.query(sql, [...data, data[2]], (err, res) => {
       if (err) return reject(errorDB());
       if (res) return resolve(res);
     });
-  });
+  }); */
 
 model.findAllXQuicena = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT *, SUM(rd.evaluacion) total FROM (SELECT * FROM recurso r, empleado emp) r LEFT JOIN (SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM recurso_despachador WHERE fecha BETWEEN ? AND LAST_DAY(?)) rd ON rd.idrecurso = r.idrecurso AND rd.idempleado = r.idempleado WHERE r.idempleado = ? AND quincena = ? GROUP BY r.idrecurso`;
-    //["2023-01-01", "2023-01-01", idEmpleado, quincena]
+    let sql = `SELECT *, AVG(rd.evaluacion) promedio, COUNT(*) totalEv FROM (SELECT * FROM recurso r, empleado emp) r LEFT JOIN (SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM recurso_despachador WHERE fecha BETWEEN ? AND LAST_DAY(?)) rd ON rd.idrecurso = r.idrecurso AND rd.idempleado = r.idempleado WHERE r.idempleado = ? AND quincena = ? GROUP BY r.idrecurso`;
+    // ["2023-01-01", "2023-01-01", idEmpleado, quincena]
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
       if (res) return resolve(res);
@@ -98,7 +98,7 @@ model.findRecursos = (id) =>
     });
   });
 
-model.validarNoDuplicadoXQuincena = (data) =>
+/* model.validarNoDuplicadoXQuincena = (data) =>
   new Promise((resolve, reject) => {
     let quinceFechaMes = `${tiempoLocal(data.fecha).getFullYear()}-${
       tiempoLocal(data.fecha).getMonth() + 1
@@ -132,7 +132,7 @@ model.validarNoDuplicadoXQuincena = (data) =>
           )
         );
     });
-  });
+  }); */
 
 model.findXTiempoGroup = (data) =>
   new Promise((resolve, reject) => {
@@ -164,6 +164,7 @@ model.findXid = (id) =>
     });
   });
 
+//No borrar porque la utilizo para la boleta quincenal de despachadores
 model.findXMesXEmpleadoEv = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT SUM(evaluacion) total, COUNT(*) todo FROM recurso_despachador WHERE fecha BETWEEN ? AND ? AND idempleado = ?`;
