@@ -107,6 +107,7 @@ model.insert = (data) =>
       "INSERT INTO evaluacion_despachar (fecha, idempleado, idpaso_despachar, evaluacion, identificador) VALUES ?";
 
     connection.query(sql, [data], (err, res) => {
+      console.log(err, res, data);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

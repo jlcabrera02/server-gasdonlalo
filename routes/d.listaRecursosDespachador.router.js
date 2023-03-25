@@ -11,7 +11,10 @@ const route = router();
     "/quincena/:year/:month/:idEmpleado/:quincena",
     listaRecursosDespachador.findListRecursosXmesXidEmpleadoXquincena
     ); */
-route.get("empleados/:year/:month", listaRecursosDespachador.findListRecursosXmes);
+route.get(
+  "/empleados/:year/:month",
+  listaRecursosDespachador.findListRecursosXmes
+);
 route.get(
   "/empleados/:year/:month/:quincena",
   listaRecursosDespachador.findAllXQuicena

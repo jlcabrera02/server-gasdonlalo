@@ -15,7 +15,7 @@ controller.findListRecursosXmes = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 17);
     if (!user.success) throw user;
-    const { year, month, quincena } = req.params;
+    const { year, month } = req.params;
     const fecha = `${year}-${month}-01`;
     const almacenar = [];
 
@@ -26,12 +26,12 @@ controller.findListRecursosXmes = async (req, res) => {
     ]);
 
     for (let i = 0; i < empleados.length; i++) {
-      let response = await listaReM.findAllXQuicena([
+      let response = await listaReM.findAllXMes([
         fecha,
         fecha,
         empleados[i].idempleado,
-        quincena,
       ]);
+
       almacenar.push({
         idempleado: empleados[i].idempleado,
         nombre_completo: empleados[i].nombre_completo,
@@ -40,7 +40,6 @@ controller.findListRecursosXmes = async (req, res) => {
       });
     }
     res.status(200).json({ success: true, response: almacenar });
-    res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });

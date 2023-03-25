@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import fileUpload from "express-fileupload";
 import path from "path";
+import morgan from "morgan";
 import indexV from "./routes/view.index.router";
 
 dotenv.config(); //Inicializo lectura de variables de entorno
@@ -27,6 +28,7 @@ app.use("/", indexV);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
+app.use(morgan("dev"));
 app.use(fileUpload()); //Para subir archivos
 
 app.use("/api", routes);
