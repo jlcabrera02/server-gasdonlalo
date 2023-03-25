@@ -6,7 +6,7 @@ const model = {};
 
 model.findTotalDocumentos = () =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT TA.idempleado, CONCAT(TA.nombre, " ", TA.apellido_paterno, " ", TA.apellido_materno) AS nombre_completo, TA.iddepartamento, TA.estatus, SUM(control_documento.cumple) AS num_documentos FROM (SELECT * FROM empleado, documento WHERE empleado.estatus != 0) AS TA LEFT JOIN control_documento ON TA.idempleado = control_documento.idempleado AND TA.iddocumento = control_documento.iddocumento GROUP BY TA.idempleado ORDER BY TA.idempleado`;
+    let sql = `SELECT TA.idempleado, CONCAT(TA.nombre, " ", TA.apellido_paterno, " ", TA.apellido_materno) AS nombre_completo, TA.iddepartamento, TA.estatus, SUM(control_documento.cumple) AS num_documentos FROM (SELECT * FROM empleado, documento WHERE empleado.estatus = 1 OR empleado.estatus = 2) AS TA LEFT JOIN control_documento ON TA.idempleado = control_documento.idempleado AND TA.iddocumento = control_documento.iddocumento GROUP BY TA.idempleado ORDER BY TA.idempleado`;
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
