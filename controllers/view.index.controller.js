@@ -8,7 +8,6 @@ import rdM from "../models/d.listaRecursosDespachador.model";
 import oyLM from "../models/d.oylIsla.model";
 import sncM from "../models/s.salidaNoConforme.model";
 import formatTiempo from "../assets/formatTiempo";
-import { format } from "mysql2";
 const { tiempoDB, formatMes } = formatTiempo;
 // import view from "../public/view/index.ejs";
 
@@ -38,13 +37,12 @@ controller.index = async (req, res) => {
       let paginas = qnas(hoy, tiempoDB(fecha_registro));
       if (hoy.getDate() > 15) paginas += 1;
       ordenar[i].page = paginas;
-      ordenar[i].link = `/${idempleado}/page/${paginas}`;
+      ordenar[i].link = `/${idempleado}/page/${paginas - 1}`;
     }
 
     const cuerpo = { despachadores: ordenar };
     res.render("index", cuerpo);
   } catch (error) {
-    console.log(error);
     res.render("error");
   }
 };
@@ -125,7 +123,7 @@ controller.empleado = async (req, res) => {
     const rd = await rdM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
     const oyl = await oyLM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
     const snc = await sncM.findXMesXEmpleadoEv([
-      [1, 3, 6, 7, 11],
+      [10, 3, 6, 7, 11, 13],
       fechaI,
       fechaF,
       idEmpleado,
@@ -175,7 +173,7 @@ controller.empleado = async (req, res) => {
 
     res.render("evempleado", ev);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.render("evempleadoerror");
   }
 };
@@ -229,7 +227,6 @@ controller.evaQnaJson = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -346,7 +343,7 @@ async function findEvaluaciones(fechaI, fechaF, idEmpleado, empleado, hoy) {
   const rd = await rdM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
   const oyl = await oyLM.findXMesXEmpleadoEv([fechaI, fechaF, idEmpleado]);
   const snc = await sncM.findXMesXEmpleadoEv([
-    [1, 3, 6, 7, 11],
+    [10, 3, 6, 7, 11, 13],
     fechaI,
     fechaF,
     idEmpleado,
@@ -367,8 +364,8 @@ async function findEvaluaciones(fechaI, fechaF, idEmpleado, empleado, hoy) {
     pd: pd ? fn(pd.promedio) : 0,
     rd: rd.total,
     oyl: oyl.total,
-    sncOtras: snc.total,
-    sncEvaluacion: snc.total - sncTotales.total,
+    sncOtras: Math.abs(snc.total),
+    sncEvaluacion: sncTotales.total - Math.abs(snc.total),
     sncTotales: sncTotales.total,
     nombre: `${empleado[0].nombre} ${empleado[0].apellido_paterno} ${empleado[0].apellido_materno}`,
     idchecador: empleado[0].idchecador,
