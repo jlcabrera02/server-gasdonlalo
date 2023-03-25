@@ -183,7 +183,7 @@ controller.insert = async (req, res) => {
 
     if (buscarInconformidad) {
       await sncaM.insert([
-        1,
+        13,
         idEmpleado,
         fecha,
         `Falta de puntos en orden y limpieza`,
@@ -222,7 +222,7 @@ controller.update = async (req, res) => {
     const incorrecto = cuerpo.some((el) => el.cumple === 0);
     if (!viejoIncorrecto && incorrecto) {
       sncaM.insert([
-        1,
+        13,
         idEmpleado,
         fecha,
         `Falta de puntos en orden y limpieza`,

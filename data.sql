@@ -21,7 +21,8 @@ INSERT INTO incumplimiento VALUES
 (9, "RECOLECCION DE EFECTIVO"),
 (10, "VENTA Y COBRO DE COMBUSTIBLE"),
 (11, "UNIFORME DE DESPACHO"),
-(12, "ACEITES");
+(12, "ACEITES"),
+(13, "LIMPIEZA ISLA");
 
 /* INSERT INTO empleado (idempleado, nombre, apellido_paterno, apellido_materno, iddepartamento) VALUES
 (1,"JOSE MANUEL", "ECHAVARRIA", "LANDERO", 1),

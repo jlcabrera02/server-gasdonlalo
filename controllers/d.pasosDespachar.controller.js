@@ -142,7 +142,12 @@ controller.insert = async (req, res) => {
 
     const incorrecto = cuerpo.map((el) => el[3]).includes(0);
     if (incorrecto) {
-      await sncaM.insert([1, empleado, fecha, `No cumplio con algunos pasos`]);
+      await sncaM.insert([
+        10,
+        empleado,
+        fecha,
+        `No cumplio con algunos pasos en pasos para despachar`,
+      ]);
     }
 
     //await pasosDM.verificar([cuerpo.fecha, cuerpo.idempleado]); //recoleccion efectivo
@@ -181,10 +186,10 @@ controller.update = async (req, res) => {
 
     if (!viejoIncorrecto && incorrecto) {
       await sncaM.insert([
-        1,
+        10,
         idEmpleado,
         fecha,
-        `No cumplio con algunos pasos`,
+        `No cumplio con algunos pasos en pasos para despachar`,
       ]);
     }
 
