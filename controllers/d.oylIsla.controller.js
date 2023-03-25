@@ -181,12 +181,12 @@ controller.insert = async (req, res) => {
 
     let buscarInconformidad = evaluaciones.some((el) => el.cumple === 0);
 
-    if (buscarInconformidad) {
+    if (buscarInconformidad || incidentes) {
       await sncaM.insert([
         13,
         idEmpleado,
         fecha,
-        `Falta de puntos en orden y limpieza`,
+        `Incidentes o falta de puntos en orden y limpieza`,
       ]);
     }
 
@@ -225,7 +225,7 @@ controller.update = async (req, res) => {
         13,
         idEmpleado,
         fecha,
-        `Falta de puntos en orden y limpieza`,
+        `Incidentes o falta de puntos en orden y limpieza`,
       ]);
     }
 
