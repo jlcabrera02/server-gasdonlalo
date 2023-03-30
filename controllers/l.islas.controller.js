@@ -41,6 +41,13 @@ controller.findIslas = async (req, res) => {
       }
     }
 
+    await guardarBitacora([
+      "buscar isla",
+      user.token.data.datos.idempleado,
+      1,
+      null,
+    ]);
+
     res.status(200).json({ success: true, response: gasolinas });
   } catch (err) {
     if (!err.code) {
@@ -58,7 +65,6 @@ controller.insertIslas = async (req, res) => {
     const { numeroIsla, idEstacion } = req.body;
 
     const insertIsla = await islaM.insertIsla(numeroIsla, idEstacion);
-    console.log("adas");
     await islaM.insertGas(insertIsla.insertId);
     await islaM.insertGas(insertIsla.insertId + 1);
 
@@ -71,6 +77,7 @@ controller.insertIslas = async (req, res) => {
 
     res.status(200).json({ success: true, response: insertIsla });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

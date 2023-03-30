@@ -1,4 +1,5 @@
 import montoFaltanteM from "../models/d.montoFaltante.model";
+import { guardarBitacora } from "../models/auditorias";
 import empleadoM from "../models/rh.empleado.model";
 import resErr from "../respuestas/error.respuestas";
 import Decimal from "decimal.js-light";
@@ -10,21 +11,7 @@ const { verificar } = auth;
 const { errorMath, sinRegistro } = resErr;
 
 const controller = {};
-
-controller.find = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization, 2);
-    if (!user.success) throw user;
-    let response = await montoFaltanteM.find();
-    res.status(200).json({ success: true, response });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
+const area = "Montos Faltantes";
 
 controller.findXSemana = async (req, res) => {
   try {
@@ -84,6 +71,8 @@ controller.findXSemana = async (req, res) => {
           ),
       });
     }
+    await guardarBitacora([area, user.token.data.datos.idempleado, 1, null]);
+
     res.status(200).json({
       success: true,
       response: acumulador,
@@ -92,23 +81,6 @@ controller.findXSemana = async (req, res) => {
         .map((el) => el.total)
         .reduce((a, b) => new Decimal(Number(a)).plus(Number(b)).toNumber(), 0),
     });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
-
-controller.findCantidadXMes = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization, 2);
-    if (!user.success) throw user;
-    const { year, month } = req.params;
-    let fecha = `${year}-${month}-01`;
-    let response = await montoFaltanteM.findCantidadXMes(fecha);
-    res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
@@ -175,6 +147,14 @@ controller.findXTiempo = async (req, res) => {
     }
     const registros = response.filter((el) => el.nombre);
     if (registros.length <= 0) throw sinRegistro();
+
+    await guardarBitacora([
+      "Montos Faltantes Historial",
+      user.token.data.datos.idempleado,
+      1,
+      null,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -207,7 +187,16 @@ controller.insert = async (req, res) => {
       fecha,
       `Inconformidad por la cantidad de $${cantidad} pesos`,
     ]);
+
     let response = await montoFaltanteM.insert(cuerpo);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -242,6 +231,9 @@ controller.update = async (req, res) => {
     const data = [cuerpo, id];
 
     let response = await montoFaltanteM.update(data);
+
+    await guardarBitacora([area, user.token.data.datos.idempleado, 3, id]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
@@ -262,6 +254,7 @@ controller.delete = async (req, res) => {
     const snca = await sncaM.validar([viejo.idempleado, 6, viejo.fecha]);
     if (snca.length > 0) await sncaM.delete(snca[0].idsncacumuladas);
     let response = await montoFaltanteM.delete(id);
+    await guardarBitacora([area, user.token.data.datos.idempleado, 4, id]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

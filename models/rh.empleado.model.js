@@ -37,8 +37,9 @@ model.findByIdChecador = (idChecador) =>
       "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND empleado.idchecador = ?";
 
     connection.query(sql, idChecador, (err, res) => {
+      console.log(res);
       if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
+      // if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res[0]);
     });
   });

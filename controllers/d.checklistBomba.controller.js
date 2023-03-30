@@ -1,10 +1,12 @@
 import checklistBombaM from "../models/d.checklistBomba.model";
 import empM from "../models/rh.empleado.model";
+import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
 const { verificar } = auth;
 
 const controller = {};
+const area = "Checklist Bomba";
 
 controller.find = async (req, res) => {
   try {
@@ -41,6 +43,13 @@ controller.find = async (req, res) => {
       almacenar.push({ empleado: empleado[i], fechas: almacenarXempleado });
     }
 
+    await guardarBitacora([
+      `${area} Empleado`,
+      user.token.data.datos.idempleado,
+      1,
+      null,
+    ]);
+
     res.status(200).json({ success: true, response: almacenar });
   } catch (err) {
     if (!err.code) {
@@ -70,6 +79,8 @@ controller.findChecklistXmes = async (req, res) => {
       const saliente = await empM.findOne(response[i].idempleado_saliente);
       response[i].empSaliente = saliente[0];
     }
+
+    await guardarBitacora([area, user.token.data.datos.idempleado, 1, null]);
 
     res.status(200).json({
       success: true,

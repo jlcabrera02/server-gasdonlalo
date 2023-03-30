@@ -318,19 +318,19 @@ INSERT INTO acceso (user, idpermiso) VALUES
 
 INSERT INTO gas VALUES ("M", "MAGNA"), ("P", "PREMIUM"), ("D", "DISIEL");
 
-INSERT INTO islas VALUES 
-(null, 1, "I", 1), 
-(null, 1, "D", 1), 
-(null, 2, "I", 1), 
-(null, 2, "D", 1), 
-(null, 3, "I", 1), 
-(null, 3, "D", 1), 
-(null, 1, "I", 2), 
-(null, 1, "D", 2), 
-(null, 2, "I", 2), 
-(null, 2, "D", 2), 
-(null, 3, "I", 2), 
-(null, 3, "D", 2);
+INSERT INTO islas (idisla, nisla, direccion, idestacion_servicio, habilitada)VALUES 
+(null, 1, "I", 1, 1), 
+(null, 1, "D", 1, 1), 
+(null, 2, "I", 1, 1), 
+(null, 2, "D", 1, 1), 
+(null, 3, "I", 1, 1), 
+(null, 3, "D", 1, 1), 
+(null, 1, "I", 2, 1), 
+(null, 1, "D", 2, 1), 
+(null, 2, "I", 2, 1), 
+(null, 2, "D", 2, 1), 
+(null, 3, "I", 2, 1), 
+(null, 3, "D", 2, 1);
 
 INSERT INTO islas_has_gas (id, idisla, idgas, tiene) VALUES
 (null, 1, "M", 1),
@@ -350,4 +350,22 @@ INSERT INTO islas_has_gas (id, idisla, idgas, tiene) VALUES
 (null, 5, "D", 1),
 (null, 6, "M", 1),
 (null, 6, "P", 1),
-(null, 6, "D", 1);
+(null, 6, "D", 1),
+(null, 7, "M", 1),
+(null, 7, "P", 1),
+(null, 7, "D", 1),
+(null, 8, "M", 1),
+(null, 8, "P", 1),
+(null, 8, "D", 1),
+(null, 9, "M", 1),
+(null, 9, "P", 1),
+(null, 9, "D", 1),
+(null, 10, "M", 1),
+(null, 10, "P", 1),
+(null, 10, "D", 1),
+(null, 11, "M", 1),
+(null, 11, "P", 1),
+(null, 11, "D", 1),
+(null, 12, "M", 1),
+(null, 12, "P", 1),
+(null, 12, "D", 1);

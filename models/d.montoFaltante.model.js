@@ -5,18 +5,6 @@ const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
-model.find = () =>
-  new Promise((resolve, reject) => {
-    let sql =
-      'SELECT CONCAT(em.nombre, " ", em.apellido_paterno, " ", em.apellido_materno) as nombre_completo, mf.* FROM monto_faltante as mf, empleado as em WHERE mf.idempleado = em.idempleado';
-
-    connection.query(sql, (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
-      if (res) return resolve(res);
-    });
-  });
-
 //Me obtiene todo los empleados que han tenido un monto faltante del mes --Importante para la obtencion de los montos faltantes por semanas
 model.findEmpleadosXmes = (fecha) =>
   new Promise((resolve, reject) => {
@@ -36,21 +24,6 @@ model.findXSemana = (data) =>
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return resolve(false); //Este false no se debe tocar porque es clave para la funcion
-      if (res) return resolve(res);
-    });
-  });
-
-model.findCantidadXMes = (fecha) =>
-  new Promise((resolve, reject) => {
-    let sql = `SELECT SUM(cantidad) AS total_mes
-FROM
-    monto_faltante
-WHERE
-    fecha BETWEEN ? AND LAST_DAY(?)`;
-
-    connection.query(sql, [fecha, fecha], (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
     });
   });
@@ -160,6 +133,7 @@ model.update = (data) =>
     let sql = "UPDATE monto_faltante SET ? WHERE idmonto_faltante = ?";
 
     connection.query(sql, data, (err, res) => {
+      console.log(res);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

@@ -3,12 +3,96 @@ import auth from "../models/auth.model";
 import evUniM from "../models/d.evaluacionUniforme.model";
 import pasosDM from "../models/d.pasosDespachar.model";
 import empM from "../models/rh.empleado.model";
-import formatTiempo from "../assets/formatTiempo";
 import path from "path";
+import XLSX from "xlsx";
+import formatTiempo from "../assets/formatTiempo";
 const { formatMes } = formatTiempo;
 const { verificar } = auth;
 
 const controller = {};
+
+const guardarArchivo = (req) =>
+  new Promise((resolve, rejects) => {
+    const archivo = req.files.dataReloj;
+
+    const pathSave = path.join(
+      __dirname,
+      "../public/excel/",
+      "relojChecador.xls"
+    );
+
+    archivo.mv(pathSave, (err) => {
+      if (err) {
+        rejects(err);
+      } else {
+        resolve(true);
+      }
+    });
+  });
+
+controller.relojChecador = async (req, res) => {
+  try {
+    await guardarArchivo(req)
+      .then((res) => console.log(res))
+      .catch((err) => {
+        throw { code: 400, msg: "No se cargo bien el archivo", sucess: false };
+      });
+
+    let ap = path.join(__dirname, "../public/excel/relojChecador.xls");
+    const excelJson = XLSX.readFile(ap);
+
+    let nhoja = excelJson.SheetNames;
+    const datos = XLSX.utils.sheet_to_json(excelJson.Sheets[nhoja[0]]);
+
+    const response = datos.filter((el) => el.Estado === "Entrada");
+    const mapear = [];
+    for (let i = 0; i < response.length; i++) {
+      const el = response[i];
+      const fecha = el.Tiempo.match(/\d\d\/\d\d\/\d\d\d\d/);
+      const tiempo = el.Tiempo.match(/\d\d\:\d\d\:\d\d/)[0].split(":");
+      const formatoPm = el.Tiempo.match(/\w\. m\./)[0].includes("p");
+      const [h, m, s] = tiempo;
+      const fechaParse = fecha[0].split("/");
+      const [dia, mes, ano] = fechaParse;
+      const idChecador = Number(el["Número"]);
+
+      const empleado = await empM.findByIdChecador(idChecador);
+
+      const fechaParce = new Date(ano, mes - 1, dia, h, m, s);
+      let fechaTiempo = formatTiempo.tiempoLocal(fechaParce);
+      if (!formatoPm) fechaTiempo.setHours(fechaTiempo.getHours() - 12);
+      mapear.push({
+        tiempoExcel: el.Tiempo,
+        nombreCompleto: el.Nombre,
+        fechaTiempo,
+        idChecador,
+        empleado,
+        estado: el.Estado,
+      });
+    }
+    /* const mapear = response.map((el) => {
+      const fecha = el.Tiempo.match(/\d\d\/\d\d\/\d\d\d\d/);
+      const tiempo = el.Tiempo.match(/\d\d\:\d\d\:\d\d/)[0].split(":");
+      const formatoPm = el.Tiempo.match(/\w\. m\./)[0].includes("p");
+      const [h, m, s] = tiempo;
+      const fechaParse = fecha[0].split("/");
+      const [dia, mes, ano] = fechaParse;
+
+      const fechaParce = new Date(ano, mes - 1, dia, h, m, s);
+      let fechaTiempo = formatTiempo.tiempoLocal(fechaParce);
+      if (!formatoPm) fechaTiempo.setHours(fechaTiempo.getHours() - 12);
+      return { ...el, fechaTiempo, idEmpleado: Number(el["Número"]) };
+    }); */
+
+    res.status(200).json(mapear);
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 controller.createEvUniforme = async (req, res) => {
   try {
