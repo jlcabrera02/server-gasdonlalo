@@ -1,6 +1,7 @@
 import ceM from "../models/rh.capturaEntradas.model";
 import tp from "../assets/formatTiempo";
 import auth from "../models/auth.model";
+import empM from "../models/rh.empleado.model";
 import sncaM from "../models/s.acumular.model";
 const { verificar } = auth;
 const { tiempoDB, transformMinute, diff } = tp;
@@ -44,25 +45,29 @@ controller.findRetardosXsemanas = async (req, res) => {
     const { dateStart, dateEnd } = req.body;
     const cuerpo = [Number(idEmpleado), dateStart, dateEnd];
 
-    let response = await ceM.findRetardosXsemanas(cuerpo);
+    const empleado = await empM.findOne(idEmpleado);
+    const entradas = await ceM.findRetardosXsemanas(cuerpo);
+    // findTurno;
 
-    response = response.map((el) => {
-      if (el.hora_entrada) {
-        const minutosDiff =
-          diff(tiempoDB(el.fecha), el.hora_anticipo) -
-          diff(tiempoDB(el.fecha), el.hora_entrada);
-        return {
-          ...el,
-          minutosRetardos:
-            minutosDiff > 0 ? "00:00" : transformMinute(minutosDiff),
-        };
-      } else {
-        return {
-          ...el,
-          minutosRetardos: null,
-        };
+    const response = [];
+    for (let i = 0; i < entradas.length; i++) {
+      // let temp = {};
+      const rec = entradas[i];
+      let temp = { ...rec, empleado: empleado[0] };
+      if (temp.idtipo_falta) {
+        let tipoFalta = await ceM.findFaltas(temp.idtipo_falta);
+        temp = { ...temp, tipo_falta: tipoFalta[0] };
       }
-    });
+
+      if (temp.idturno) {
+        let turno = await ceM.findTurno(temp.idturno);
+        temp = { ...temp, turno: turno[0].turno };
+      } else {
+        temp = { ...temp, turno: null };
+      }
+
+      response.push(temp);
+    }
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -89,6 +94,7 @@ controller.findFalta = async (req, res) => {
   }
 };
 
+//Saca una relacion de semanas de las que obtiene el mes
 controller.semanasXmes = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
@@ -156,18 +162,15 @@ controller.insert = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
     if (!user.success) throw user;
-    const { idEmpleado, horaEntrada, fecha, idTurno, idTipoFalta } = req.body;
+    const { idEmpleado, horaEntrada, fecha, idTurno } = req.body;
     const cuerpo = {
       idempleado: Number(idEmpleado),
       hora_entrada: horaEntrada,
       fecha,
       idturno: Number(idTurno) || 1,
-      idtipo_falta: Number(idTipoFalta),
     };
 
-    if (!idTipoFalta) cuerpo.idtipo_falta = 1;
-
-    if (cuerpo.idtipo_falta === 4) {
+    /* f (cuerpo.idtipo_falta === 4) {
       await sncaM.insert([8, cuerpo.idempleado, fecha]);
     }
 
@@ -177,21 +180,21 @@ controller.insert = async (req, res) => {
 
     if (cuerpo.idtipo_falta === 7) {
       await sncaM.insert([4, cuerpo.idempleado, fecha]);
-    }
+    } */
 
     await ceM.validarDuplicados([cuerpo.idempleado, fecha, cuerpo.idturno]); // Validar existencia
 
-    /* const horaAnticipo = await ceM.horaAnticipo(cuerpo.idturno);
+    const horaAnticipo = await ceM.horaAnticipo(cuerpo.idturno);
     let minutosDiff = diff(fecha, horaAnticipo) - diff(fecha, horaEntrada);
-    minutosDiff > 0
-      ? (cuerpo.idtipo_falta = 1)
-      : (cuerpo.idtipo_falta = cuerpo.idtipo_falta); */
+    const minutosRetardos =
+      minutosDiff > 0 ? "00:00" : transformMinute(minutosDiff);
+
+    cuerpo["minutos_retardos"] = minutosRetardos;
 
     const response = await ceM.insert(cuerpo);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    // console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -200,13 +203,60 @@ controller.insert = async (req, res) => {
   }
 };
 
+controller.insertDescanso = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { fecha, idEmpleado } = req.body;
+    const cuerpo = {
+      idempleado: idEmpleado,
+      fecha,
+      idtipo_falta: 3,
+    };
+    const response = await ceM.insert(cuerpo);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+/* 
+ontroller.insertInconformidad = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { fecha, idEmpleado, inconformidad } = req.body;
+    const cuerpo = {
+      idempleado: idEmpleado,
+      fecha,
+    };
+    const response = await ceM.insert(cuerpo);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+}; */
+
 controller.update = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
     if (!user.success) throw user;
-    const { idempleado, idcontrolDocumento } = req.body;
+    const { idCaptura, idTipoFalta, minutosR } = req.body;
 
-    const cuerpo = [idcontrolDocumento, idempleado];
+    const cuerpo = [
+      {
+        idtipo_falta: idTipoFalta,
+      },
+      idCaptura,
+    ];
+    if (minutosR) cuerpo[0]["minutos_retardos"] = minutosR;
     let response = await ceM.update(cuerpo);
     res.status(200).json({ success: true, response });
   } catch (err) {

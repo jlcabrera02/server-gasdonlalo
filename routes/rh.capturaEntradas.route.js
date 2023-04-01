@@ -12,7 +12,8 @@ route.get("/faltas", se.findFalta);
 route.get("/semanas/:year/:month/", se.semanasXmes);
 route.post("/buscar-capturas/:idEmpleado", se.findRetardosXsemanas);
 route.post("/captura", se.insert);
-// route.put("/control/:idSolicitud", se.update);
+route.post("/descanso", se.insertDescanso);
+route.put("/editar", se.update);
 // route.delete("/:id", bomba.delete);
 
 export default route;

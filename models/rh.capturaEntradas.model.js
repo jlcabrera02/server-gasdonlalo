@@ -15,13 +15,38 @@ model.findEntradasXidEmpleadoXMes = (id, fecha) =>
     });
   });
 
+//Funcion principal de reportes
 model.findRetardosXsemanas = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT ce.*, t.hora_anticipo, t.turno, emp.nombre, emp.apellido_paterno, emp.apellido_materno, tp.tipo, tp.color, tp.inconforme FROM captura_entrada ce, turno t, empleado emp, tipo_falta tp WHERE ce.idturno = t.idturno AND emp.idempleado = ce.idempleado AND ce.idtipo_falta = tp.idtipo_falta AND ce.idempleado = ? AND ce.fecha BETWEEN ? AND ? ORDER BY ce.fecha`;
+    let sql = `SELECT ce.* FROM captura_entrada ce WHERE ce.idempleado = ? AND  ce.fecha BETWEEN ? AND ? ORDER BY ce.fecha`;
 
     connection.query(sql, data, (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findTurno = (idturno) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM turno WHERE idturno = ?`;
+
+    connection.query(sql, idturno, (err, res) => {
+      console.log(err);
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findFaltas = async (idFalta) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM tipo_falta WHERE idtipo_falta = ?`;
+
+    connection.query(sql, idFalta, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro("No se encontro faltas"));
       if (res) return resolve(res);
     });
   });
@@ -35,7 +60,9 @@ model.validarDuplicados = (data) =>
       if (res.length < 1) return resolve(false);
       if (res)
         return reject(
-          datosExistentes("Ya se capturo entrada para el empleado")
+          datosExistentes(
+            "Ya se capturo entrada para el empleado con la misma fecha y mismo turno"
+          )
         );
     });
   });
@@ -75,6 +102,18 @@ model.insert = (data) =>
   });
 
 model.update = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = "UPDATE captura_entrada SET ? WHERE idcaptura_entrada = ?";
+
+    connection.query(sql, data, (err, res) => {
+      console.log(err);
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
+model.delete = (data) =>
   new Promise((resolve, reject) => {
     let sql =
       "DELETE FROM captura_entrada WHERE iddocumento = ? AND idempleado = ?";
