@@ -40,6 +40,18 @@ model.findTurno = (idturno) =>
     });
   });
 
+model.findTurnos = (idturno) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM turno`;
+
+    connection.query(sql, idturno, (err, res) => {
+      console.log(err);
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.findFaltas = async (idFalta) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT * FROM tipo_falta WHERE idtipo_falta = ?`;
@@ -112,12 +124,46 @@ model.update = (data) =>
     });
   });
 
-model.delete = (data) =>
+model.insertTurnos = (data) =>
   new Promise((resolve, reject) => {
     let sql =
-      "DELETE FROM captura_entrada WHERE iddocumento = ? AND idempleado = ?";
+      "INSERT INTO turno (turno, hora_anticipo, hora_empiezo, hora_termino) VALUES (?,?,?,?)";
 
     connection.query(sql, data, (err, res) => {
+      console.log(err);
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
+model.updateTurnos = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = "UPDATE turno SET ? WHERE idturno = ?";
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
+model.deleteTurno = (idTurno) =>
+  new Promise((resolve, reject) => {
+    let sql = "DELETE FROM turno WHERE idturno = ?";
+
+    connection.query(sql, idTurno, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
+model.delete = (idCaptura) =>
+  new Promise((resolve, reject) => {
+    let sql = "DELETE FROM captura_entrada WHERE idcaptura_entrada = ?";
+
+    connection.query(sql, idCaptura, (err, res) => {
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

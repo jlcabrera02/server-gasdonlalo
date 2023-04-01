@@ -2,7 +2,7 @@ import ceM from "../models/rh.capturaEntradas.model";
 import tp from "../assets/formatTiempo";
 import auth from "../models/auth.model";
 import empM from "../models/rh.empleado.model";
-import sncaM from "../models/s.acumular.model";
+// import sncaM from "../models/s.acumular.model";
 const { verificar } = auth;
 const { tiempoDB, transformMinute, diff } = tp;
 
@@ -94,6 +94,21 @@ controller.findFalta = async (req, res) => {
   }
 };
 
+controller.findTurnos = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const response = await ceM.findTurnos();
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 //Saca una relacion de semanas de las que obtiene el mes
 controller.semanasXmes = async (req, res) => {
   try {
@@ -170,18 +185,6 @@ controller.insert = async (req, res) => {
       idturno: Number(idTurno) || 1,
     };
 
-    /* f (cuerpo.idtipo_falta === 4) {
-      await sncaM.insert([8, cuerpo.idempleado, fecha]);
-    }
-
-    if (cuerpo.idtipo_falta === 5) {
-      await sncaM.insert([2, cuerpo.idempleado, fecha]);
-    }
-
-    if (cuerpo.idtipo_falta === 7) {
-      await sncaM.insert([4, cuerpo.idempleado, fecha]);
-    } */
-
     await ceM.validarDuplicados([cuerpo.idempleado, fecha, cuerpo.idturno]); // Validar existencia
 
     const horaAnticipo = await ceM.horaAnticipo(cuerpo.idturno);
@@ -223,17 +226,17 @@ controller.insertDescanso = async (req, res) => {
     }
   }
 };
-/* 
-ontroller.insertInconformidad = async (req, res) => {
+
+controller.insertTurno = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
     if (!user.success) throw user;
-    const { fecha, idEmpleado, inconformidad } = req.body;
-    const cuerpo = {
-      idempleado: idEmpleado,
-      fecha,
-    };
-    const response = await ceM.insert(cuerpo);
+    const { turno, hora_empiezo, hora_termino, hora_anticipo } = req.body;
+
+    const cuerpo = [turno, hora_empiezo, hora_termino, hora_anticipo];
+
+    let response = await ceM.insertTurnos(cuerpo);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -242,7 +245,35 @@ ontroller.insertInconformidad = async (req, res) => {
       res.status(err.code).json(err);
     }
   }
-}; */
+};
+
+controller.updateTurno = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { idTurno, turno, hora_empiezo, hora_termino, hora_anticipo } =
+      req.body;
+
+    const cuerpo = [
+      {
+        turno,
+        hora_empiezo,
+        hora_termino,
+        hora_anticipo,
+      },
+      idTurno,
+    ];
+
+    let response = await ceM.updateTurnos(cuerpo);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 controller.update = async (req, res) => {
   try {
@@ -258,6 +289,38 @@ controller.update = async (req, res) => {
     ];
     if (minutosR) cuerpo[0]["minutos_retardos"] = minutosR;
     let response = await ceM.update(cuerpo);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.deleteTurno = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { idTurno } = req.params;
+    let response = await ceM.deleteTurno(idTurno);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.delete = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { idCaptura } = req.params;
+    let response = await ceM.delete(idCaptura);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

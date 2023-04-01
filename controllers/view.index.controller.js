@@ -34,8 +34,8 @@ controller.index = async (req, res) => {
     //Obtiene cuantas paginas debe tener el empleado
     for (let i = 0; i < ordenar.length; i++) {
       const { fecha_registro, idempleado } = ordenar[i];
-      let paginas = qnas(hoy, tiempoDB(fecha_registro));
-      if (hoy.getDate() > 15) paginas += 1;
+      let paginas = qnas(hoy, tiempoDB(fecha_registro)) + 1;
+      // if (hoy.getDate() > 15) paginas += 1;
       ordenar[i].page = paginas;
       ordenar[i].link = `/${idempleado}/page/${paginas - 1}`;
     }
