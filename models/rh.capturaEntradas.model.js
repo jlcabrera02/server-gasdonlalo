@@ -106,7 +106,6 @@ model.update = (data) =>
     let sql = "UPDATE captura_entrada SET ? WHERE idcaptura_entrada = ?";
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
