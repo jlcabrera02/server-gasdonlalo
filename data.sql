@@ -180,26 +180,18 @@ INSERT INTO puntaje_minimo VALUES
 (4,'concurso_madrugador', 240);
 
 INSERT INTO recurso VALUES
-(1,'Libreta'),
-(2,'Pluma'),
-(3,'Engrapadora'),
+(1,'Plumón detector de billetes falsos'),
+(2,'Tabla porta papeles'),
+(3,'Caja de metal para monedas y documentos'),
 (4,'Tabla portapapeles'),
-(5,'Plumon detector'),
-(6,'Caja de metal'),
-(7,'Calculadora'),
-(8,'Sobre de plastico'),
-(9,'Hoja liquidacion'),
-(10,'Sobres de recoleccion'),
-(11,'Gafete'),
-(12,'Limpia parabrisas'),
-(13,'Bolsa de cincho'),
-(14,'Franela'),
-(15,'Jabon'),
-(16,'Juego de uniforme'),
-(17,'impermeable'),
-(18,'Par de botas'),
-(19,'Desodorante'),
-(20,'Candado');
+(5,'Caja de metal para monedas y documentos'),
+(6,'Sobre de plástico'),
+(7,'Hoja de liquidacíon'),
+(8,'25 Sobres para recolección parcial'),
+(9,'Gafete'),
+(10,'Cartera para vales'),
+(11,'2 juegos de uniformes'),
+(12,'Impermeable');
 
 INSERT INTO mantenimiento VALUES 
 (1, "Reparaciones"),
