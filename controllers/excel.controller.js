@@ -70,21 +70,10 @@ controller.relojChecador = async (req, res) => {
         estado: el.Estado,
       });
     }
-    /* const mapear = response.map((el) => {
-      const fecha = el.Tiempo.match(/\d\d\/\d\d\/\d\d\d\d/);
-      const tiempo = el.Tiempo.match(/\d\d\:\d\d\:\d\d/)[0].split(":");
-      const formatoPm = el.Tiempo.match(/\w\. m\./)[0].includes("p");
-      const [h, m, s] = tiempo;
-      const fechaParse = fecha[0].split("/");
-      const [dia, mes, ano] = fechaParse;
 
-      const fechaParce = new Date(ano, mes - 1, dia, h, m, s);
-      let fechaTiempo = formatTiempo.tiempoLocal(fechaParce);
-      if (!formatoPm) fechaTiempo.setHours(fechaTiempo.getHours() - 12);
-      return { ...el, fechaTiempo, idEmpleado: Number(el["Número"]) };
-    }); */
+    let nuevo = mapear.map((el, i) => ({ ...el, index: i }));
 
-    res.status(200).json(mapear);
+    res.status(200).json(nuevo);
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
