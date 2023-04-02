@@ -8,7 +8,8 @@ export const guardarBitacora = async (data) =>
     //[peticion, idempleado, accion, idaffectado]
 
     connection.query(sql, data, (err, res) => {
-      if (err) return reject(err);
-      if (res) return resolve(res);
+      return { msg: "bitacora" };
+      // if (err) return reject(err);
+      // if (res) return resolve(res);
     });
   });

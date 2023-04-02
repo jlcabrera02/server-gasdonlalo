@@ -71,7 +71,7 @@ controller.findXSemana = async (req, res) => {
           ),
       });
     }
-    await guardarBitacora([area, user.token.data.datos.idempleado, 1, null]);
+    // await guardarBitacora([area, user.token.data.datos.idempleado, 1, null]);
 
     res.status(200).json({
       success: true,
@@ -148,12 +148,12 @@ controller.findXTiempo = async (req, res) => {
     const registros = response.filter((el) => el.nombre);
     if (registros.length <= 0) throw sinRegistro();
 
-    await guardarBitacora([
-      "Montos Faltantes Historial",
-      user.token.data.datos.idempleado,
-      1,
-      null,
-    ]);
+    // await guardarBitacora([
+    //   "Montos Faltantes Historial",
+    //   user.token.data.datos.idempleado,
+    //   1,
+    //   null,
+    // ]);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
