@@ -1,9 +1,11 @@
 import departamentoM from "../models/rh.departamento.model";
+import { guardarBitacora } from "../models/auditorias";
 import mayusxPalabra from "./formatearText.controller";
 import auth from "../models/auth.model";
 const { verificar } = auth;
 
 const controller = {};
+const area = "Departamentos";
 
 controller.find = async (req, res) => {
   try {
@@ -26,7 +28,13 @@ controller.insert = async (req, res) => {
     if (!user.success) throw user;
     const departamento = mayusxPalabra(req.body.departamento);
     let response = await departamentoM.insert(departamento);
-    res.status(200).json({ success: true });
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
+    res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
@@ -44,7 +52,8 @@ controller.update = async (req, res) => {
     const departamento = mayusxPalabra(req.body.departamento);
     const data = [departamento, id];
     let response = await departamentoM.update(data);
-    res.status(200).json({ success: true });
+    await guardarBitacora([area, user.token.data.datos.idempleado, 3, id]);
+    res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
@@ -60,6 +69,7 @@ controller.delete = async (req, res) => {
     if (!user.success) throw user;
     const { id } = req.params;
     let response = await departamentoM.delete(id);
+    await guardarBitacora([area, user.token.data.datos.idempleado, 4, id]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

@@ -6,7 +6,7 @@ const model = {};
 
 model.find = () =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM departamento";
+    let sql = "SELECT * FROM departamento WHERE iddepartamento > 0";
 
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());

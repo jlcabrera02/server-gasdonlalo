@@ -1,9 +1,11 @@
 import empleadoM from "../models/rh.empleado.model";
+import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 const { verificar } = auth;
 import { mayus } from "./formatearText.controller";
 
 const controller = {};
+const area = "Empleados";
 
 controller.find = async (req, res) => {
   try {
@@ -52,7 +54,14 @@ controller.insert = async (req, res) => {
     };
 
     let response = await empleadoM.insert(cuerpo);
-    console.log(response);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -94,6 +103,13 @@ controller.update = async (req, res) => {
 
     const response = await empleadoM.update(cuerpo, idEmpleado);
 
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      3,
+      idEmpleado,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
@@ -116,6 +132,13 @@ controller.updateFechaRegistro = async (req, res) => {
 
     const response = await empleadoM.update(cuerpo, idEmpleado);
 
+    await guardarBitacora([
+      "Fecha Registro Empleado",
+      user.token.data.datos.idempleado,
+      3,
+      idEmpleado,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -132,7 +155,9 @@ controller.delete = async (req, res) => {
     if (!user.success) throw user;
     const { id } = req.params;
     let response = await empleadoM.delete(id);
-    console.log(response);
+
+    await guardarBitacora([area, user.token.data.datos.idempleado, 4, id]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

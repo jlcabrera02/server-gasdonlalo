@@ -1,4 +1,5 @@
 import acuM from "../models/s.acumular.model";
+import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 const { verificar } = auth;
 
@@ -10,6 +11,12 @@ controller.delete = async (req, res) => {
     if (!user.success) throw user;
     const { idSncacumulada } = req.params;
     let response = await acuM.delete(idSncacumulada);
+    await guardarBitacora([
+      "snc pendientes por captura",
+      user.token.data.datos.idempleado,
+      4,
+      idSncacumulada,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

@@ -1,4 +1,5 @@
 import generadorId from "../assets/generadorId";
+import { guardarBitacora } from "../models/auditorias";
 import pasosDM from "../models/d.pasosDespachar.model";
 import errRes from "../respuestas/error.respuestas";
 import sncaM from "../models/s.acumular.model";
@@ -9,6 +10,8 @@ const { verificar } = auth;
 const { sinRegistro } = errRes;
 
 const controller = {};
+
+const area = "Evaluación Pasos de despacho";
 
 controller.findEvaluacionesXEmpleado = async (req, res) => {
   try {
@@ -152,6 +155,14 @@ controller.insert = async (req, res) => {
 
     //await pasosDM.verificar([cuerpo.fecha, cuerpo.idempleado]); //recoleccion efectivo
     let response = await pasosDM.insert(cuerpo);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      idGenerico,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -176,7 +187,7 @@ controller.update = async (req, res) => {
 
     const viejo = await pasosDM.findOneId(cuerpo[0][1]);
     const fecha = tiempoDB(viejo[0].fecha);
-    const snca = await sncaM.validar([idEmpleado, 1, fecha]);
+    const snca = await sncaM.validar([idEmpleado, 10, fecha]);
     const viejoGroup = await pasosDM.findOne(viejo[0].identificador);
 
     const incorrecto = cuerpo.map((el) => el[0]).includes(0);
@@ -198,6 +209,14 @@ controller.update = async (req, res) => {
     }
 
     let response = await pasosDM.update(cuerpo);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      3,
+      viejo[0].identificador,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -216,13 +235,19 @@ controller.delete = async (req, res) => {
     const viejo = await pasosDM.findOne(identificador);
     const snca = await sncaM.validar([
       viejo[0].idempleado,
-      1,
+      10,
       tiempoDB(viejo[0].fecha),
     ]);
     if (snca.length > 0) {
       await sncaM.delete(snca[0].idsncacumuladas);
     }
     let response = await pasosDM.delete(identificador);
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      4,
+      identificador,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

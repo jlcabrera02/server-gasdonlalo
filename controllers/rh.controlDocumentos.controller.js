@@ -1,8 +1,10 @@
 import controlDocumentoM from "../models/rh.controlDocumentos.model";
+import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 const { verificar } = auth;
 
 const controller = {};
+const area = "Control de documentos";
 
 controller.findTotalDocumentos = async (req, res) => {
   try {
@@ -56,6 +58,13 @@ controller.insert = async (req, res) => {
 
     let response = await controlDocumentoM.insert(cuerpo);
 
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -74,6 +83,12 @@ controller.update = async (req, res) => {
 
     const cuerpo = [iddocumento, idempleado];
     let response = await controlDocumentoM.update(cuerpo);
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      4,
+      `d${iddocumento} e${idempleado}`,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -93,6 +108,13 @@ controller.updateFecha = async (req, res) => {
 
     const cuerpo = [fecha, Number(iddocumento)];
     let response = await controlDocumentoM.updateFecha(cuerpo);
+    await guardarBitacora([
+      "Actualización fecha entrega de documentos",
+      user.token.data.datos.idempleado,
+      3,
+      iddocumento,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

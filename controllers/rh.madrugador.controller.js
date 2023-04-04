@@ -1,9 +1,12 @@
 import cmM from "../models/rh.madrugador.model";
+import { guardarBitacora } from "../models/auditorias";
 import empleadoM from "../models/rh.empleado.model";
 import incModel from "../models/s.incumplimiento.model";
 import auth from "../models/auth.model";
 const { verificar } = auth;
+
 const controller = {};
+const area = "Concurso madrugador nuuevo departamento";
 
 controller.findControlMadrugadorD = async (req, res) => {
   try {
@@ -155,6 +158,14 @@ controller.insert = async (req, res) => {
     const { idDepartamento } = req.body;
     await cmM.validarNoDuplicados(idDepartamento);
     const response = await cmM.insertDepartamento(idDepartamento);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);

@@ -10,7 +10,6 @@ route.get(
 );
 route.get("/turnos", se.findTurnos);
 route.get("/faltas", se.findFalta);
-route.get("/semanas/:year/:month/", se.semanasXmes);
 route.post("/buscar-capturas/:idEmpleado", se.findRetardosXsemanas);
 route.post("/captura", se.insert);
 route.post("/descanso", se.insertDescanso);

@@ -1,4 +1,5 @@
 import salidaNoCM from "../models/s.salidaNoConforme.model";
+import { guardarBitacora } from "../models/auditorias";
 import empleadoM from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
@@ -347,6 +348,14 @@ controller.insert = async (req, res) => {
     }
 
     let response = await salidaNoCM.insert(cuerpo);
+
+    await guardarBitacora([
+      "SNC",
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -432,6 +441,13 @@ controller.update = async (req, res) => {
     ];
 
     let response = await salidaNoCM.update(cuerpo);
+    await guardarBitacora([
+      "SNC",
+      user.token.data.datos.idempleado,
+      3,
+      idSalidaNoConforme,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -448,6 +464,12 @@ controller.delete = async (req, res) => {
     if (!user.success) throw user;
     const { idSalidaNoConforme } = req.params;
     let response = await salidaNoCM.delete(idSalidaNoConforme);
+    await guardarBitacora([
+      "SNC",
+      user.token.data.datos.idempleado,
+      4,
+      idSalidaNoConforme,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

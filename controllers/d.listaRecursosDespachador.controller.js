@@ -1,15 +1,15 @@
 import generadorId from "../assets/generadorId";
+import { guardarBitacora } from "../models/auditorias";
 import listaReM from "../models/d.listaRecursosDespachador.model";
-import resErr from "../respuestas/error.respuestas";
 import empleado from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
 import formatTiempo from "../assets/formatTiempo";
 import sncaM from "../models/s.acumular.model";
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
-const { sinRegistro } = resErr;
 
 const controller = {};
+const area = "Recursos de despachador";
 
 controller.findListRecursosXmes = async (req, res) => {
   try {
@@ -186,6 +186,13 @@ controller.insert = async (req, res) => {
     }
 
     let response = await listaReM.insert(cuerpo);
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      idGenerico,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -233,6 +240,14 @@ controller.update = async (req, res) => {
     }
 
     const response = await listaReM.update(cuerpo);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      3,
+      viejo[0].identificador,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -258,6 +273,13 @@ controller.delete = async (req, res) => {
       await sncaM.delete(snca[0].idsncacumuladas);
     }
     const response = await listaReM.delete(identificador);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      4,
+      identificador,
+    ]);
 
     res.status(200).json({ success: true, response });
   } catch (err) {

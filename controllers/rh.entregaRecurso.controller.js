@@ -1,8 +1,10 @@
 import erM from "../models/rh.entregaRecursos.model";
+import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 const { verificar } = auth;
 
 const controller = {};
+const area = "Entrega Recursos";
 
 controller.findRecursos = async (req, res) => {
   try {
@@ -48,6 +50,12 @@ controller.insert = async (req, res) => {
       tipo_recibo: Number(tipo),
     };
     const response = await erM.insert(cuerpo);
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

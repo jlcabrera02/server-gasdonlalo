@@ -14,6 +14,21 @@ model.find = (data) =>
     });
   });
 
+model.validarNoDuplicacado = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM venta_litros WHERE fecha = ? AND idempleado = ?`;
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return resolve(false);
+      if (res)
+        return reject({
+          code: 400,
+          success: false,
+          msg: "Ya hay datos almacenados para el empleado",
+        });
+    });
+  });
+
 model.obtenerEmpleadosXRegistro = (data) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT emp.* FROM venta_litros vl, empleado emp WHERE vl.idempleado = emp.idempleado AND vl.idestacion_servicio = ? AND vl.fecha BETWEEN ? AND LAST_DAY(?) GROUP BY emp.idempleado`;

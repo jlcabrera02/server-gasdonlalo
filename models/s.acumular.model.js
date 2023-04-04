@@ -37,8 +37,10 @@ model.validar = (data, capturado = 0) =>
 
 model.insert = (data) =>
   new Promise((resolve, reject) => {
-    let cortarTexto = data[3].substring(0, 47);
-    data[3] = cortarTexto += "...";
+    if (data[3].length > 46) {
+      let cortarTexto = data[3].substring(0, 47);
+      data[3] = cortarTexto += "...";
+    }
     let sql =
       "INSERT INTO sncacumuladas (idincumplimiento, capturado, idempleado, fecha, descripcion) VALUES (?, 0, ?, ?, ?)";
 

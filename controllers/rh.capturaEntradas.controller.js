@@ -1,4 +1,5 @@
 import ceM from "../models/rh.capturaEntradas.model";
+import { guardarBitacora } from "../models/auditorias";
 import tp from "../assets/formatTiempo";
 import auth from "../models/auth.model";
 import empM from "../models/rh.empleado.model";
@@ -109,70 +110,6 @@ controller.findTurnos = async (req, res) => {
   }
 };
 
-//Saca una relacion de semanas de las que obtiene el mes
-controller.semanasXmes = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization, 24);
-    if (!user.success) throw user;
-    const { year, month } = req.params;
-    let diasDelMes = new Date(year, month, 0).getDate();
-    let primerSabado;
-    const response = [];
-    for (let i = 0; i < diasDelMes; i++) {
-      let a = new Date(`${year}-${month}-${i}`).getDay();
-      if (a === 5) {
-        primerSabado = i + 1;
-        break;
-      }
-    }
-
-    for (let i = primerSabado; i < diasDelMes - 2; i++) {
-      let firstFecha = `${year}-${month}-${i}`;
-
-      if (primerSabado > 2 && i < primerSabado + 7) {
-        let tiempo = new Date(
-          new Date(firstFecha).setDate(new Date(firstFecha).getDate() - 7)
-        )
-          .toISOString()
-          .split("T")[0];
-
-        let tiempod = new Date(
-          new Date(tiempo).setDate(new Date(tiempo).getDate() + 6)
-        )
-          .toISOString()
-          .split("T")[0];
-
-        response.push({
-          semana: 1,
-          diaEmpiezo: tiempo,
-          diaTermino: tiempod,
-        });
-      }
-
-      let lastFecha = new Date(
-        new Date(firstFecha).setDate(new Date(firstFecha).getDay() + i)
-      )
-        .toISOString()
-        .split("T")[0];
-      let index = response.length;
-      response.push({
-        semana: index + 1,
-        diaEmpiezo: firstFecha,
-        diaTermino: lastFecha,
-      });
-      i = i + 6;
-    }
-
-    res.status(200).json({ success: true, response: response });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
-
 controller.insert = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
@@ -196,6 +133,13 @@ controller.insert = async (req, res) => {
 
     const response = await ceM.insert(cuerpo);
 
+    await guardarBitacora([
+      "Captura Entradas",
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -217,6 +161,12 @@ controller.insertDescanso = async (req, res) => {
       idtipo_falta: 3,
     };
     const response = await ceM.insert(cuerpo);
+    await guardarBitacora([
+      "Captura Entradas",
+      user.token.data.datos.idempleado,
+      3,
+      response.insertId,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -236,6 +186,13 @@ controller.insertTurno = async (req, res) => {
     const cuerpo = [turno, hora_empiezo, hora_termino, hora_anticipo];
 
     let response = await ceM.insertTurnos(cuerpo);
+
+    await guardarBitacora([
+      "Turnos",
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -265,6 +222,14 @@ controller.updateTurno = async (req, res) => {
     ];
 
     let response = await ceM.updateTurnos(cuerpo);
+
+    await guardarBitacora([
+      "Turnos",
+      user.token.data.datos.idempleado,
+      3,
+      idTurno,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -289,6 +254,14 @@ controller.update = async (req, res) => {
     ];
     if (minutosR) cuerpo[0]["minutos_retardos"] = minutosR;
     let response = await ceM.update(cuerpo);
+
+    await guardarBitacora([
+      "Captura Entradas",
+      user.token.data.datos.idempleado,
+      3,
+      idCaptura,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -305,6 +278,12 @@ controller.deleteTurno = async (req, res) => {
     if (!user.success) throw user;
     const { idTurno } = req.params;
     let response = await ceM.deleteTurno(idTurno);
+    await guardarBitacora([
+      "Turnos",
+      user.token.data.datos.idempleado,
+      4,
+      idTurno,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -321,6 +300,12 @@ controller.delete = async (req, res) => {
     if (!user.success) throw user;
     const { idCaptura } = req.params;
     let response = await ceM.delete(idCaptura);
+    await guardarBitacora([
+      "Captura Entradas",
+      user.token.data.datos.idempleado,
+      4,
+      idCaptura,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

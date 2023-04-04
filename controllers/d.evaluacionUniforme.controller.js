@@ -1,4 +1,5 @@
 import evaluacionUniformeM from "../models/d.evaluacionUniforme.model";
+import { guardarBitacora } from "../models/auditorias";
 import generadorId from "../assets/generadorId";
 import empM from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
@@ -8,6 +9,7 @@ const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 
 const controller = {};
+const area = "Evaluación Uniforme";
 
 controller.findPasosEvUniforme = async (req, res) => {
   try {
@@ -190,6 +192,14 @@ controller.insert = async (req, res) => {
     //await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro
 
     let response = await evaluacionUniformeM.insert(cuerpo);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      idGenerico,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -241,6 +251,13 @@ controller.update = async (req, res) => {
       }
     }
     let response = await evaluacionUniformeM.update(cuerpo);
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      3,
+      viejo.identificador,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -264,7 +281,12 @@ controller.delete = async (req, res) => {
     }
 
     let response = await evaluacionUniformeM.delete(identificador);
-
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      4,
+      identificador,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

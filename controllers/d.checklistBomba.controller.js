@@ -43,12 +43,12 @@ controller.find = async (req, res) => {
       almacenar.push({ empleado: empleado[i], fechas: almacenarXempleado });
     }
 
-    await guardarBitacora([
-      `${area} Empleado`,
-      user.token.data.datos.idempleado,
-      1,
-      null,
-    ]);
+    // await guardarBitacora([
+    //   `${area} Empleado`,
+    //   user.token.data.datos.idempleado,
+    //   1,
+    //   null,
+    // ]);
 
     res.status(200).json({ success: true, response: almacenar });
   } catch (err) {
@@ -80,7 +80,7 @@ controller.findChecklistXmes = async (req, res) => {
       response[i].empSaliente = saliente[0];
     }
 
-    await guardarBitacora([area, user.token.data.datos.idempleado, 1, null]);
+    // await guardarBitacora([area, user.token.data.datos.idempleado, 1, null]);
 
     res.status(200).json({
       success: true,
@@ -147,6 +147,14 @@ controller.insert = async (req, res) => {
     }
 
     let response = await checklistBombaM.insert(cuerpo);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -232,6 +240,7 @@ controller.update = async (req, res) => {
 
     const data = [cuerpo, id];
     let response = await checklistBombaM.update(data);
+    await guardarBitacora([area, user.token.data.datos.idempleado, 3, id]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -253,6 +262,7 @@ controller.delete = async (req, res) => {
       await sncaM.delete(snca[0].idsncacumuladas);
     }
     let response = await checklistBombaM.delete(id);
+    await guardarBitacora([area, user.token.data.datos.idempleado, 4, id]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

@@ -1,10 +1,13 @@
 import octM from "../models/rh.octanoso.model";
+import { guardarBitacora } from "../models/auditorias";
 import empM from "../models/rh.empleado.model";
 import salidaNCM from "../models/s.salidaNoConforme.model";
 import formatTiempo from "../assets/formatTiempo";
 import auth from "../models/auth.model";
 const { verificar } = auth;
+
 const controller = {};
+const area = "Concurso octanoso";
 
 controller.find = async (req, res) => {
   try {
@@ -220,7 +223,16 @@ controller.insertVentaLitros = async (req, res) => {
       descalificado: Number(descalificado),
     };
 
+    await octM.validarNoDuplicacado([cuerpo.fecha, cuerpo.idempleado]);
+
     const response = await octM.insertVentaLitros(cuerpo);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -239,6 +251,8 @@ controller.delete = async (req, res) => {
     const { idOct } = req.params;
 
     const response = await octM.delete(idOct);
+
+    await guardarBitacora([area, user.token.data.datos.idempleado, 4, idOct]);
 
     res.status(200).json({ success: true, response });
   } catch (err) {

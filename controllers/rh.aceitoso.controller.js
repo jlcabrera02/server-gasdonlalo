@@ -1,10 +1,13 @@
 import aceiM from "../models/rh.aceitoso.model";
+import { guardarBitacora } from "../models/auditorias";
 import empM from "../models/rh.empleado.model";
 import salidaNCM from "../models/s.salidaNoConforme.model";
 import formatTiempo from "../assets/formatTiempo";
 import auth from "../models/auth.model";
 const { verificar } = auth;
+
 const controller = {};
+const area = "Concurso Aceitoso";
 
 controller.find = async (req, res) => {
   try {
@@ -221,7 +224,16 @@ controller.insertVentaAceite = async (req, res) => {
       descalificado: Number(descalificado),
     };
 
+    await aceiM.validarNoDuplicacado([cuerpo.fecha, cuerpo.idempleado]);
+
     const response = await aceiM.insertVentaAceite(cuerpo);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -240,6 +252,13 @@ controller.delete = async (req, res) => {
     const { idAceite } = req.params;
 
     const response = await aceiM.delete(idAceite);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      4,
+      idAceite,
+    ]);
 
     res.status(200).json({ success: true, response });
   } catch (err) {

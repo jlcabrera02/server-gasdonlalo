@@ -1,4 +1,5 @@
 import oylM from "../models/d.oylIsla.model";
+import { guardarBitacora } from "../models/auditorias";
 import generadorId from "../assets/generadorId";
 import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
@@ -8,6 +9,7 @@ const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 
 const controller = {};
+const area = "Orden y limpieza";
 
 controller.findEvaluacionXmensual = async (req, res) => {
   try {
@@ -192,6 +194,13 @@ controller.insert = async (req, res) => {
 
     const response = await oylM.insert(cuerpo);
 
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      idGenerico,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -217,9 +226,10 @@ controller.update = async (req, res) => {
     const viejoIncorrecto = viejo.some((el) => el.cumple === false);
 
     const fecha = tiempoDB(viejo[0].fecha);
-    const snca = await sncaM.validar([idEmpleado, 7, fecha]);
+    const snca = await sncaM.validar([idEmpleado, 13, fecha]);
     const cuerpo = evaluaciones.map((el) => [el.cumple, el.idoyl, idEmpleado]);
-    const incorrecto = cuerpo.some((el) => el.cumple === 0);
+    console.log(cuerpo);
+    const incorrecto = cuerpo.some((el) => el[0] === 0);
     if (!viejoIncorrecto && incorrecto) {
       sncaM.insert([
         13,
@@ -229,11 +239,17 @@ controller.update = async (req, res) => {
       ]);
     }
 
-    if (snca.length > 0 && incorrecto) {
+    if (snca.length > 0 && !incorrecto) {
       await sncaM.delete(snca[0].idsncacumuladas);
     }
 
     let response = await oylM.update(cuerpo);
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      3,
+      getIdentificador.identificador,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -261,6 +277,12 @@ controller.delete = async (req, res) => {
     if (snca.length > 0) await sncaM.delete(snca[0].idsncacumuladas);
 
     let response = await oylM.delete(identificador);
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      4,
+      identificador,
+    ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

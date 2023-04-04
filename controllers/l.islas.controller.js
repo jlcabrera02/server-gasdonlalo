@@ -41,12 +41,12 @@ controller.findIslas = async (req, res) => {
       }
     }
 
-    await guardarBitacora([
-      "buscar isla",
-      user.token.data.datos.idempleado,
-      1,
-      null,
-    ]);
+    // await guardarBitacora([
+    //   "buscar isla",
+    //   user.token.data.datos.idempleado,
+    //   1,
+    //   null,
+    // ]);
 
     res.status(200).json({ success: true, response: gasolinas });
   } catch (err) {

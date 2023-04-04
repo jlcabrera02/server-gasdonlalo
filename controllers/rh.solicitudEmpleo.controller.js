@@ -1,10 +1,11 @@
 import seM from "../models/rh.solicitudEmpleo.model";
-import empleadoM from "../models/rh.empleado.model";
+import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 const { verificar } = auth;
 import resErr from "../respuestas/error.respuestas";
 
 const controller = {};
+const area = "Solicitudes de empleo y empleados";
 
 const { peticionImposible, sinCambios } = resErr;
 
@@ -83,6 +84,13 @@ controller.insert = async (req, res) => {
 
     let response = await seM.insert(cuerpo);
 
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      2,
+      response.insertId,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -104,6 +112,13 @@ controller.updateMotivo = async (req, res) => {
 
     const response = await seM.update(cuerpo);
 
+    await guardarBitacora([
+      "Solicitudes de empleo Motivos",
+      user.token.data.datos.idempleado,
+      3,
+      response.insertId,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -124,6 +139,13 @@ controller.changeDep = async (req, res) => {
     const cuerpo = [{ idDepartamento }, idEmpleado];
 
     const response = await seM.update(cuerpo);
+
+    await guardarBitacora([
+      "Cambio de departamento a empleado",
+      user.token.data.datos.idempleado,
+      3,
+      `e${idEmpleado} d${idDepartamento}`,
+    ]);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -161,22 +183,13 @@ controller.update = async (req, res) => {
 
     if (!response) throw sinCambios();
 
-    res.status(200).json({ success: true, response });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      3,
+      idEmpleado,
+    ]);
 
-controller.delete = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization, 24);
-    if (!user.success) throw user;
-    const { id } = req.params;
-    let response = await seM.delete(id);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
