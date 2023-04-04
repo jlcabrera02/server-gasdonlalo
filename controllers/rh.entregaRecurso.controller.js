@@ -41,23 +41,55 @@ controller.insert = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
     if (!user.success) throw user;
-    const { fecha, idEmpleado, cantidad, recurso, tipo } = req.body;
-    const cuerpo = {
-      fecha,
-      idempleado_recibe: Number(idEmpleado),
-      cantidad: Number(cantidad),
-      recurso,
-      tipo_recibo: Number(tipo),
-    };
+    console.log(req.body);
+
+    const cuerpo = req.body.map((el) => [
+      el.fecha,
+      el.cantidad,
+      el.recurso,
+      el.idEmpleado,
+      el.tipoRecibo,
+      el.estado,
+    ]);
+
     const response = await erM.insert(cuerpo);
+
     await guardarBitacora([
       area,
       user.token.data.datos.idempleado,
       2,
       response.insertId,
     ]);
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.delete = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { idRecurso } = req.params;
+
+    const response = await erM.delete(idRecurso);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      4,
+      idRecurso,
+    ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

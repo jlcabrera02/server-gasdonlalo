@@ -26,8 +26,19 @@ model.findRecursosXId = (id) =>
 
 model.insert = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `INSERT INTO recurso_entrega SET ?`;
-    connection.query(sql, data, (err, res) => {
+    let sql = `INSERT INTO recurso_entrega (fecha, cantidad, recurso, idempleado_recibe, tipo_recibo, estado) VALUES ?`;
+    connection.query(sql, [data], (err, res) => {
+      console.log(err);
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
+model.delete = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `DELETE FROM recurso_entrega WHERE idrecurso_entrega = ? `;
+    connection.query(sql, [data], (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res) return resolve(res);
     });
