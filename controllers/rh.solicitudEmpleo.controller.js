@@ -66,6 +66,12 @@ controller.insert = async (req, res) => {
         "No puedes despedir al empleado si no tiene datos existentes dentro de la empresa"
       );
 
+    if ((ns === 2 || ns === 1) && idDepartamento === 0) {
+      throw peticionImposible(
+        "Tienes que asignarle un departamento al empleado cuando es aceptado o en practica"
+      );
+    }
+
     const cuerpo = {
       idchecador: idChecador || null,
       nombre: nombre.toLocaleUpperCase(),
