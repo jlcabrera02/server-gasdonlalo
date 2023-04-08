@@ -135,18 +135,12 @@ model.changePass = (data) =>
     });
   });
 
-model.changePass = (data) =>
+model.changePassAdmin = (data) =>
   new Promise((resolve, reject) => {
     let sql = `UPDATE user SET password = ? WHERE username = ?`;
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB("La contraseña no coindice"));
-      if (res.affectedRows < 1)
-        return reject({
-          success: false,
-          code: 400,
-          msg: "Procura que la contraseña sea distinta",
-          response,
-        });
+      if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });
