@@ -77,7 +77,7 @@ model.findFaltas = async (idFalta) =>
 
 model.validarDuplicados = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT ce.idcaptura_entrada FROM captura_entrada ce WHERE idempleado = ? AND fecha = ? AND idturno = ?`;
+    let sql = `SELECT ce.idcaptura_entrada FROM captura_entrada ce WHERE idempleado = ? AND fecha = ? AND hora_establecida = ?`;
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -102,23 +102,11 @@ model.findFalta = (data) =>
     });
   });
 
-model.horaAnticipo = (id) =>
-  new Promise((resolve, reject) => {
-    let sql = `SELECT hora_anticipo FROM turno WHERE idturno = ?`;
-
-    connection.query(sql, id, (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro("No existe este turno"));
-      if (res) return resolve(res[0].hora_anticipo);
-    });
-  });
-
 model.insert = (data) =>
   new Promise((resolve, reject) => {
     let sql = "INSERT INTO captura_entrada SET ?";
 
     connection.query(sql, data, (err, res) => {
-      // console.log(err);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

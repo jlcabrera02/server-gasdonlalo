@@ -118,18 +118,18 @@ controller.insert = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
     if (!user.success) throw user;
-    const { idEmpleado, horaEntrada, fecha, idTurno } = req.body;
+    const { idEmpleado, horaEntrada, fecha, horaEstablecida } = req.body;
+
     const cuerpo = {
       idempleado: Number(idEmpleado),
       hora_entrada: horaEntrada,
       fecha,
-      idturno: Number(idTurno) || 1,
+      hora_establecida: horaEstablecida,
     };
 
     await ceM.validarDuplicados([cuerpo.idempleado, fecha, cuerpo.idturno]); // Validar existencia
 
-    const horaAnticipo = await ceM.horaAnticipo(cuerpo.idturno);
-    let minutosDiff = diff(fecha, horaAnticipo) - diff(fecha, horaEntrada);
+    let minutosDiff = diff(fecha, horaEstablecida) - diff(fecha, horaEntrada);
     const minutosRetardos =
       minutosDiff > 0 ? "00:00" : transformMinute(minutosDiff);
 
