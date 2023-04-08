@@ -52,9 +52,9 @@ controller.findRetardosXsemanas = async (req, res) => {
 
     const response = [];
     for (let i = 0; i < entradas.length; i++) {
-      // let temp = {};
+      let temp = {};
       const rec = entradas[i];
-      let temp = { ...rec, empleado: empleado[0] };
+      temp = { ...rec, empleado: empleado[0] };
       if (temp.idtipo_falta) {
         let tipoFalta = await ceM.findFaltas(temp.idtipo_falta);
         temp = { ...temp, tipo_falta: tipoFalta[0] };
@@ -62,7 +62,11 @@ controller.findRetardosXsemanas = async (req, res) => {
 
       if (temp.idturno) {
         let turno = await ceM.findTurno(temp.idturno);
-        temp = { ...temp, turno: turno[0].turno };
+        if (turno) {
+          temp = { ...temp, turno: turno[0].turno };
+        } else {
+          temp = { ...temp, turno: "eliminado" };
+        }
       } else {
         temp = { ...temp, turno: null };
       }
@@ -296,7 +300,6 @@ controller.update = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

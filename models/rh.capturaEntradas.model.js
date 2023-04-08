@@ -18,10 +18,9 @@ model.findEntradasXidEmpleadoXMes = (id, fecha) =>
 //Funcion principal de reportes
 model.findRetardosXsemanas = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT ce.* FROM captura_entrada ce WHERE ce.idempleado = ? AND  ce.fecha BETWEEN ? AND ? ORDER BY ce.fecha`;
+    let sql = `SELECT * FROM captura_entrada WHERE idempleado = ? AND fecha BETWEEN ? AND ? ORDER BY fecha`;
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -33,7 +32,7 @@ model.findOne = (idCap) =>
     let sql = `SELECT ce.* FROM captura_entrada ce WHERE ce.idcaptura_entrada = ?`;
 
     connection.query(sql, idCap, (err, res) => {
-      console.log(err);
+      // console.log(err);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res[0]);
@@ -45,9 +44,10 @@ model.findTurno = (idturno) =>
     let sql = `SELECT * FROM turno WHERE idturno = ?`;
 
     connection.query(sql, idturno, (err, res) => {
-      console.log(err);
+      // console.log(err);
+
       if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
+      if (res.length < 1) resolve(false);
       if (res) return resolve(res);
     });
   });
@@ -57,7 +57,7 @@ model.findTurnos = (idturno) =>
     let sql = `SELECT * FROM turno`;
 
     connection.query(sql, idturno, (err, res) => {
-      console.log(err);
+      // console.log(err);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
@@ -118,7 +118,7 @@ model.insert = (data) =>
     let sql = "INSERT INTO captura_entrada SET ?";
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
+      // console.log(err);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
@@ -142,7 +142,7 @@ model.insertTurnos = (data) =>
       "INSERT INTO turno (turno, hora_anticipo, hora_empiezo, hora_termino) VALUES (?,?,?,?)";
 
     connection.query(sql, data, (err, res) => {
-      console.log(err);
+      console.log(data);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);

@@ -186,6 +186,7 @@ controller.update = async (req, res) => {
       fechac,
       empleadoSaliente,
       estacionServicio,
+      incidentes,
     } = req.body;
 
     const cuerpo = {
@@ -200,6 +201,7 @@ controller.update = async (req, res) => {
       fechac: fechac ? fechac : false,
       idempleado_saliente: idEmpleadoSaliente,
       idempleado: Number(idEmpleado),
+      incidentes: incidentes ? incidentes : null,
     };
 
     const snca = await sncaM.validar([cuerpo.idempleado, 3, cuerpo.fecha]);
