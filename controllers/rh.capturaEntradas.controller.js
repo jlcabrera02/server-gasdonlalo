@@ -3,7 +3,7 @@ import { guardarBitacora } from "../models/auditorias";
 import tp from "../assets/formatTiempo";
 import auth from "../models/auth.model";
 import empM from "../models/rh.empleado.model";
-// import sncaM from "../models/s.acumular.model";
+import sncaM from "../models/s.acumular.model";
 const { verificar } = auth;
 const { tiempoDB, transformMinute, diff } = tp;
 
@@ -245,6 +245,9 @@ controller.update = async (req, res) => {
     let user = verificar(req.headers.authorization, 24);
     if (!user.success) throw user;
     const { idCaptura, idTipoFalta, minutosR } = req.body;
+    let ceViejo = await ceM.findOne(idCaptura);
+    let validar = [];
+    const fecha = tiempoDB(ceViejo.fecha);
 
     const cuerpo = [
       {
@@ -255,6 +258,35 @@ controller.update = async (req, res) => {
     if (minutosR) cuerpo[0]["minutos_retardos"] = minutosR;
     let response = await ceM.update(cuerpo);
 
+    if (ceViejo.idtipo_falta) {
+      if (
+        ceViejo.idtipo_falta === 4 ||
+        ceViejo.idtipo_falta === 5 ||
+        ceViejo.idtipo_falta === 7
+      ) {
+        let idInc = 0;
+        if (ceViejo.idtipo_falta === 4) idInc = 8;
+        if (ceViejo.idtipo_falta === 5) idInc = 2;
+        if (ceViejo.idtipo_falta === 7) idInc = 4;
+        validar = await sncaM.validar([ceViejo.idempleado, idInc, fecha]);
+      }
+    }
+
+    if (validar.length > 0) {
+      await sncaM.delete(validar[0].idsncacumuladas);
+    }
+
+    if (idTipoFalta == 4 || idTipoFalta == 5 || idTipoFalta == 7) {
+      let text = "";
+      let inc = 0;
+      if (idTipoFalta == 4) (text = "Inconformidad por falta"), (inc = 8);
+      if (idTipoFalta == 5) (text = "Inconformidad por retardo"), (inc = 2);
+      if (idTipoFalta == 7)
+        (text = "Inconformidad por no chechar entrada"), (inc = 4);
+
+      await sncaM.insert([inc, ceViejo.idempleado, fecha, text]);
+    }
+
     await guardarBitacora([
       "Captura Entradas",
       user.token.data.datos.idempleado,
@@ -264,6 +296,7 @@ controller.update = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -299,13 +332,37 @@ controller.delete = async (req, res) => {
     let user = verificar(req.headers.authorization, 24);
     if (!user.success) throw user;
     const { idCaptura } = req.params;
+    let ceViejo = await ceM.findOne(idCaptura);
+    let validar = [];
+    const fecha = tiempoDB(ceViejo.fecha);
+
+    if (ceViejo.idtipo_falta) {
+      if (
+        ceViejo.idtipo_falta === 4 ||
+        ceViejo.idtipo_falta === 5 ||
+        ceViejo.idtipo_falta === 7
+      ) {
+        let idInc = 0;
+        if (ceViejo.idtipo_falta === 4) idInc = 8;
+        if (ceViejo.idtipo_falta === 5) idInc = 2;
+        if (ceViejo.idtipo_falta === 7) idInc = 4;
+        validar = await sncaM.validar([ceViejo.idempleado, idInc, fecha]);
+      }
+    }
+
     let response = await ceM.delete(idCaptura);
+
+    if (validar.length > 0) {
+      await sncaM.delete(validar[0].idsncacumuladas);
+    }
+
     await guardarBitacora([
       "Captura Entradas",
       user.token.data.datos.idempleado,
       4,
       idCaptura,
     ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

@@ -28,6 +28,18 @@ model.findRetardosXsemanas = (data) =>
     });
   });
 
+model.findOne = (idCap) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT ce.* FROM captura_entrada ce WHERE ce.idcaptura_entrada = ?`;
+
+    connection.query(sql, idCap, (err, res) => {
+      console.log(err);
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res[0]);
+    });
+  });
+
 model.findTurno = (idturno) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT * FROM turno WHERE idturno = ?`;

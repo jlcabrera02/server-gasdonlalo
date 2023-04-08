@@ -287,6 +287,7 @@ controller.delete = async (req, res) => {
       4,
       identificador,
     ]);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
