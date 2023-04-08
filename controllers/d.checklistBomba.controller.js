@@ -114,6 +114,7 @@ controller.insert = async (req, res) => {
       fechac,
       empleadoSaliente,
       idEmpleado,
+      incidentes,
     } = req.body;
 
     const cuerpo = {
@@ -128,6 +129,7 @@ controller.insert = async (req, res) => {
       empleado_saliente: empleadoSaliente ? empleadoSaliente : false,
       idempleado_saliente: idEmpleadoSaliente,
       idempleado: Number(idEmpleado),
+      incidentes: incidentes ? incidentes : null,
     };
 
     if (

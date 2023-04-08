@@ -22,6 +22,7 @@ controller.findIslas = async (req, res) => {
       if (buscar) {
         let restar = i - 1;
         let index = restar / 2;
+        gasolinas[index].idIslas.idderecho = islas[i].idisla;
         gasolinas[index].derecha = {
           id: islas[i].id,
           direccion: islas[i].direccion,
@@ -32,6 +33,7 @@ controller.findIslas = async (req, res) => {
           numeroIsla: islas[i].nisla,
           estacion: islas[i].idestacion_servicio,
           habilitada: islas[i].habilitada && islas[i + 1].habilitada,
+          idIslas: { idizquierdo: islas[i].idisla },
           izquierda: {
             id: islas[i].id,
             direccion: islas[i].direccion,
@@ -40,13 +42,6 @@ controller.findIslas = async (req, res) => {
         });
       }
     }
-
-    // await guardarBitacora([
-    //   "buscar isla",
-    //   user.token.data.datos.idempleado,
-    //   1,
-    //   null,
-    // ]);
 
     res.status(200).json({ success: true, response: gasolinas });
   } catch (err) {
@@ -77,6 +72,99 @@ controller.insertIslas = async (req, res) => {
 
     res.status(200).json({ success: true, response: insertIsla });
   } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.insertLecturas = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+
+    const cuerpo = req.body.map((el) => [
+      el.idisla,
+      el.idgas,
+      el.lectura,
+      el.fecha,
+    ]);
+
+    const insertIsla = await islaM.insertIsla(numeroIsla, idEstacion);
+    await islaM.insertGas(insertIsla.insertId);
+    await islaM.insertGas(insertIsla.insertId + 1);
+
+    await guardarBitacora([
+      "Insertar nueva isla",
+      user.token.data.datos.idempleado,
+      2,
+      insertIsla.insertId,
+    ]);
+
+    res.status(200).json({ success: true, response: insertIsla });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.updateIsla = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+
+    const cuerpo = req.body.map((el) => [el.tiene, el.idgas, el.idisla]);
+
+    const response = await islaM.updateIsla(cuerpo);
+
+    for (let i = 0; i < cuerpo.length; i++) {
+      await guardarBitacora([
+        "Modificar Estacion",
+        user.token.data.datos.idempleado,
+        3,
+        `gas: ${cuerpo[i][1]} idisla: ${cuerpo[i][2]}`,
+      ]);
+    }
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.updateNumeroIsla = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+
+    const { numeroIsla, idIslas } = req.body;
+
+    const cuerpo = [numeroIsla, ...idIslas];
+
+    console.log(cuerpo);
+
+    const response = await islaM.updateNumIsla(cuerpo);
+
+    for (let i = 0; i < cuerpo.length; i++) {
+      await guardarBitacora([
+        "Modificar Numero Isla",
+        user.token.data.datos.idempleado,
+        3,
+        `${idIslas[0]} -- ${idIslas[1]}`,
+      ]);
+    }
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
     console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
@@ -87,13 +175,29 @@ controller.insertIslas = async (req, res) => {
 };
 
 async function consultGas(id) {
+  let lectm = false,
+    lectp = false,
+    lectd = false;
   let m = await islaM.findEstacionYTipos(id, "M"),
     p = await islaM.findEstacionYTipos(id, "P"),
     d = await islaM.findEstacionYTipos(id, "D");
+
+  if (m.tiene) {
+    lectm = await islaM.findLecturas([id, "M"]);
+  }
+
+  if (p.tiene) {
+    lectp = await islaM.findLecturas([id, "P"]);
+  }
+
+  if (d.tiene) {
+    lectd = await islaM.findLecturas([id, "D"]);
+  }
+
   return {
-    m,
-    p,
-    d,
+    m: { ...m, lecturas: lectm },
+    p: { ...p, lecturas: lectp },
+    d: { ...d, lecturas: lectd },
   };
 }
 

@@ -1,4 +1,5 @@
 import connection from "./connection";
+import { format } from "mysql2";
 import resErr from "../respuestas/error.respuestas";
 const { errorDB, sinRegistro } = resErr;
 
@@ -12,6 +13,41 @@ model.findIslas = (idEstacion) =>
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
+    });
+  });
+
+model.findLecturas = (data) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT * FROM lecturas WHERE idisla = ? AND idgas = ? ORDER BY fecha DESC";
+
+    let dataDefault = {
+      idLectura: null,
+      idgas: data[1],
+      idisla: data[0],
+      lectura: 0,
+      fecha: null,
+      numReinicio: 0,
+    };
+
+    connection.query(sql, data, (err, res) => {
+      console.log(res);
+      if (err) return reject(errorDB());
+      if (res.length < 1)
+        return resolve({
+          anterior: null,
+          actual: dataDefault,
+        });
+      if (res.length === 1)
+        return resolve({
+          anterior: dataDefault,
+          actual: res[0],
+        });
+      if (res)
+        return resolve({
+          anterior: res[1],
+          actual: res[0],
+        });
     });
   });
 
@@ -53,6 +89,35 @@ model.insertIsla = (nisla, idEstacion) =>
         if (res) return resolve(res);
       }
     );
+  });
+
+model.updateIsla = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = "";
+
+    data.forEach((el) => {
+      sql += format(
+        "UPDATE islas_has_gas SET tiene = ? WHERE idgas = ? AND idisla = ?; ",
+        el
+      );
+    });
+
+    connection.query(sql, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.changedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
+model.updateNumIsla = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = "UPDATE islas SET nisla = ? WHERE idisla IN (?, ?)";
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.changedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
   });
 
 model.insertGas = (idisla) =>
