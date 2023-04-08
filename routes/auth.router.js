@@ -12,6 +12,7 @@ route.post("/login", estacionService.login);
 route.post("/registrar/permiso", estacionService.registerPermisos);
 route.post("/registrar", estacionService.register);
 route.put("/changePass", estacionService.changePass);
+route.put("/changePassA", estacionService.changePassAdmin);
 route.put("/quitar/permiso", estacionService.quitarPermisos);
 
 export default route;

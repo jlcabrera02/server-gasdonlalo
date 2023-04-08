@@ -160,6 +160,23 @@ controller.changePass = async (req, res) => {
   }
 };
 
+controller.changePassAdmin = async (req, res) => {
+  try {
+    const { user, newPassword } = req.body;
+
+    const cuerpo = [mysql.raw(`MD5('${newPassword}')`), user];
+
+    let response = await auth.changePassAdmin(cuerpo);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.update = async (req, res) => {
   try {
     const { id } = req.params;
