@@ -76,6 +76,16 @@ model.insertVentaAceite = (data) =>
     });
   });
 
+model.updateVentaAceite = (data, idAceite) =>
+  new Promise((resolve, reject) => {
+    let sql = `UPDATE venta_aceite SET ? WHERE idventa_aceite = ?`;
+    connection.query(sql, [data, idAceite], (err, res) => {
+      console.log(data, idAceite);
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
 model.delete = (idAceite) =>
   new Promise((resolve, reject) => {
     let sql = `DELETE FROM venta_aceite WHERE idventa_aceite = ?`;

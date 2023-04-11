@@ -245,6 +245,46 @@ controller.insertVentaAceite = async (req, res) => {
   }
 };
 
+controller.updateVentaAceite = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { idAceite } = req.params;
+    const {
+      idEmpleado,
+      idEstacionServicio,
+      litrosVendidos,
+      fecha,
+      descalificado,
+    } = req.body;
+
+    const cuerpo = {
+      idempleado: Number(idEmpleado),
+      idestacion_servicio: Number(idEstacionServicio),
+      fecha: fecha,
+      cantidad: litrosVendidos,
+      descalificado: Number(descalificado),
+    };
+
+    const response = await aceiM.updateVentaAceite(cuerpo, idAceite);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      3,
+      idAceite,
+    ]);
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.delete = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);

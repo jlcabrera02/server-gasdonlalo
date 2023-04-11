@@ -76,6 +76,15 @@ model.insertVentaLitros = (data) =>
     });
   });
 
+model.updateLitros = (data, idLitro) =>
+  new Promise((resolve, reject) => {
+    let sql = `UPDATE venta_litros SET ? WHERE idventa_litros = ?`;
+    connection.query(sql, [data, idLitro], (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
 model.delete = (idLitro) =>
   new Promise((resolve, reject) => {
     let sql = `DELETE FROM venta_litros WHERE idventa_litros = ?`;

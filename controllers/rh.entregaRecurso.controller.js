@@ -61,7 +61,46 @@ controller.insert = async (req, res) => {
       response.insertId,
     ]);
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.update = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    console.log(req.body);
+    const { idRecurso } = req.params;
+
+    const { fecha, cantidad, recurso, idEmpleado, tipoRecibo, estado } =
+      req.body;
+
+    const cuerpo = {
+      fecha,
+      cantidad,
+      recurso,
+      idempleado: idEmpleado,
+      tipo_recibo: tipoRecibo,
+      estado,
+    };
+
+    const response = await erM.update(cuerpo, idRecurso);
+
+    await guardarBitacora([
+      area,
+      user.token.data.datos.idempleado,
+      3,
+      idRecurso,
+    ]);
+
+    res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
     if (!err.code) {

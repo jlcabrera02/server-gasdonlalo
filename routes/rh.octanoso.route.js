@@ -11,6 +11,7 @@ route.get(
 route.get("/reporte/:year/:month", oct.findVentasL);
 route.post("/obtener", oct.findVentasLXestacionXIntervaloTiempo);
 route.post("/registro", oct.insertVentaLitros);
+route.put("/edit/:idOct", oct.updateLitros);
 route.delete("/delete/:idOct", oct.delete);
 
 export default route;

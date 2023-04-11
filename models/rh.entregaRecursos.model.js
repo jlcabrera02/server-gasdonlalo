@@ -34,6 +34,16 @@ model.insert = (data) =>
     });
   });
 
+model.update = (data, id) =>
+  new Promise((resolve, reject) => {
+    let sql = `UPDATE recurso_entrega SET ? WHERE idrecurso_entrega = ?`;
+    connection.query(sql, [data, id], (err, res) => {
+      console.log(err);
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
 model.delete = (data) =>
   new Promise((resolve, reject) => {
     let sql = `DELETE FROM recurso_entrega WHERE idrecurso_entrega = ? `;
