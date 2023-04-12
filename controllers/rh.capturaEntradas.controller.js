@@ -248,17 +248,36 @@ controller.update = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
     if (!user.success) throw user;
-    const { idCaptura, idTipoFalta, minutosR } = req.body;
+    const { idCaptura, idTipoFalta, minutosR, horaEntrada, horaEstablecida } =
+      req.body;
     let ceViejo = await ceM.findOne(idCaptura);
     let validar = [];
     const fecha = tiempoDB(ceViejo.fecha);
 
+    let idTipo = Number(idTipoFalta);
+
+    if (idTipo === 0) idTipo = null;
+
     const cuerpo = [
       {
-        idtipo_falta: idTipoFalta,
+        idtipo_falta: idTipo,
+        hora_entrada: horaEntrada,
+        hora_establecida: horaEstablecida,
       },
       idCaptura,
     ];
+
+    if (!horaEntrada) delete cuerpo[0].hora_entrada;
+    if (!horaEstablecida) delete cuerpo[0].hora_establecida;
+
+    if (horaEntrada && horaEstablecida) {
+      let minutosDiff = diff(fecha, horaEstablecida) - diff(fecha, horaEntrada);
+      const minutosRetardos =
+        minutosDiff > 0 ? "00:00" : transformMinute(minutosDiff);
+
+      cuerpo[0]["minutos_retardos"] = minutosRetardos;
+    }
+
     if (minutosR) cuerpo[0]["minutos_retardos"] = minutosR;
     let response = await ceM.update(cuerpo);
 
@@ -286,7 +305,7 @@ controller.update = async (req, res) => {
       if (idTipoFalta == 4) (text = "Inconformidad por falta"), (inc = 8);
       if (idTipoFalta == 5) (text = "Inconformidad por retardo"), (inc = 2);
       if (idTipoFalta == 7)
-        (text = "Inconformidad por no chechar entrada"), (inc = 4);
+        (text = "Inconformidad por no chechar entrada o salida"), (inc = 4);
 
       await sncaM.insert([inc, ceViejo.idempleado, fecha, text]);
     }
