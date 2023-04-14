@@ -2,6 +2,13 @@ export default {
   tiempoLocal: (date) =>
     new Date(new Date(date).getTime() + new Date().getTimezoneOffset() * 60000),
 
+  tiempoMX: (date) =>
+    new Date(
+      new Date(date).getTime() +
+        new Date().getTimezoneOffset() * 60000 -
+        1000 * 60 * 60 * 24
+    ),
+
   tiempoLocalShort: (date) =>
     new Intl.DateTimeFormat("es-MX", {
       dateStyle: "short",

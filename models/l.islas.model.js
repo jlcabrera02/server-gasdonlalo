@@ -1,7 +1,7 @@
 import connection from "./connection";
 import { format } from "mysql2";
 import resErr from "../respuestas/error.respuestas";
-const { errorDB, sinRegistro } = resErr;
+const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
@@ -16,121 +16,71 @@ model.findIslas = (idEstacion) =>
     });
   });
 
-model.findLecturas = (data) =>
+model.findManguerasByIsla = (idIsla) =>
   new Promise((resolve, reject) => {
-    let sql =
-      "SELECT * FROM lecturas WHERE idisla = ? AND idgas = ? ORDER BY fecha DESC";
+    let sql = "SELECT * FROM mangueras WHERE idisla = ?";
 
-    let dataDefault = {
-      idLectura: null,
-      idgas: data[1],
-      idisla: data[0],
-      lectura: 0,
-      fecha: null,
-      numReinicio: 0,
-    };
-
-    connection.query(sql, data, (err, res) => {
-      console.log(res);
+    connection.query(sql, idIsla, (err, res) => {
       if (err) return reject(errorDB());
-      if (res.length < 1)
-        return resolve({
-          anterior: null,
-          actual: dataDefault,
-        });
-      if (res.length === 1)
-        return resolve({
-          anterior: dataDefault,
-          actual: res[0],
-        });
-      if (res)
-        return resolve({
-          anterior: res[1],
-          actual: res[0],
-        });
-    });
-  });
-
-model.findGasolinaTipos = () =>
-  new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM gas";
-
-    connection.query(sql, (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
-    });
-  });
-
-model.findEstacionYTipos = (idIsla, idGas) =>
-  new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM islas_has_gas WHERE idisla = ? AND idgas = ?";
-
-    connection.query(sql, [idIsla, idGas], (err, res) => {
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
-      if (res) return resolve(res[0]);
     });
   });
 
 model.insertIsla = (nisla, idEstacion) =>
   new Promise((resolve, reject) => {
     let sql =
-      "INSERT INTO islas (nIsla, direccion, idestacion_servicio, habilitada) VALUES (?, 'I', ?, 1), (?, 'D', ?, 1)";
-    console.log(sql);
+      "INSERT INTO islas (nIsla, idestacion_servicio, habilitada) VALUES (?, ?, 1)";
 
     connection.query(
       sql,
       [nisla, idEstacion, nisla, idEstacion],
       (err, res) => {
-        console.log(err, res);
         if (err) return reject(errorDB());
-        if (res.length < 1) return reject(sinRegistro());
+        if (res.affectedRows < 1) return reject(sinCambios());
         if (res) return resolve(res);
       }
     );
   });
 
-model.updateIsla = (data) =>
+model.insertManguera = (data) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "INSERT INTO mangueras (idisla, idgas, tiene, direccion, idmanguera) VALUES ?";
+
+    connection.query(sql, [data], (err, res) => {
+      console.log(err);
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
+model.updateMangueras = (data) =>
   new Promise((resolve, reject) => {
     let sql = "";
 
     data.forEach((el) => {
       sql += format(
-        "UPDATE islas_has_gas SET tiene = ? WHERE idgas = ? AND idisla = ?; ",
+        "UPDATE mangueras SET tiene = ? WHERE idmanguera = ?; ",
         el
       );
     });
 
     connection.query(sql, (err, res) => {
+      console.log(err, data);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });
 
-model.updateNumIsla = (data) =>
+model.updateIsla = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "UPDATE islas SET nisla = ? WHERE idisla IN (?, ?)";
+    let sql = "UPDATE islas SET  ? WHERE idisla = ?";
 
     connection.query(sql, data, (err, res) => {
+      console.log(data);
       if (err) return reject(errorDB());
-      if (res.changedRows < 1) return reject(sinCambios());
-      if (res) return resolve(res);
-    });
-  });
-
-model.insertGas = (idisla) =>
-  new Promise((resolve, reject) => {
-    let sql =
-      "INSERT INTO islas_has_gas (idisla, idgas, tiene) VALUES (?, 'M', 0), (?, 'P', 0), (?, 'D', 0)";
-
-    connection.query(sql, [idisla, idisla, idisla], (err, res) => {
-      // console.log(res);
-      // console.log([idIsla, idGas]);
-      console.log(idisla, err);
-      if (err) return reject(errorDB());
-      if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
     });
   });

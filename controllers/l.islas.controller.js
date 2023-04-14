@@ -1,11 +1,7 @@
 import islaM from "../models/l.islas.model";
 import { guardarBitacora } from "../models/auditorias";
-// import errRes from "../respuestas/error.respuestas";
 import auth from "../models/auth.model";
-// import formatTiempo from "../assets/formatTiempo";
-// const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
-// const { sinRegistro } = errRes;
 
 const controller = {};
 
@@ -16,34 +12,16 @@ controller.findIslas = async (req, res) => {
     const { idEstacion } = req.params;
 
     const islas = await islaM.findIslas(idEstacion);
-    const gasolinas = [];
     for (let i = 0; i < islas.length; i++) {
-      let buscar = gasolinas.some((el) => el.numeroIsla === islas[i].nisla);
-      if (buscar) {
-        let restar = i - 1;
-        let index = restar / 2;
-        gasolinas[index].idIslas.idderecho = islas[i].idisla;
-        gasolinas[index].derecha = {
-          id: islas[i].id,
-          direccion: islas[i].direccion,
-          contiene: await consultGas(islas[i].idisla),
-        };
-      } else {
-        gasolinas.push({
-          numeroIsla: islas[i].nisla,
-          estacion: islas[i].idestacion_servicio,
-          habilitada: islas[i].habilitada && islas[i + 1].habilitada,
-          idIslas: { idizquierdo: islas[i].idisla },
-          izquierda: {
-            id: islas[i].id,
-            direccion: islas[i].direccion,
-            contiene: await consultGas(islas[i].idisla),
-          },
-        });
-      }
+      const el = islas[i];
+      const mangueras = await islaM.findManguerasByIsla(el.idisla);
+      islas[i].positionL = mangueras.filter((el) => el.direccion === "iz");
+      islas[i].positionR = mangueras.filter((el) => el.direccion === "dr");
     }
+    // const gasolinas = [];
+    // for (let i = 0; i < islas.length; i++) {}
 
-    res.status(200).json({ success: true, response: gasolinas });
+    res.status(200).json({ success: true, response: islas });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
@@ -60,8 +38,15 @@ controller.insertIslas = async (req, res) => {
     const { numeroIsla, idEstacion } = req.body;
 
     const insertIsla = await islaM.insertIsla(numeroIsla, idEstacion);
-    await islaM.insertGas(insertIsla.insertId);
-    await islaM.insertGas(insertIsla.insertId + 1);
+    const dataMangueras = [
+      [insertIsla.insertId, "M", 0, 1, `M${insertIsla.insertId * 2 - 1}`],
+      [insertIsla.insertId, "M", 0, 2, `M${insertIsla.insertId * 2}`],
+      [insertIsla.insertId, "P", 0, 1, `p${insertIsla.insertId * 2 - 1}`],
+      [insertIsla.insertId, "P", 0, 2, `p${insertIsla.insertId * 2}`],
+      [insertIsla.insertId, "D", 0, 1, `D${insertIsla.insertId * 2 - 1}`],
+      [insertIsla.insertId, "D", 0, 2, `D${insertIsla.insertId * 2}`],
+    ];
+    await islaM.insertManguera(dataMangueras);
 
     await guardarBitacora([
       "Insertar nueva isla",
@@ -80,47 +65,14 @@ controller.insertIslas = async (req, res) => {
   }
 };
 
-controller.insertLecturas = async (req, res) => {
+controller.updateMangueras = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
 
-    const cuerpo = req.body.map((el) => [
-      el.idisla,
-      el.idgas,
-      el.lectura,
-      el.fecha,
-    ]);
+    const cuerpo = req.body.map((el) => [el.tiene, el.idmanguera]);
 
-    const insertIsla = await islaM.insertIsla(numeroIsla, idEstacion);
-    await islaM.insertGas(insertIsla.insertId);
-    await islaM.insertGas(insertIsla.insertId + 1);
-
-    await guardarBitacora([
-      "Insertar nueva isla",
-      user.token.data.datos.idempleado,
-      2,
-      insertIsla.insertId,
-    ]);
-
-    res.status(200).json({ success: true, response: insertIsla });
-  } catch (err) {
-    if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
-    } else {
-      res.status(err.code).json(err);
-    }
-  }
-};
-
-controller.updateIsla = async (req, res) => {
-  try {
-    let user = verificar(req.headers.authorization);
-    if (!user.success) throw user;
-
-    const cuerpo = req.body.map((el) => [el.tiene, el.idgas, el.idisla]);
-
-    const response = await islaM.updateIsla(cuerpo);
+    const response = await islaM.updateMangueras(cuerpo);
 
     for (let i = 0; i < cuerpo.length; i++) {
       await guardarBitacora([
@@ -141,25 +93,31 @@ controller.updateIsla = async (req, res) => {
   }
 };
 
-controller.updateNumeroIsla = async (req, res) => {
+controller.updateIsla = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
 
-    const { numeroIsla, idIslas } = req.body;
+    const { idIsla } = req.params;
+    const { numeroIsla, idEstacionServicio, habilitada } = req.body;
 
-    const cuerpo = [numeroIsla, ...idIslas];
+    const cuerpo = [
+      {
+        nisla: numeroIsla,
+        idestacion_servicio: idEstacionServicio,
+        habilitada,
+      },
+      idIsla,
+    ];
 
-    console.log(cuerpo);
-
-    const response = await islaM.updateNumIsla(cuerpo);
+    const response = await islaM.updateIsla(cuerpo);
 
     for (let i = 0; i < cuerpo.length; i++) {
       await guardarBitacora([
-        "Modificar Numero Isla",
+        "Modificar Isla",
         user.token.data.datos.idempleado,
         3,
-        `${idIslas[0]} -- ${idIslas[1]}`,
+        idIsla,
       ]);
     }
 
@@ -173,32 +131,5 @@ controller.updateNumeroIsla = async (req, res) => {
     }
   }
 };
-
-async function consultGas(id) {
-  let lectm = false,
-    lectp = false,
-    lectd = false;
-  let m = await islaM.findEstacionYTipos(id, "M"),
-    p = await islaM.findEstacionYTipos(id, "P"),
-    d = await islaM.findEstacionYTipos(id, "D");
-
-  if (m.tiene) {
-    lectm = await islaM.findLecturas([id, "M"]);
-  }
-
-  if (p.tiene) {
-    lectp = await islaM.findLecturas([id, "P"]);
-  }
-
-  if (d.tiene) {
-    lectd = await islaM.findLecturas([id, "D"]);
-  }
-
-  return {
-    m: { ...m, lecturas: lectm },
-    p: { ...p, lecturas: lectp },
-    d: { ...d, lecturas: lectd },
-  };
-}
 
 export default controller;
