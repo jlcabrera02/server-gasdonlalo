@@ -58,7 +58,7 @@ controller.updateLecturaInicial = async (req, res) => {
     ]);
 
     if (req.body[0].folio === null) {
-      response = await lecM.insertLecturas(cuerpoInsert);
+      response = await lecM.insertLecturasIniciales(cuerpoInsert);
     } else {
       response = await lecM.updateLecturaInicial(cuerpoEdit);
     }
