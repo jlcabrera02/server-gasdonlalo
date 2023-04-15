@@ -34,7 +34,28 @@ model.findAllTurnos = (id) =>
     let sql = `SELECT * FROM turno`;
 
     connection.query(sql, id, (err, res) => {
+      if (err) return reject(sinRegistro(null, "No se encontro los turnos"));
+      if (res) return resolve(res);
+    });
+  });
+
+model.findTurnoById = (idT) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM turno WHERE idturno = ?`;
+
+    connection.query(sql, idT, (err, res) => {
+      if (err) return reject(sinRegistro(null, "No existe el turno"));
+      if (res) return resolve(res[0]);
+    });
+  });
+
+model.insertTurnos = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = "INSERT INTO turno SET ?";
+
+    connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
+      if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });

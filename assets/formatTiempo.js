@@ -30,6 +30,13 @@ export default {
 
   diff: (f, h) => new Date(`${f} ${h}`),
 
+  tiempoHorario: (date) =>
+    new Date(
+      new Date(date).getTime() +
+        new Date().getTimezoneOffset() * 60000 -
+        1000 * 60 * 60 * 12
+    ),
+
   transformMinute: (m) => {
     let minutos = Math.abs(m / (1000 * 60));
     let segundo = Math.abs((m % (1000 * 60)) / 1000);

@@ -46,11 +46,11 @@ respuesta.errorDB = (response) => {
   };
 };
 
-respuesta.sinRegistro = (response = []) => {
+respuesta.sinRegistro = (response = [], msg) => {
   return {
     success: false,
     code: 400,
-    msg: "No hay registros",
+    msg: msg || "No hay registros",
     response,
   };
 };

@@ -41,8 +41,8 @@ controller.insertIslas = async (req, res) => {
     const dataMangueras = [
       [insertIsla.insertId, "M", 0, 1, `M${insertIsla.insertId * 2 - 1}`],
       [insertIsla.insertId, "M", 0, 2, `M${insertIsla.insertId * 2}`],
-      [insertIsla.insertId, "P", 0, 1, `p${insertIsla.insertId * 2 - 1}`],
-      [insertIsla.insertId, "P", 0, 2, `p${insertIsla.insertId * 2}`],
+      [insertIsla.insertId, "P", 0, 1, `P${insertIsla.insertId * 2 - 1}`],
+      [insertIsla.insertId, "P", 0, 2, `P${insertIsla.insertId * 2}`],
       [insertIsla.insertId, "D", 0, 1, `D${insertIsla.insertId * 2 - 1}`],
       [insertIsla.insertId, "D", 0, 2, `D${insertIsla.insertId * 2}`],
     ];
