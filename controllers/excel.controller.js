@@ -61,6 +61,8 @@ controller.relojChecador = async (req, res) => {
       const fechaParce = new Date(ano, mes - 1, dia, h, m, s);
       let fechaTiempo = formatTiempo.tiempoLocal(fechaParce);
       if (!formatoPm) fechaTiempo.setHours(fechaTiempo.getHours() - 12);
+      if (formatoPm && h === "12")
+        fechaTiempo.setHours(fechaTiempo.getHours() - 12);
       mapear.push({
         tiempoExcel: el.Tiempo,
         nombreCompleto: el.Nombre,
@@ -184,7 +186,6 @@ controller.pasosDespachar = async (req, res) => {
 
     for (let h = 0; h < despachadores.length; h++) {
       const emp = despachadores[h];
-      console.log(emp);
       const identificador = await pasosDM.agruparEvaluaciones([
         Number(emp.idempleado),
         fecha,
