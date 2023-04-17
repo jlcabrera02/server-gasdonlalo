@@ -86,7 +86,7 @@ controller.update = async (req, res) => {
       fecha,
       cantidad,
       recurso,
-      idempleado: idEmpleado,
+      idempleado_recibe: idEmpleado,
       tipo_recibo: tipoRecibo,
       estado,
     };
