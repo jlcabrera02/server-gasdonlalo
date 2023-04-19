@@ -107,6 +107,34 @@ controller.insert = async (req, res) => {
   }
 };
 
+controller.changeColor = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { idEmpleado } = req.params;
+    const { color } = req.body;
+
+    const cuerpo = [color, idEmpleado];
+
+    const response = await seM.changeColor(cuerpo);
+
+    await guardarBitacora([
+      "Actualizacion color solicitud empleo",
+      user.token.data.datos.idempleado,
+      3,
+      idEmpleado,
+    ]);
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.updateMotivo = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);

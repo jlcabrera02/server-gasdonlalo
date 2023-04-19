@@ -67,6 +67,17 @@ model.insert = (data) =>
     });
   });
 
+model.changeColor = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = "UPDATE empleado SET `color` = ? WHERE idempleado = ?";
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.affectedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
 model.update = (data) =>
   new Promise((resolve, reject) => {
     let sql =
