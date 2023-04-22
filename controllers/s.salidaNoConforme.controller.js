@@ -266,8 +266,19 @@ controller.findByEmpleado = async (req, res) => {
     let user = verificar(req.headers.authorization, 20);
     if (!user.success) throw user;
     const { idChecador } = req.params;
+    const { fechaI, fechaF } = req.query;
+    let sncs = [];
     const empleado = await empleadoM.findByIdChecador(idChecador);
-    const sncs = await salidaNoCM.findByEmpleado(empleado.idempleado);
+    if (fechaI && fechaF) {
+      sncs = await salidaNoCM.findByEmpleadoXfecha([
+        empleado.idempleado,
+        fechaI,
+        fechaF,
+      ]);
+    } else {
+      sncs = await salidaNoCM.findByEmpleado(empleado.idempleado);
+    }
+
     for (let i = 0; i < sncs.length; i++) {
       const { idempleado_autoriza, concesiones, acciones_corregir } = sncs[i];
       sncs[i].empleado = empleado;

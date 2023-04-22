@@ -58,6 +58,17 @@ model.findByEmpleado = (idEmpleado) =>
     });
   });
 
+model.findByEmpleadoXfecha = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT snc.*, inc.incumplimiento FROM salida_noconforme snc, incumplimiento inc WHERE inc.idincumplimiento = snc.idincumplimiento AND idempleado = ? AND snc.fecha BETWEEN ? AND ?`;
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      // if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.findSalidasXSemanaXidEmpleado = (id) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT COUNT(*) total, emp.nombre, emp.apellido_paterno, emp.apellido_materno, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) nombre_completo FROM salida_noconforme sn,empleado emp WHERE sn.idempleado = emp.idempleado AND sn.idempleado = ? AND sn.fecha BETWEEN ? AND ?`;
