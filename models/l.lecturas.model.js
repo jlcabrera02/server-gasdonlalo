@@ -57,7 +57,10 @@ model.insertLecturasIniciales = (data) =>
 
     connection.query(sql, [data], (err, res) => {
       if (err) return reject(errorDB());
-      if (res.changedRows < 1) return reject(sinCambios());
+      if (res.changedRows < 1)
+        return reject(
+          sinCambios("No se establecio una configuración inicial previa")
+        );
       if (res) return resolve(res);
     });
   });

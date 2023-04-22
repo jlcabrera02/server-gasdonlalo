@@ -1,5 +1,6 @@
 import connection from "./connection";
 import resErr from "../respuestas/error.respuestas";
+import { format } from "mysql2";
 const { errorDB, sinRegistro } = resErr;
 
 const model = {};
@@ -7,6 +8,27 @@ const model = {};
 model.findRecursos = () =>
   new Promise((resolve, reject) => {
     let sql = `SELECT re.*, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM recurso_entrega re, empleado emp WHERE re.idempleado_recibe = emp.idempleado ORDER BY re.fecha DESC`;
+    connection.query(sql, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findRecursosByEmpleado = (idEmpleado, fechaI, fechaF) =>
+  new Promise((resolve, reject) => {
+    let sql;
+    if (!fechaF && !fechaI) {
+      sql = format(
+        `SELECT re.*, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM recurso_entrega re, empleado emp WHERE re.idempleado_recibe = emp.idempleado AND idempleado = ? ORDER BY re.fecha DESC`,
+        idEmpleado
+      );
+    } else {
+      sql = format(
+        `SELECT re.*, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM recurso_entrega re, empleado emp WHERE re.idempleado_recibe = emp.idempleado AND emp.idempleado = ? AND re.fecha BETWEEN ? AND ? ORDER BY re.fecha DESC`,
+        [idEmpleado, fechaI, fechaF]
+      );
+    }
     connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());

@@ -59,7 +59,7 @@ respuesta.sinCambios = (response) => {
   return {
     success: false,
     code: 400,
-    msg: "No se detecto ningún cambio",
+    msg: response || "No se detecto ningún cambio",
     response,
   };
 };

@@ -37,6 +37,29 @@ controller.findRecursosXId = async (req, res) => {
   }
 };
 
+controller.findRecursosXEmpleado = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { idEmpleado } = req.params;
+    const { fechaI, fechaF } = req.query;
+
+    const response = await erM.findRecursosByEmpleado(
+      idEmpleado,
+      fechaI,
+      fechaF
+    );
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.insert = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
