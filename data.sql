@@ -10,19 +10,19 @@ INSERT INTO departamento VALUES
 (9, "Base Datos");
 
 INSERT INTO incumplimiento VALUES 
-(1, "INCUMPLIMIENTO REGLAS AREAS DEL DESPACHO"),
-(2, "RETARDOS"),
-(3, "CHECKLIST ERRONEO"),
-(4, "RELOJ CHECADOR"),
-(5, "HOJAS DE LIQUIDACION"),
-(6, "MONTOS FALTANTES"),
-(7, "FALTA RECURSOS"),
-(8, "FALTAS"),
-(9, "RECOLECCION DE EFECTIVO"),
-(10, "VENTA Y COBRO DE COMBUSTIBLE"),
-(11, "UNIFORME DE DESPACHO"),
-(12, "ACEITES"),
-(13, "LIMPIEZA ISLA");
+(1, "INCUMPLIMIENTO REGLAS AREAS DEL DESPACHO", 1),
+(2, "RETARDOS", 1),
+(3, "CHECKLIST ERRONEO", 1),
+(4, "RELOJ CHECADOR", 1),
+(5, "HOJAS DE LIQUIDACION", 1),
+(6, "MONTOS FALTANTES", 1),
+(7, "FALTA RECURSOS", 1),
+(8, "FALTAS", 1),
+(9, "RECOLECCION DE EFECTIVO", 1),
+(10, "VENTA Y COBRO DE COMBUSTIBLE", 1),
+(11, "UNIFORME DE DESPACHO", 1),
+(12, "ACEITES", 1),
+(13, "LIMPIEZA ISLA", 1);
 
 INSERT INTO empleado (idempleado, idchecador, nombre, apellido_paterno, apellido_materno, iddepartamento, estatus, edad, fecha_registro, update_time) VALUES
 (1, 1,"JOSE MANUEL", "ECHAVARRIA", "LANDERO", 1, 1, 50, "2022-12-14 00:00:00", CURRENT_TIMESTAMP),
@@ -303,7 +303,7 @@ INSERT INTO mangueras (idisla, idgas, tiene, direccion, idmanguera) VALUES
 (6, "D", 1, 1, "D11"),
 (6, "D", 1, 2, "D12");
 
-INSERT INTO lecturas_iniciales (idmanguera, lectura, fecha, folio) VALUES 
+/* INSERT INTO lecturas_iniciales (idmanguera, lectura, fecha, folio) VALUES 
 ("M1",  100, "2023-04-12",1),
 ("M2",  150, "2023-04-12",1),
 ("P1",  21, "2023-04-12",1),
@@ -321,4 +321,4 @@ INSERT INTO lecturas_iniciales (idmanguera, lectura, fecha, folio) VALUES
 ("P5",  10, "2023-04-12",1),
 ("P6",  0, "2023-04-12",1),
 ("D5",  0, "2023-04-12",1),
-("D6",  0, "2023-04-12",1);
+("D6",  0, "2023-04-12",1); */

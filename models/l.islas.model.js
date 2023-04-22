@@ -48,7 +48,8 @@ model.insertManguera = (data) =>
       "INSERT INTO mangueras (idisla, idgas, tiene, direccion, idmanguera) VALUES ?";
 
     connection.query(sql, [data], (err, res) => {
-      console.log(err);
+      console.log(err, "m");
+
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
