@@ -64,6 +64,7 @@ model.findByEmpleadoXfecha = (data) =>
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
+      console.log(data);
       // if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
     });
