@@ -25,6 +25,7 @@ import empleadoRouter from "./rh.empleado.router";
 import madrugador from "./rh.madrugador.route";
 import octanoso from "./rh.octanoso.route";
 import aceitoso from "./rh.aceitoso.route";
+import rhr from "./recursosHumanos";
 //Autenticacion
 import auth from "./auth.router";
 //Excel
@@ -38,7 +39,7 @@ import com from "./complementos.router";
 import indexV from "./view.index.router";
 
 //Liquidacion
-import islas from "./l.islas.router"
+import islas from "./l.islas.router";
 
 //Salidas no conformes
 route.use("/salida-no-conforme", salidaNoConformeRouter);
@@ -66,6 +67,7 @@ route.use("/madrugador", madrugador);
 route.use("/entrada", capturaEntrada);
 route.use("/octanoso", octanoso);
 route.use("/aceitoso", aceitoso);
+route.use("/recursoshumanos", rhr);
 //Autenticacion
 route.use("/auth", auth);
 //Complementos
