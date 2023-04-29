@@ -18,6 +18,20 @@ model.find = (query = null) =>
     });
   });
 
+model.findTodo = (query = null) =>
+  new Promise((resolve, reject) => {
+    let sql =
+      "SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento ORDER BY empleado.nombre";
+    if (query)
+      sql = `SELECT empleado.*, departamento.departamento FROM empleado, departamento WHERE empleado.iddepartamento = departamento.iddepartamento AND departamento.iddepartamento = ${query} ORDER BY empleado.nombre`;
+
+    connection.query(sql, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 model.findOne = (idEmpleado) =>
   //La usare para obtener todo los atributos con el idempleado.
   new Promise((resolve, reject) => {

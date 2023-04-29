@@ -14,7 +14,9 @@ export async function guardarNomina(req, res) {
     });
     res.status(200).json({ success: true, response });
   } catch (err) {
-    res.status(400).json({ success: false, err, msg: "asd" });
+    res
+      .status(400)
+      .json({ success: false, err, msg: "Error al guardar la nomina" });
   }
 }
 
@@ -30,6 +32,44 @@ export async function obtenerNominas(req, res) {
       ],
       where: {
         fecha: { [Op.between]: [fechaI, fechaF] },
+      },
+    });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    res.status(400).json({ success: false, err });
+  }
+}
+
+export async function obtenerUltimoRegistro(req, res) {
+  try {
+    const response = await nominas.findOne({
+      include: [
+        {
+          model: tiposNominas,
+        },
+        { model: empleados, include: [{ model: departamento }] },
+      ],
+      limit: 1,
+      order: [["idnomina", "DESC"]],
+    });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    res.status(400).json({ success: false, err });
+  }
+}
+
+export async function obtenerNomina(req, res) {
+  try {
+    const { idNomina } = req.params;
+    const response = await nominas.findOne({
+      include: [
+        {
+          model: tiposNominas,
+        },
+        { model: empleados, include: [{ model: departamento }] },
+      ],
+      where: {
+        idnomina: idNomina,
       },
     });
     res.status(200).json({ success: true, response });
@@ -76,6 +116,15 @@ export async function guardarTipoNomina(req, res) {
       tipo,
       banco,
     });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    res.status(400).json({ success: false, err: err, msg: "asd" });
+  }
+}
+
+export async function obtenerTipoNomina(req, res) {
+  try {
+    const response = await tiposNominas.findAll();
     res.status(200).json({ success: true, response });
   } catch (err) {
     res.status(400).json({ success: false, err: err, msg: "asd" });
