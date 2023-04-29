@@ -11,8 +11,13 @@ controller.find = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { departamento } = req.query;
-    let response = await empleadoM.find(departamento);
+    const { departamento, todo } = req.query;
+    let response;
+    if (todo) {
+      response = await empleadoM.findTodo(departamento);
+    } else {
+      response = await empleadoM.find(departamento);
+    }
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
