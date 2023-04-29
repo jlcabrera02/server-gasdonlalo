@@ -7,7 +7,7 @@ const model = {};
 model.obtenerHorario = (fechas) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT * FROM horarios, empleado emp, estacion_servicio es WHERE horarios.idempleado = emp.idempleado AND horarios.idestacion_servicio = es.idestacion_servicio AND  fechaturno BETWEEN ? AND ?";
+      "SELECT *, es.nombre as nombre_estacion, emp.nombre FROM horarios, empleado emp, estacion_servicio es WHERE horarios.idempleado = emp.idempleado AND horarios.idestacion_servicio = es.idestacion_servicio AND  fechaturno BETWEEN ? AND ?";
 
     connection.query(sql, fechas, (err, res) => {
       if (err) return reject(errorDB());
