@@ -21,8 +21,8 @@ detalleEmpleado.belongsTo(empleados, { foreignKey: "idempleado" });
 detalleEmpleado.belongsTo(tiposNominas, { foreignKey: "idtipo_nomina" });
 tiposNominas.hasMany(detalleEmpleado, { foreignKey: "idtipo_nomina" });
 
-Incumplimientos.belongsTo(departamentos, { foreignKey: "iddepartamento" });
-departamentos.hasMany(Incumplimientos, { foreignKey: "iddepartamento" });
+// Incumplimientos.belongsTo(departamentos, { foreignKey: "iddepartamento" });
+// departamentos.hasMany(Incumplimientos, { foreignKey: "iddepartamento" });
 
 SNC.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(SNC, { foreignKey: "idempleado" });

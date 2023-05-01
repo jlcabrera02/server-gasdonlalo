@@ -14,7 +14,7 @@ const Incumplimientos = sequelize.define(
       type: DataTypes.STRING(25),
       allowNull: false,
     },
-    iddepartamento: {
+    departamento: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
