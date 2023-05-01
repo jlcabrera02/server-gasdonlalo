@@ -8,7 +8,7 @@ import {
   obtenerNominas,
   obtenerTipoNomina,
   obtenerUltimoRegistro,
-} from "../../controllers//recursosHumanos/nominas.controller";
+} from "../../controllers/recursosHumanos/nominas.controller";
 const route = router();
 
 route.get("/nomina/ultima", obtenerUltimoRegistro);

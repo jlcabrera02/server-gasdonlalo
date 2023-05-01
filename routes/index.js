@@ -3,6 +3,7 @@ import Router from "express";
 import salidaNoConformeRouter from "./s.salidaNoConforme.router";
 import incumplimientoRouter from "./s.incumplimiento.router";
 import acumular from "./s.acumular.router";
+import snc from "./snc/index";
 //despacho
 import listaRecursosDespachadorRouter from "./d.listaRecursosDespachador.router";
 import evaluacionUniformeRouter from "./d.evaluacionUniforme.router";
@@ -45,6 +46,7 @@ import islas from "./l.islas.router";
 route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/incumplimiento", incumplimientoRouter);
 route.use("/sncacumuladas", acumular);
+route.use("/snc", snc);
 //despacho
 route.use("/lista-recurso-despachador", listaRecursosDespachadorRouter);
 route.use("/monto-faltante-despachador", montoFaltanteRouter);
