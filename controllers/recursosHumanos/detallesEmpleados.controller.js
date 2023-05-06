@@ -30,6 +30,7 @@ export async function buscarDetallesXEmpleados(req, res) {
       where: {
         [Op.or]: [{ estatus: 1 }, { estatus: 2 }],
       },
+      include: { model: departamentos },
     });
     for (let i = 0; i < empleadosD.length; i++) {
       const detalle = await detalleEmpleado.findOne({

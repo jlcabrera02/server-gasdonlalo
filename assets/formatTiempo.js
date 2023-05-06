@@ -2,6 +2,27 @@ export default {
   tiempoLocal: (date) =>
     new Date(new Date(date).getTime() + new Date().getTimezoneOffset() * 60000),
 
+  formatHours: (date, convert = true) =>
+    new Intl.DateTimeFormat("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      // hour12: true,
+    }).format(
+      new Date(
+        convert
+          ? new Date(date).getTime() + new Date().getTimezoneOffset() * 60000
+          : date
+      )
+    ),
+
+  tiempoHora: (date) =>
+    new Date(
+      new Date(
+        new Date(date).getTime() + new Date().getTimezoneOffset() * 60000
+      ).getTime()
+    ),
+
   tiempoMX: (date) =>
     new Date(
       new Date(date).getTime() +

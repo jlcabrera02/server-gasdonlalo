@@ -7,6 +7,9 @@ import detalleEmpleado from "./recursosHumanos/detalleEmpleado.model";
 import SNC from "./snc/snc.model";
 import Incumplimientos from "./snc/incumplimientos";
 
+//Administrativo
+import Turnos from "./administrativo/turnos.model";
+
 nominas.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(nominas, { foreignKey: "idempleado" });
 
@@ -43,4 +46,5 @@ export default {
   detalleEmpleado,
   SNC,
   Incumplimientos,
+  Turnos,
 };

@@ -4,14 +4,10 @@ import sequelize from "../../config/configdb";
 const detalles = sequelize.define(
   "detalles",
   {
-    iddetalle: {
+    idempleado: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
-    },
-    idempleado: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
     },
     idtipo_nomina: {
       type: DataTypes.INTEGER,

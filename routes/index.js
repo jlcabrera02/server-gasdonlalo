@@ -14,6 +14,7 @@ import oylRouter from "./d.oylIsla.router";
 //administrativo
 import estacionServiceRouter from "./ad.estacionService.router";
 import bombaRouter from "./ad.bomba.router";
+import administrativo from "./administrativo";
 //mantenimiento
 import ordenTrabajoCalidad from "./m.ordenTrabajoCalidad.router";
 // Recursos humanos
@@ -80,5 +81,6 @@ route.use("/excel", excel);
 route.use("/view", indexV);
 //Lisquidacion
 route.use("/liquidacion", islas);
+route.use("/administrativo", administrativo);
 
 export default route;

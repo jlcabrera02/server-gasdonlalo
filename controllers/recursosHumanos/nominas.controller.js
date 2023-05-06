@@ -122,9 +122,40 @@ export async function guardarTipoNomina(req, res) {
   }
 }
 
+export async function editarTipoNomina(req, res) {
+  try {
+    const { idTipo } = req.params;
+    const { tipo, banco } = req.body;
+    const response = await tiposNominas.update(
+      {
+        tipo,
+        banco,
+      },
+      { where: { idtipo_nomina: idTipo } }
+    );
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    res.status(400).json({ success: false, err: err, msg: "asd" });
+  }
+}
+
+export async function eliminarTipoNomina(req, res) {
+  try {
+    const { idTipo } = req.params;
+    const response = await tiposNominas.destroy({
+      where: { idtipo_nomina: idTipo },
+    });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    res.status(400).json({ success: false, err: err, msg: "asd" });
+  }
+}
+
 export async function obtenerTipoNomina(req, res) {
   try {
     const response = await tiposNominas.findAll();
+    console.log({ response });
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     res.status(400).json({ success: false, err: err, msg: "asd" });
