@@ -7,7 +7,7 @@ const model = {};
 model.liquidacionesPendientes = (fecha) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT * FROM liquidaciones lq, horarios hr, empleado emp, turno t WHERE lq.folio = hr.idhorario AND emp.idempleado = hr.idempleado AND t.idturno = hr.idturno  AND hr.fechaliquidacion = ?";
+      "SELECT lq.*, hr.*, emp.*, t.*, es.nombre AS nombres_estacion FROM liquidaciones lq, horarios hr, empleado emp, turno t, estacion_servicio es WHERE lq.folio = hr.idhorario AND emp.idempleado = hr.idempleado AND t.idturno = hr.idturno  AND  es.idestacion_servicio = hr.idestacion_servicio AND hr.fechaliquidacion = ?";
 
     connection.query(sql, fecha, (err, res) => {
       if (err) return reject(errorDB());
@@ -52,11 +52,34 @@ model.capturarFolio = (data) =>
 
 model.capturarVales = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "INSERT INTO vales (monto, combustible, folioH, folio) VALUES ? ";
+    let sql =
+      "INSERT INTO vales (monto, combustible, folioH, folio, label) VALUES ? ";
 
     connection.query(sql, [data], (err, res) => {
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findValesByFolio = (folio) =>
+  new Promise((resolve, reject) => {
+    let sql = "SELECT * FROM vales WHERE folioH = ?";
+
+    connection.query(sql, folio, (err, res) => {
+      if (err) return reject(errorDB());
+      // if (res.affectedRows < 1) return reject(sinCambios());
+      if (res) return resolve(res);
+    });
+  });
+
+model.findEfectivoByFolio = (folio) =>
+  new Promise((resolve, reject) => {
+    let sql = "SELECT * FROM efectivo WHERE folioH = ?";
+
+    connection.query(sql, folio, (err, res) => {
+      if (err) return reject(errorDB());
+      // if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });

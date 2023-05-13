@@ -35,4 +35,6 @@ route.post("/capturar", liquido.insertarLiquidos);
 route.post("/reservar/:folio", liquido.reservarFolio);
 route.delete("/noreservar/:folio", liquido.quitarReservarFolio);
 
+route.get("/capturados/:folio", liquido.consultarLiquido);
+
 export default route;

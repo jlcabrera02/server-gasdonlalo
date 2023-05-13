@@ -28,9 +28,12 @@ controller.insertarLiquidos = async (req, res) => {
       el.combustible,
       folio,
       el.folio,
+      el.label,
     ]);
 
     const efectivosC = efectivo.map((el) => [el.monto, folio, el.folio]);
+
+    console.log(efectivosC);
 
     const lecturasTable = lecturas.map((el) => [
       el.manguera,
@@ -132,6 +135,35 @@ controller.liquidacionesPendientes = async (req, res) => {
     if (!user.success) throw user;
     const { fecha } = req.query;
     const response = await liqM.liquidacionesPendientes(fecha);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.consultarLiquido = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { folio } = req.params;
+
+    const vales = await liqM.findValesByFolio(folio);
+    const efectivo = await liqM.findEfectivoByFolio(folio);
+    const liquidaciones = await liqM.liquidacionByFolio(folio);
+    const horario = await horM.obtenerHorarioById(folio);
+    const response = {
+      ...liquidaciones,
+      vales,
+      efectivo,
+      horario,
+    };
+
+    // const response = await liqM.liquidacionesPendientes(fecha);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

@@ -18,7 +18,8 @@ model.obtenerHorario = (fechas) =>
 
 model.obtenerHorarioById = (idHorario) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM horarios WHERE  idhorario = ?";
+    let sql =
+      "SELECT emp.*, horarios.*, turno.turno, es.nombre AS nombre_estacion FROM horarios, empleado emp,  turno, estacion_servicio es WHERE  emp.idempleado = horarios.idempleado AND es.idestacion_servicio = horarios.idestacion_servicio AND horarios.idturno = turno.idturno AND idhorario = ?";
 
     connection.query(sql, idHorario, (err, res) => {
       console.log(err);
