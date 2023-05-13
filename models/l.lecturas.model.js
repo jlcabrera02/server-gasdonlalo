@@ -8,7 +8,7 @@ const model = {};
 model.lastFolio = (idEstacion) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT * FROM lecturas_iniciales lci, mangueras mg, islas WHERE lci.idmanguera = mg.idmanguera AND mg.idisla = islas.idisla AND islas.idestacion_servicio = ?  ORDER BY folio DESC LIMIT 1";
+      "SELECT * FROM lecturas_iniciales lci, mangueras mg, islas WHERE lci.idmanguera = mg.idmanguera AND mg.idisla = islas.idisla AND islas.idestacion_servicio = ?  ORDER BY lci.idlectura DESC LIMIT 1";
 
     connection.query(sql, idEstacion, (err, res) => {
       if (err) return reject(errorDB());
@@ -20,7 +20,7 @@ model.lastFolio = (idEstacion) =>
 model.lastFolioEstacion = (idEstacion) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT lci.* FROM lecturas_iniciales lci, mangueras mg, islas WHERE lci.idmanguera = mg.idmanguera AND mg.idisla = islas.idisla AND islas.idestacion_servicio = ? ORDER BY folio DESC LIMIT 1";
+      "SELECT lci.* FROM lecturas_iniciales lci, mangueras mg, islas WHERE lci.idmanguera = mg.idmanguera AND mg.idisla = islas.idisla AND islas.idestacion_servicio = ? ORDER BY lci.idlectura DESC LIMIT 1";
 
     connection.query(sql, idEstacion, (err, res) => {
       if (err) return reject(errorDB());

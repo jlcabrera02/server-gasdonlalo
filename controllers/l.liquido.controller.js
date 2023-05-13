@@ -23,9 +23,14 @@ controller.insertarLiquidos = async (req, res) => {
       };
     }
 
-    const valesC = vales.map((el) => [el.monto, el.combustible, folio]);
+    const valesC = vales.map((el) => [
+      el.monto,
+      el.combustible,
+      folio,
+      el.folio,
+    ]);
 
-    const efectivosC = efectivo.map((el) => [el.monto, folio]);
+    const efectivosC = efectivo.map((el) => [el.monto, folio, el.folio]);
 
     const lecturasTable = lecturas.map((el) => [
       el.manguera,

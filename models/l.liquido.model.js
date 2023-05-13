@@ -52,7 +52,7 @@ model.capturarFolio = (data) =>
 
 model.capturarVales = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "INSERT INTO vales (monto, combustible, folio) VALUES ? ";
+    let sql = "INSERT INTO vales (monto, combustible, folioH, folio) VALUES ? ";
 
     connection.query(sql, [data], (err, res) => {
       if (err) return reject(errorDB());
@@ -63,7 +63,7 @@ model.capturarVales = (data) =>
 
 model.capturarEfectivo = (data) =>
   new Promise((resolve, reject) => {
-    let sql = "INSERT INTO efectivo (monto, folio) VALUES ? ";
+    let sql = "INSERT INTO efectivo (monto, folioH, folio) VALUES ? ";
 
     connection.query(sql, [data], (err, res) => {
       if (err) return reject(errorDB());
