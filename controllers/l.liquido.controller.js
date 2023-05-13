@@ -76,9 +76,19 @@ controller.reservarFolio = async (req, res) => {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
     const { folio } = req.params;
+    const { numero, total } = req.body;
     const idempleadoC = user.token.data.datos.idempleado;
 
-    const cuerpo = [{ capturado: 1, idempleado_captura: idempleadoC }, folio];
+    const cuerpo = [
+      {
+        capturado: 1,
+        idempleado_captura: idempleadoC,
+        paginacion: JSON.stringify({ numero, total }),
+      },
+      folio,
+    ];
+
+    console.log(cuerpo);
 
     const response = await liqM.capturarFolio(cuerpo);
     res.status(200).json({ success: true, response });
