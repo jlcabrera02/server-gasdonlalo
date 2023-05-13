@@ -54,6 +54,7 @@ controller.insertarLiquidos = async (req, res) => {
 
     await lecM.insertLecturas(lecturasTable);
     await liqM.capturarEfectivo(efectivosC);
+    console.log("asds");
 
     // esta funcion insertar las lecturas iniciales para el siguiente turno
     await insertLecturasFinales(

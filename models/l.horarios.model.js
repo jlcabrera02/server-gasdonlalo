@@ -54,42 +54,11 @@ model.eliminarHorario = (idHorario) =>
     let sql = "DELETE FROM  horarios WHERE idhorario = ?";
 
     connection.query(sql, idHorario, (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.changedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
     });
   });
-
-/* 
-
-model.updateMangueras = (data) =>
-  new Promise((resolve, reject) => {
-    let sql = "";
-
-    data.forEach((el) => {
-      sql += format(
-        "UPDATE mangueras SET tiene = ? WHERE idgas = ? AND idisla = ? AND direccion = ?; ",
-        el
-      );
-    });
-
-    connection.query(sql, (err, res) => {
-      console.log(err, data);
-      if (err) return reject(errorDB());
-      if (res.changedRows < 1) return reject(sinCambios());
-      if (res) return resolve(res);
-    });
-  });
-
-model.updateIsla = (data) =>
-  new Promise((resolve, reject) => {
-    let sql = "UPDATE islas SET  ? WHERE idisla = ?";
-
-    connection.query(sql, data, (err, res) => {
-      console.log(data);
-      if (err) return reject(errorDB());
-      if (res) return resolve(res);
-    });
-  }); */
 
 export default model;

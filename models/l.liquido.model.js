@@ -18,7 +18,7 @@ model.liquidacionesPendientes = (fecha) =>
 
 model.liquidacionByFolio = (folio) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM liquidaciones WHERE idliquidacion = ?";
+    let sql = "SELECT * FROM liquidaciones WHERE folio = ?";
 
     connection.query(sql, folio, (err, res) => {
       if (err) return reject(errorDB());
@@ -66,6 +66,7 @@ model.capturarEfectivo = (data) =>
     let sql = "INSERT INTO efectivo (monto, folioH, folio) VALUES ? ";
 
     connection.query(sql, [data], (err, res) => {
+      console.log(err);
       if (err) return reject(errorDB());
       if (res.affectedRows < 1) return reject(sinCambios());
       if (res) return resolve(res);
