@@ -5,9 +5,25 @@ import { insertLecturasFinales } from "../services/lecturasFinales";
 // import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import formatTiempo from "../assets/formatTiempo";
+import modelos from "../models/";
+const { LecturasFinales, InfoLecturas, Mangueras } = modelos;
 const { verificar } = auth;
 
 const controller = {};
+
+controller.prueba = async (req, res) => {
+  try {
+    const a = await Mangueras.findAll();
+    res.status(200).json({ success: true, response: a });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 controller.insertarLiquidos = async (req, res) => {
   try {

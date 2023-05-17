@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../config/configdb";
+import sequelize from "../../../config/configdb";
 
 const Islas = sequelize.define(
   "islas",
@@ -20,6 +20,7 @@ const Islas = sequelize.define(
     habilitada: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
+      defaultValue: true,
     },
   },
   {

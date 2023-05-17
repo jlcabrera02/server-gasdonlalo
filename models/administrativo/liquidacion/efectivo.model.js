@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../config/configdb";
+import sequelize from "../../../config/configdb";
 
 const Efectivo = sequelize.define(
   "efectivo",

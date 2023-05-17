@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../config/configdb";
+import sequelize from "../../../config/configdb";
 
 const Mangueras = sequelize.define(
   "mangueras",
@@ -11,15 +11,14 @@ const Mangueras = sequelize.define(
     tiene: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
+      defaultValue: false,
     },
     idisla: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
       allowNull: false,
     },
     idgas: {
       type: DataTypes.CHAR,
-      primaryKey: true,
       allowNull: false,
     },
     direccion: {

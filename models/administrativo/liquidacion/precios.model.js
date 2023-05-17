@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../config/configdb";
+import sequelize from "../../../config/configdb";
 
-const Islas = sequelize.define(
+const Precios = sequelize.define(
   "precios",
   {
     idprecio: {
@@ -31,4 +31,4 @@ const Islas = sequelize.define(
   }
 );
 
-export default Islas;
+export default Precios;

@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../config/configdb";
+import sequelize from "../../../config/configdb";
 
 const InfoLect = sequelize.define(
   "info_lecturas",
@@ -13,10 +13,6 @@ const InfoLect = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    idhorario: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     idliquidacion: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -24,7 +20,7 @@ const InfoLect = sequelize.define(
   },
   {
     freezeTableName: true,
-    createdAt: "create_time",
+    createdAt: "createdAt",
     updatedAt: false,
   }
 );

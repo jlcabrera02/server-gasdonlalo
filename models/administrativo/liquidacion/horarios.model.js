@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../config/configdb";
+import sequelize from "../../../config/configdb";
 
-const Horario = sequelize.define(
+const Horarios = sequelize.define(
   "horarios",
   {
     idhorario: {
@@ -17,11 +17,11 @@ const Horario = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    fechaTurno: {
+    fechaturno: {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    fechaLiquidacion: {
+    fechaliquidacion: {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
@@ -36,4 +36,4 @@ const Horario = sequelize.define(
   }
 );
 
-export default Horario;
+export default Horarios;

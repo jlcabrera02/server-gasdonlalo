@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../config/configdb";
+import sequelize from "../../../config/configdb";
 
 const LecturasFinales = sequelize.define(
   "lecturas_finales",
@@ -9,7 +9,12 @@ const LecturasFinales = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    lectura: {
+    lecturai: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+    },
+    lecturaf: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
@@ -18,10 +23,14 @@ const LecturasFinales = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    precio: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+    },
   },
   {
     freezeTableName: true,
-    createdAt: "create_time",
+    createdAt: "createdAt",
     updatedAt: false,
   }
 );

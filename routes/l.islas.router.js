@@ -38,4 +38,6 @@ route.delete("/noreservar/:folio", liquido.quitarReservarFolio);
 
 route.get("/capturados/:folio", liquido.consultarLiquido);
 
+route.get("/prueba", liquido.prueba);
+
 export default route;

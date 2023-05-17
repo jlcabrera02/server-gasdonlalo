@@ -1,10 +1,10 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../config/configdb";
+import sequelize from "../../../config/configdb";
 
 const Vales = sequelize.define(
   "vales",
   {
-    idvales: {
+    idvale: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -18,12 +18,16 @@ const Vales = sequelize.define(
       allowNull: false,
     },
     folio: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     combustible: {
       type: DataTypes.CHAR,
-      allowNull: true,
+      allowNull: false,
+    },
+    label: {
+      type: DataTypes.STRING(8),
+      allowNull: false,
     },
   },
   {
