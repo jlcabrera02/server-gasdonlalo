@@ -6,7 +6,7 @@ const model = {};
 
 model.ultimosPrecios = () =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM precios ORDER BY fecha, createdAt LIMIT 3";
+    let sql = "SELECT * FROM precios ORDER BY createdAt DESC LIMIT 3";
 
     connection.query(sql, (err, res) => {
       console.log(err);
@@ -21,6 +21,16 @@ model.preciosPorFecha = (fecha) =>
       "SELECT * FROM precios WHERE fecha = ? ORDER BY fecha, createdAt LIMIT 3";
 
     connection.query(sql, fecha, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
+model.preciosHistoricos = () =>
+  new Promise((resolve, reject) => {
+    let sql = "SELECT * FROM precios";
+
+    connection.query(sql, (err, res) => {
       if (err) return reject(errorDB());
       if (res) return resolve(res);
     });

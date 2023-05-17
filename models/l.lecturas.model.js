@@ -8,7 +8,7 @@ const model = {};
 model.lastFolio = (idEstacion) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT * FROM lecturas_iniciales lci, mangueras mg, islas WHERE lci.idmanguera = mg.idmanguera AND mg.idisla = islas.idisla AND islas.idestacion_servicio = ?  ORDER BY lci.idlectura DESC LIMIT 1";
+      "SELECT * FROM lecturas_finales lcf, info_lecturas infl, mangueras mg, islas WHERE lcf.idmanguera = mg.idmanguera AND mg.idisla = islas.idisla AND infl.idinfo_lectura = lcf.idinfo_lectura AND islas.idestacion_servicio = ?  ORDER BY lcf.idlectura DESC LIMIT 1";
 
     connection.query(sql, idEstacion, (err, res) => {
       if (err) return reject(errorDB());
@@ -20,7 +20,7 @@ model.lastFolio = (idEstacion) =>
 model.lastFolioEstacion = (idEstacion) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT lci.* FROM lecturas_iniciales lci, mangueras mg, islas WHERE lci.idmanguera = mg.idmanguera AND mg.idisla = islas.idisla AND islas.idestacion_servicio = ? ORDER BY lci.idlectura DESC LIMIT 1";
+      "SELECT lcf.* FROM lecturas_finales lcf, info_lecturas infl, mangueras mg, islas WHERE lcf.idmanguera = mg.idmanguera AND mg.idisla = islas.idisla AND infl.idinfo_lectura = lcf.idinfo_lectura AND islas.idestacion_servicio = ? ORDER BY lcf.idlectura DESC LIMIT 1";
 
     connection.query(sql, idEstacion, (err, res) => {
       if (err) return reject(errorDB());
@@ -32,7 +32,7 @@ model.lastFolioEstacion = (idEstacion) =>
 model.lecturasIniciales = (data) =>
   new Promise((resolve, reject) => {
     let sql =
-      "SELECT * FROM lecturas_iniciales lci, mangueras mg, islas WHERE lci.idmanguera = mg.idmanguera AND mg.idisla = islas.idisla AND islas.idestacion_servicio = ? AND lci.folio = ? ORDER BY lci.folio DESC";
+      "SELECT * FROM lecturas_finales lcf, info_lecturas infl mangueras mg, islas WHERE lcf.idmanguera = mg.idmanguera AND mg.idisla = islas.idisla AND islas.idestacion_servicio = ? AND infl.idinfo_lectura = lcf.idinfo_lectura AND infl.folio = ? ORDER BY lcf.folio DESC";
 
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
@@ -40,9 +40,10 @@ model.lecturasIniciales = (data) =>
     });
   });
 
-model.lecturasByFolio = (folio) =>
+model.lecturasByIdLiquidacion = (folio) =>
   new Promise((resolve, reject) => {
-    let sql = "SELECT * FROM lecturas_iniciales WHERE folio = ?";
+    let sql =
+      "SELECT * FROM lecturas_finales lecf, info_lecturas infl WHERE infl.idinfo_lectura = lcf.idinfo_lectura AND infl.idliquidacion = ?";
 
     connection.query(sql, folio, (err, res) => {
       if (err) return reject(errorDB());
@@ -50,10 +51,10 @@ model.lecturasByFolio = (folio) =>
     });
   });
 
-model.insertLecturasIniciales = (data) =>
+model.insertLecturasFinales = (data) =>
   new Promise((resolve, reject) => {
     let sql =
-      "INSERT INTO lecturas_iniciales (idmanguera, lectura, fecha, folio) VALUES ?";
+      "INSERT INTO lecturas_finales (idmanguera, lectura, fecha, idliquidacion) VALUES ?";
 
     connection.query(sql, [data], (err, res) => {
       if (err) return reject(errorDB());
@@ -83,7 +84,7 @@ model.updateLecturaInicial = (data) =>
 
     data.forEach((el) => {
       sql += format(
-        "UPDATE lecturas_iniciales SET lectura =  ?, updatedAt = CURRENT_TIME WHERE folio = ? AND idmanguera = ?; ",
+        "UPDATE lecturas_finales SET lectura =  ?, updatedAt = CURRENT_TIME WHERE folio = ? AND idmanguera = ?; ",
         el
       );
     });
@@ -97,7 +98,7 @@ model.updateLecturaInicial = (data) =>
 
 model.deleteLecturaInicial = (folio) =>
   new Promise((resolve, reject) => {
-    let sql = "DELETE FROM lecturas_iniciales WHERE folio = ?";
+    let sql = "DELETE FROM lecturas_finales WHERE folio = ?";
 
     connection.query(sql, folio, (err, res) => {
       if (err) return reject(errorDB());

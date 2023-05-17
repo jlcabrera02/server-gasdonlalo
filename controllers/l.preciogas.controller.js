@@ -55,6 +55,23 @@ controller.obtenerPrecios = async (req, res) => {
   }
 };
 
+controller.obtenerPreciosHistoricos = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const response = await preM.preciosHistoricos();
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.actualizarPrecios = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);

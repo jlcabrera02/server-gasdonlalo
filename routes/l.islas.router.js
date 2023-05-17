@@ -25,6 +25,7 @@ route.put("/horarios/edit/:idHorario", horarios.actualizarHorario);
 route.delete("/horarios/delete/:idHorario", horarios.eliminarHorario);
 
 //captura de precios
+route.get("/preciosCombustible/Historico", precio.obtenerPreciosHistoricos);
 route.get("/preciosCombustible", precio.obtenerPrecios);
 route.post("/preciosCombustible", precio.insertarPrecios);
 route.put("/preciosCombustible/edit/:idPrecio", precio.actualizarPrecios);
