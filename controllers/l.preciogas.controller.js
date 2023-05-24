@@ -1,7 +1,8 @@
 import preM from "../models/l.preciogas.model";
 import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
-import formatTiempo from "../assets/formatTiempo";
+import models from "../models/";
+const { Precios } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -14,16 +15,15 @@ controller.insertarPrecios = async (req, res) => {
     const idempleadoC = user.token.data.datos.idempleado;
 
     const cuerpo = [
-      ["M", fecha, idempleadoC, M],
-      ["P", fecha, idempleadoC, P],
-      ["D", fecha, idempleadoC, D],
+      { idgas: "M", fecha, idempleado_captura: idempleadoC, precio: M },
+      { idgas: "P", fecha, idempleado_captura: idempleadoC, precio: P },
+      { idgas: "D", fecha, idempleado_captura: idempleadoC, precio: D },
     ];
 
-    const response = await preM.nuevosPrecios(cuerpo);
+    const response = await Precios.bulkCreate(cuerpo);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -39,14 +39,16 @@ controller.obtenerPrecios = async (req, res) => {
     const { fecha } = req.query;
     let response;
     if (fecha) {
-      response = await preM.preciosPorFecha(fecha);
+      response = await Precios.findAll({ where: { fecha } });
     } else {
-      response = await preM.ultimosPrecios();
+      response = await Precios.findAll({
+        order: [["createdAt", "DESC"]],
+        limit: 3,
+      });
     }
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -59,7 +61,7 @@ controller.obtenerPreciosHistoricos = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const response = await preM.preciosHistoricos();
+    const response = await Precios.findAll();
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -80,8 +82,14 @@ controller.actualizarPrecios = async (req, res) => {
     const { precio } = req.body;
 
     const idempleadoC = user.token.data.datos.idempleado;
+    const cuerpo = {
+      precio,
+      idempleado_captura: idempleadoC,
+    };
 
-    const response = await preM.updatePrecios([precio, idempleadoC, idPrecio]);
+    const response = await Precios.update(cuerpo, {
+      where: { idprecio: idPrecio },
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {

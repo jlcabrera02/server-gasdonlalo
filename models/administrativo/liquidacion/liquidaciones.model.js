@@ -28,6 +28,7 @@ const Liquidaciones = sequelize.define(
     capturado: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
+      defaultValue: false,
     },
     idempleado_captura: {
       type: DataTypes.INTEGER,

@@ -1,5 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/configdb";
+import Islas from "./islas.model";
+import Gas from "./gas.model";
 
 const Mangueras = sequelize.define(
   "mangueras",
@@ -13,14 +15,22 @@ const Mangueras = sequelize.define(
       allowNull: false,
       defaultValue: false,
     },
-    idisla: {
+    /* idisla: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: Islas,
+        key: "idisla",
+      },
     },
     idgas: {
       type: DataTypes.CHAR,
       allowNull: false,
-    },
+      references: {
+        model: Gas,
+        key: "idgas",
+      },
+    }, */
     direccion: {
       type: DataTypes.ENUM("iz", "dr"),
       primaryKey: true,
@@ -32,5 +42,8 @@ const Mangueras = sequelize.define(
     timestamps: false,
   }
 );
+
+Islas.belongsToMany(Gas, { through: Mangueras, foreignKey: "idisla" });
+Gas.belongsToMany(Islas, { through: Mangueras, foreignKey: "idgas" });
 
 export default Mangueras;

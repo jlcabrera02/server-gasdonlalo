@@ -1,25 +1,16 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/configdb";
+import Mangueras from "./mangueras.model";
+import InfoLect from "./infoLecturas.model";
 
 const LecturasFinales = sequelize.define(
   "lecturas_finales",
   {
-    idmanguera: {
-      type: DataTypes.STRING(3),
-      primaryKey: true,
-      autoIncrement: true,
-    },
     lecturai: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      primaryKey: true,
     },
     lecturaf: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-    },
-    idinfo_lectura: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -34,5 +25,14 @@ const LecturasFinales = sequelize.define(
     updatedAt: false,
   }
 );
+
+InfoLect.belongsToMany(Mangueras, {
+  through: LecturasFinales,
+  foreignKey: "idinfo_lectura",
+});
+Mangueras.belongsToMany(InfoLect, {
+  through: LecturasFinales,
+  foreignKey: "idmanguera",
+});
 
 export default LecturasFinales;

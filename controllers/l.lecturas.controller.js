@@ -1,8 +1,8 @@
-import lecM from "../models/l.lecturas.model";
-import preM from "../models/l.preciogas.model";
 import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
-import ft from "../assets/formatTiempo";
+import models from "../models";
+import sequelize from "../config/configdb";
+const { InfoLecturas, LecturasFinales, Islas, Mangueras } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -12,22 +12,25 @@ controller.lecturasIniciales = async (req, res) => {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
     const { idEstacion } = req.params;
-    const { folio } = req.query;
-    const precios = await preM.ultimosPrecios();
 
-    let lastFolio;
-    if (folio) {
-      lastFolio = Number(folio);
-    } else {
-      lastFolio = await lecM.lastFolio(idEstacion);
-    }
+    Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
+    Islas.hasMany(Mangueras, { foreignKey: "idisla" });
 
-    const response = await lecM.lecturasIniciales([idEstacion, lastFolio]);
+    const response = await Mangueras.findAll({
+      include: [
+        {
+          model: InfoLecturas,
+        },
+        {
+          model: Islas,
+          where: { idestacion_servicio: idEstacion },
+        },
+      ],
+    });
 
-    res
-      .status(200)
-      .json({ success: true, response, folio: lastFolio, precios });
+    res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -40,31 +43,48 @@ controller.updateLecturaInicial = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
+    const { data, folio, action } = req.body;
+
     let response;
 
-    let idFolio = req.body[0].folio ? req.body[0].folio : 0;
+    if (action === "create") {
+      response = await sequelize.transaction(async (t) => {
+        const infoLect = await InfoLecturas.create(
+          {
+            fecha: new Date(),
+            idliquidacion: 0,
+          },
+          { transaction: t }
+        );
 
-    const cuerpoEdit = req.body.map((el) => [
-      el.lectura,
-      idFolio,
-      el.idmanguera,
-    ]);
+        const cuerpo = data.map((el) => ({
+          idmanguera: el.idmanguera,
+          idinfo_lectura: infoLect.idinfo_lectura,
+          lecturai: 0,
+          lecturaf: el.lectura,
+          precio: 0,
+        }));
+        const lecturasFinales = await LecturasFinales.bulkCreate(cuerpo);
 
-    const cuerpoInsert = req.body.map((el) => [
-      el.idmanguera,
-      el.lectura,
-      el.fecha,
-      0,
-    ]);
-
-    if (req.body[0].folio === null) {
-      response = await lecM.insertLecturasIniciales(cuerpoInsert);
+        return { infoLect, lecturasFinales };
+      });
     } else {
-      response = await lecM.updateLecturaInicial(cuerpoEdit);
+      const cuerpo = data.map((el) => ({
+        idmanguera: el.idmanguera,
+        idinfo_lectura: folio,
+        lecturai: 0,
+        lecturaf: el.lectura,
+        precio: 0,
+      }));
+
+      response = await LecturasFinales.bulkCreate(cuerpo, {
+        updateOnDuplicate: ["lecturaf"],
+      });
     }
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

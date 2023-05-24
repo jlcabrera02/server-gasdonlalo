@@ -1,8 +1,10 @@
-import horM from "../models/l.horarios.model";
 import estSerM from "../models/ad.estacionService.model";
-import liqM from "../models/l.liquido.model";
 import auth from "../models/auth.model";
 import tp from "../assets/formatTiempo";
+import models from "../models/";
+import { Op } from "sequelize";
+import sequelize from "../config/configdb";
+const { Horarios, empleados, Liquidaciones, Turnos } = models;
 const { diff, tiempoDB, tiempoHorario } = tp;
 const { verificar } = auth;
 
@@ -17,7 +19,12 @@ controller.obtenerHorario = async (req, res) => {
 
     console.log([fechaI, fechaFinal]);
 
-    const response = await horM.obtenerHorario([fechaI, fechaFinal]);
+    const response = await Horarios.findAll({
+      where: {
+        fechaturno: { [Op.between]: [fechaI, fechaFinal] },
+      },
+      include: [{ model: empleados }, { model: Turnos }],
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -47,15 +54,21 @@ controller.nuevoHorario = async (req, res) => {
     const fecha = tiempoHorario(`${fechaTurno} ${hora_empiezo}`);
     const fechaLiquidacion = tiempoDB(new Date(fecha.getTime() + horaDiff));
 
-    const response = await horM.insertarHorarios([
-      idEmpleado,
-      idTurno,
-      fechaTurno,
-      fechaLiquidacion,
-      idEstacion,
-    ]);
+    const cuerpo = {
+      idempleado: idEmpleado,
+      idturno: idTurno,
+      fechaturno: fechaTurno,
+      fechaliquidacion: fechaLiquidacion,
+      idestacion_servicio: idEstacion,
+    };
 
-    await liqM.generarFolios(response.insertId);
+    const response = await sequelize.transaction(async (tr) => {
+      const horarios = await Horarios.create(cuerpo, { transaction: tr });
+      const liquidaciones = await Liquidaciones.create({
+        idhorario: horarios.idhorario,
+      });
+      return { horarios, liquidaciones };
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -86,16 +99,17 @@ controller.actualizarHorario = async (req, res) => {
     const fecha = tiempoHorario(`${fechaTurno} ${hora_empiezo}`);
     const fechaLiquidacion = tiempoDB(new Date(fecha.getTime() + horaDiff));
 
-    const response = await horM.updateHorario([
-      {
-        idempleado: idEmpleado,
-        idturno: idTurno,
-        fechaturno: fechaTurno,
-        fechaliquidacion: fechaLiquidacion,
-        idestacion_servicio: idEstacion,
-      },
-      idHorario,
-    ]);
+    const cuerpo = {
+      idempleado: idEmpleado,
+      idturno: idTurno,
+      fechaturno: fechaTurno,
+      fechaliquidacion: fechaLiquidacion,
+      idestacion_servicio: idEstacion,
+    };
+
+    const response = await Horarios.update(cuerpo, {
+      where: { idhorario: idHorario },
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -112,8 +126,9 @@ controller.eliminarHorario = async (req, res) => {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
     const { idHorario } = req.params;
-    // const { idEmpleado, idTurno, fechaTurno, idEstacion } = req.body;
-    const liquidacion = await liqM.liquidacionByFolio(idHorario);
+    const liquidacion = await Liquidaciones.findOne({
+      where: { idhorario: idHorario },
+    });
     if (liquidacion) {
       if (liquidacion.capturado && !liquidacion.fechaCancelado)
         throw {
@@ -122,9 +137,23 @@ controller.eliminarHorario = async (req, res) => {
         };
     }
 
-    await liqM.deleteLiquido(idHorario);
+    const response = await sequelize.transaction(async (t) => {
+      const liquidacion = await Liquidaciones.destroy(
+        {
+          where: { idhorario: idHorario },
+        },
+        { transaction: t }
+      );
 
-    const response = await horM.eliminarHorario(idHorario);
+      const horario = await Horarios.destroy(
+        {
+          where: { idhorario: idHorario },
+        },
+        { transaction: t }
+      );
+
+      return { liquidacion, horario };
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
