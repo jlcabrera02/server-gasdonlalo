@@ -28,7 +28,15 @@ controller.lecturasIniciales = async (req, res) => {
       ],
     });
 
-    res.status(200).json({ success: true, response });
+    const buscar = response.find(
+      (el) => el.dataValues.info_lecturas.length > 0
+    );
+
+    const folio = buscar
+      ? buscar.dataValues.info_lecturas[0].dataValues.idinfo_lectura
+      : null;
+
+    res.status(200).json({ success: true, response, folio });
   } catch (err) {
     console.log(err);
     if (!err.code) {
@@ -43,11 +51,11 @@ controller.updateLecturaInicial = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { data, folio, action } = req.body;
+    const { data, folio } = req.body;
 
     let response;
 
-    if (action === "create") {
+    if (!folio) {
       response = await sequelize.transaction(async (t) => {
         const infoLect = await InfoLecturas.create(
           {
