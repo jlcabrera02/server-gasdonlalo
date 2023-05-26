@@ -20,6 +20,7 @@ import Vales from "./administrativo/liquidacion/vales.model";
 import Efectivo from "./administrativo/liquidacion/efectivo.model";
 import Liquidaciones from "./administrativo/liquidacion/liquidaciones.model";
 import Precios from "./administrativo/liquidacion/precios.model";
+import LlaveAcceso from "./administrativo/llavesAcceso.model";
 
 nominas.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(nominas, { foreignKey: "idempleado" });
@@ -52,12 +53,6 @@ Incumplimientos.hasMany(SNC, { foreignKey: "idincumplimiento" });
 InfoLecturas.belongsTo(Liquidaciones, { foreignKey: "idliquidacion" });
 Liquidaciones.hasMany(InfoLecturas, { foreignKey: "idliquidacion" });
 
-// LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
-// InfoLecturas.hasOne(LecturasFinales, { foreignKey: "idinfo_lectura" });
-
-// LecturasFinales.belongsTo(Mangueras, { foreignKey: "idmanguera" });
-// Mangueras.hasMany(LecturasFinales, { foreignKey: "idmanguera" });
-
 Precios.belongsTo(Gas, { foreignKey: "idgas" });
 Gas.hasMany(Precios, { foreignKey: "idgas" });
 
@@ -87,6 +82,9 @@ ES.belongsTo(Horarios, {
   foreignKey: "idestacion_servicio",
 });
 
+empleados.hasOne(LlaveAcceso, { foreignKey: "idempleado" });
+LlaveAcceso.belongsTo(empleados, { foreignKey: "idempleado" });
+
 export default {
   nominas,
   tiposNominas,
@@ -107,4 +105,5 @@ export default {
   Efectivo,
   Vales,
   Liquidaciones,
+  LlaveAcceso,
 };

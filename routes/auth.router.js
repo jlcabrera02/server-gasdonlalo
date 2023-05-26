@@ -8,6 +8,8 @@ route.get("/usuarios/:idChecador", estacionService.findByIdEmpleado);
 route.get("/usuarios", estacionService.findAll);
 route.get("/permisos/:idChecador", estacionService.findPermisosXEmpleado);
 route.get("/permisos", estacionService.findPermisos);
+route.post("/accessKey", estacionService.AccessLlaveAcceso);
+route.post("/createAccessKey", estacionService.CreateLlaveAcceso);
 route.post("/login", estacionService.login);
 route.post("/registrar/permiso", estacionService.registerPermisos);
 route.post("/registrar", estacionService.register);

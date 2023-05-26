@@ -1,5 +1,7 @@
 import auth from "../models/auth.model";
 import mysql from "mysql2";
+import models from "../models";
+const { LlaveAcceso, empleados } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -19,6 +21,42 @@ controller.login = async (req, res) => {
       permisos: permisosId,
       permisosGeneral: permisos,
     });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.AccessLlaveAcceso = async (req, res) => {
+  try {
+    const { key } = req.body;
+    const response = await LlaveAcceso.findOne({
+      where: { key },
+      include: empleados,
+    });
+    if (!response) throw { code: 403, msg: "No autorizado", success: false };
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.CreateLlaveAcceso = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 1);
+    if (!user.success) throw user;
+    const { key, idempleado } = req.body;
+    const response = await LlaveAcceso.create({ idempleado, key });
+    res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
     if (!err.code) {

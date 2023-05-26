@@ -4,7 +4,6 @@ import models from "../models";
 import sequelize from "../config/configdb";
 const { InfoLecturas, LecturasFinales, Islas, Mangueras } = models;
 const { verificar } = auth;
-
 const controller = {};
 
 controller.lecturasIniciales = async (req, res) => {
