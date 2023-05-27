@@ -20,7 +20,7 @@ controller.lecturasIniciales = async (req, res) => {
       include: [
         {
           model: InfoLecturas,
-          include: [{ model: Liquidaciones, where: { cancelado: null } }],
+          include: [{ model: Liquidaciones }],
         },
         {
           model: Islas,
