@@ -18,6 +18,10 @@ const LecturasFinales = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    importe: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+    },
   },
   {
     freezeTableName: true,

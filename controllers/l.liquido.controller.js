@@ -44,7 +44,7 @@ controller.insertarLiquidos = async (req, res) => {
     }));
 
     const response = await sequelize.transaction(async (t) => {
-      const liquidacion = Liquidaciones.findByPk(folio, {
+      const liquidacion = await Liquidaciones.findByPk(folio, {
         include: [{ model: Horarios }],
         transaction: t,
       });
@@ -62,23 +62,25 @@ controller.insertarLiquidos = async (req, res) => {
       });
 
       const cuerpoLectF = lecturas.map((el) => ({
-        idmanguera: el.idmanguera,
+        idmanguera: el.manguera,
         idinfo_lectura: infoLect.idinfo_lectura,
         lecturai: el.lecturaInicial,
         lecturaf: el.lecturaFinal,
         precio: el.precioUnitario,
+        importe: el.importe,
       }));
 
-      const lectF = await LecturasFinales.create(cuerpoLectF, {
+      const lectF = await LecturasFinales.bulkCreate(cuerpoLectF, {
         transaction: t,
       });
 
-      const liquidaciones = Liquidaciones.update(
+      const liquidaciones = await Liquidaciones.update(
         {
           lecturas: JSON.stringify(lecturas),
           capturado: true,
           idempleado_captura: user.token.data.datos.idempleado,
         },
+        { where: { idliquidacion: folio } },
         { transaction: t }
       );
 
@@ -87,6 +89,7 @@ controller.insertarLiquidos = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       console.log(err);
       res.status(400).json({ msg: "datos no enviados correctamente" });
@@ -177,6 +180,10 @@ controller.consultarLiquido = async (req, res) => {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
     const { idliquidacion } = req.params;
+
+    LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
+    InfoLecturas.hasMany(LecturasFinales, { foreignKey: "idinfo_lectura" });
+
     const response = await Liquidaciones.findByPk(idliquidacion, {
       include: [
         {
@@ -185,6 +192,7 @@ controller.consultarLiquido = async (req, res) => {
         },
         { model: Efectivo },
         { model: Vales },
+        { model: InfoLecturas, include: LecturasFinales },
       ],
     });
 

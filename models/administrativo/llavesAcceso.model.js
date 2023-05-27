@@ -6,7 +6,6 @@ const LlaveAcceso = sequelize.define(
   {
     idempleado: {
       type: DataTypes.INTEGER,
-      unique: true,
     },
     key: {
       type: DataTypes.CHAR(10),

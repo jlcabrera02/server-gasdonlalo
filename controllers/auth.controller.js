@@ -41,7 +41,37 @@ controller.AccessLlaveAcceso = async (req, res) => {
     if (!response) throw { code: 403, msg: "No autorizado", success: false };
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.RemoveLlaveAcceso = async (req, res) => {
+  try {
+    const { key } = req.params;
+    const response = await LlaveAcceso.destroy({
+      where: { key },
+    });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.ListLlaveAcceso = async (req, res) => {
+  try {
+    const response = await LlaveAcceso.findAll({
+      include: empleados,
+    });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -58,7 +88,6 @@ controller.CreateLlaveAcceso = async (req, res) => {
     const response = await LlaveAcceso.create({ idempleado, key });
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

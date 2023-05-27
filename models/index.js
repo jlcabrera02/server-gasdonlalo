@@ -51,7 +51,7 @@ SNC.belongsTo(Incumplimientos, { foreignKey: "idincumplimiento" });
 Incumplimientos.hasMany(SNC, { foreignKey: "idincumplimiento" });
 
 InfoLecturas.belongsTo(Liquidaciones, { foreignKey: "idliquidacion" });
-Liquidaciones.hasMany(InfoLecturas, { foreignKey: "idliquidacion" });
+Liquidaciones.hasOne(InfoLecturas, { foreignKey: "idliquidacion" });
 
 Precios.belongsTo(Gas, { foreignKey: "idgas" });
 Gas.hasMany(Precios, { foreignKey: "idgas" });
