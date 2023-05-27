@@ -2,7 +2,8 @@ import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import models from "../models";
 import sequelize from "../config/configdb";
-const { InfoLecturas, LecturasFinales, Islas, Mangueras } = models;
+const { InfoLecturas, LecturasFinales, Islas, Mangueras, Liquidaciones } =
+  models;
 const { verificar } = auth;
 const controller = {};
 
@@ -19,12 +20,14 @@ controller.lecturasIniciales = async (req, res) => {
       include: [
         {
           model: InfoLecturas,
+          include: [{ model: Liquidaciones, where: { cancelado: null } }],
         },
         {
           model: Islas,
           where: { idestacion_servicio: idEstacion },
         },
       ],
+      order: [[InfoLecturas, "idinfo_lectura", "DESC"]],
     });
 
     const buscar = response.find(
@@ -72,7 +75,10 @@ controller.updateLecturaInicial = async (req, res) => {
           precio: 0,
           importe: "0",
         }));
-        const lecturasFinales = await LecturasFinales.bulkCreate(cuerpo);
+
+        const lecturasFinales = await LecturasFinales.bulkCreate(cuerpo, {
+          transaction: t,
+        });
 
         return { infoLect, lecturasFinales };
       });
