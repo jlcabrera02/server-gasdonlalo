@@ -70,6 +70,7 @@ controller.updateLecturaInicial = async (req, res) => {
           lecturai: 0,
           lecturaf: el.lectura,
           precio: 0,
+          importe: "0",
         }));
         const lecturasFinales = await LecturasFinales.bulkCreate(cuerpo);
 
@@ -82,6 +83,7 @@ controller.updateLecturaInicial = async (req, res) => {
         lecturai: 0,
         lecturaf: el.lectura,
         precio: 0,
+        importe: "0",
       }));
 
       response = await LecturasFinales.bulkCreate(cuerpo, {
