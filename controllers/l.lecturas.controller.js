@@ -2,8 +2,15 @@ import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import models from "../models";
 import sequelize from "../config/configdb";
-const { InfoLecturas, LecturasFinales, Islas, Mangueras, Liquidaciones } =
-  models;
+import { where } from "sequelize";
+const {
+  InfoLecturas,
+  LecturasFinales,
+  Islas,
+  Mangueras,
+  Liquidaciones,
+  Horarios,
+} = models;
 const { verificar } = auth;
 const controller = {};
 
@@ -16,11 +23,14 @@ controller.lecturasIniciales = async (req, res) => {
     Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
     Islas.hasMany(Mangueras, { foreignKey: "idisla" });
 
+    // LecturasFinales.hasOne(Mangueras, { foreignKey: "idmanguera" });
+    // Mangueras.belongsTo(LecturasFinales, { foreignKey: "idmanguera" });
+
     const response = await Mangueras.findAll({
       include: [
         {
           model: InfoLecturas,
-          include: [{ model: Liquidaciones }],
+          where: { cancelado: false, idestacion_servicio: idEstacion },
         },
         {
           model: Islas,
@@ -53,7 +63,7 @@ controller.updateLecturaInicial = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { data, folio } = req.body;
+    const { data, folio, idestacionServicio } = req.body;
 
     let response;
 
@@ -63,6 +73,7 @@ controller.updateLecturaInicial = async (req, res) => {
           {
             fecha: new Date(),
             idliquidacion: 0,
+            idestacion_servicio: idestacionServicio,
           },
           { transaction: t }
         );

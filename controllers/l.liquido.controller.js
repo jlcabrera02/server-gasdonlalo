@@ -55,6 +55,7 @@ controller.insertarLiquidos = async (req, res) => {
       const cuerpoinfoLect = {
         fecha: liquidacion.horario.fechaliquidacion,
         idliquidacion: folio,
+        idestacion_servicio: liquidacion.horario.idestacion_servicio,
       };
 
       const infoLect = await InfoLecturas.create(cuerpoinfoLect, {
@@ -85,6 +86,41 @@ controller.insertarLiquidos = async (req, res) => {
       );
 
       return { vales, efectivo, infoLect, lectF, liquidaciones };
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      console.log(err);
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.cancelarLiquido = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { fecha, idLiquidacion, motivo } = req.body;
+
+    const response = await sequelize.transaction(async (t) => {
+      const liquidacion = await Liquidaciones.update(
+        {
+          motivo,
+          fechaCancelado: fecha,
+        },
+        { where: { idliquidacion: idLiquidacion }, transaction: t }
+      );
+
+      const lecturasF = await InfoLecturas.update(
+        { cancelado: true },
+        { where: { idliquidacion: idLiquidacion }, transaction: t }
+      );
+
+      return { liquidacion, lecturasF };
     });
 
     res.status(200).json({ success: true, response });

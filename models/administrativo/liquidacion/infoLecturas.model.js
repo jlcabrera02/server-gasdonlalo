@@ -17,6 +17,15 @@ const InfoLect = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    idestacion_servicio: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    cancelado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     freezeTableName: true,
