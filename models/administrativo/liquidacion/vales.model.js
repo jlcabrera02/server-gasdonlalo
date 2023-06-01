@@ -19,7 +19,7 @@ const Vales = sequelize.define(
     },
     folio: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     combustible: {
       type: DataTypes.CHAR,
