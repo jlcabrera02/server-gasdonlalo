@@ -15,6 +15,9 @@ route.put("/islas/edit/:idIsla", islas.updateIsla); //
 
 //Lectura de bombas
 route.get("/lectura/inicial/:idEstacion", lecturas.lecturasIniciales); //
+route.get("/lectura/buscar/:idEstacion", lecturas.buscarLecturas); //
+route.get("/infolecturas/:idEstacion", lecturas.buscarInfoLec); //
+route.get("/infolecturasxLimit/:idEstacion", lecturas.buscarInfoLecLimit); //
 route.put("/lectura/inicial", lecturas.updateLecturaInicial); //
 
 //configuracion horarios

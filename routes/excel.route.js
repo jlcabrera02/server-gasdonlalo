@@ -1,10 +1,12 @@
 import router from "express-promise-router";
 import excel from "../controllers/excel.controller";
+import { preciosCombustible } from "../excelReportes/liquidacion.excel";
 
 const route = router();
 
-route.get("/evuniforme/:year/:month", excel.createEvUniforme);
 route.post("/relojChecador", excel.relojChecador);
-route.get("/evPasoDespachador/:year/:month", excel.pasosDespachar);
+
+//Liquidacion
+route.get("/liquidacion/preciosCombustible", preciosCombustible);
 
 export default route;

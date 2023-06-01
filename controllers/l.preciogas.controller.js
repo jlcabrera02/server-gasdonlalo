@@ -2,6 +2,7 @@ import preM from "../models/l.preciogas.model";
 import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import models from "../models/";
+import { Op } from "sequelize";
 const { Precios } = models;
 const { verificar } = auth;
 
@@ -61,7 +62,15 @@ controller.obtenerPreciosHistoricos = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const response = await Precios.findAll();
+    const { fechaI, fechaF } = req.query;
+    const querys = {};
+
+    if (fechaF && fechaI) querys.fecha = { [Op.between]: [fechaI, fechaF] };
+
+    const response = await Precios.findAll({
+      where: querys,
+      order: [["fecha", "ASC"]],
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {

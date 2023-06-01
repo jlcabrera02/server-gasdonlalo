@@ -109,7 +109,7 @@ controller.cancelarLiquido = async (req, res) => {
     const response = await sequelize.transaction(async (t) => {
       const liquidacion = await Liquidaciones.update(
         {
-          motivo,
+          cancelado: motivo,
           fechaCancelado: fecha,
         },
         { where: { idliquidacion: idLiquidacion }, transaction: t }

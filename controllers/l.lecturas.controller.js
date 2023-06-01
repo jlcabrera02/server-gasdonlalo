@@ -2,15 +2,8 @@ import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import models from "../models";
 import sequelize from "../config/configdb";
-import { where } from "sequelize";
-const {
-  InfoLecturas,
-  LecturasFinales,
-  Islas,
-  Mangueras,
-  Liquidaciones,
-  Horarios,
-} = models;
+import { Op } from "sequelize";
+const { InfoLecturas, LecturasFinales, Islas, Mangueras } = models;
 const { verificar } = auth;
 const controller = {};
 
@@ -22,9 +15,6 @@ controller.lecturasIniciales = async (req, res) => {
 
     Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
     Islas.hasMany(Mangueras, { foreignKey: "idisla" });
-
-    // LecturasFinales.hasOne(Mangueras, { foreignKey: "idmanguera" });
-    // Mangueras.belongsTo(LecturasFinales, { foreignKey: "idmanguera" });
 
     const response = await Mangueras.findAll({
       include: [
@@ -49,6 +39,101 @@ controller.lecturasIniciales = async (req, res) => {
       : null;
 
     res.status(200).json({ success: true, response, folio });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.buscarLecturas = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { idEstacion } = req.params;
+    const { folio } = req.query;
+
+    Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
+    Islas.hasMany(Mangueras, { foreignKey: "idisla" });
+
+    const response = await Mangueras.findAll({
+      include: [
+        {
+          model: InfoLecturas,
+          where: {
+            cancelado: false,
+            idestacion_servicio: idEstacion,
+            idinfo_lectura: { [Op.lte]: folio },
+          },
+        },
+        {
+          model: Islas,
+          where: { idestacion_servicio: idEstacion },
+        },
+      ],
+      order: [[InfoLecturas, "idinfo_lectura", "DESC"]],
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (error) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.buscarInfoLec = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { idEstacion } = req.params;
+    const { cancelado } = req.query;
+
+    LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
+    InfoLecturas.hasMany(LecturasFinales, { foreignKey: "idinfo_lectura" });
+
+    const querys = {
+      idestacion_servicio: idEstacion,
+    };
+
+    if (cancelado) querys.cancelado = cancelado;
+
+    const response = await InfoLecturas.findAll({
+      where: querys,
+      include: LecturasFinales,
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.buscarInfoLecLimit = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { idEstacion } = req.params;
+    const { num } = req.query;
+    const limit = Number(num);
+
+    const response = await InfoLecturas.findAll({
+      attributes: ["idinfo_lectura", "idliquidacion"],
+      where: { idestacion_servicio: idEstacion, cancelado: false },
+      order: [["idinfo_lectura", "DESC"]],
+      limit: [limit, limit + 2],
+    });
+
+    res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
     if (!err.code) {

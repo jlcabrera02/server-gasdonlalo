@@ -23,6 +23,7 @@ app.set("views", path.join(__dirname, "views"));
 //Establecer recursos estaticos
 app.use("/static", express.static(path.join(__dirname, "public")));
 app.use("/", indexV);
+app.use(express.raw());
 
 //Uso de bodyParse.json y bodyParse.urlencode para poder recibir desde el navegador datos json y poder utilizar el req.body
 app.use(bodyParser.urlencoded({ extended: true }));
