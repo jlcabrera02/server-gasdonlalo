@@ -3,7 +3,16 @@ import auth from "../models/auth.model";
 import models from "../models";
 import sequelize from "../config/configdb";
 import { Op } from "sequelize";
-const { InfoLecturas, LecturasFinales, Islas, Mangueras } = models;
+const {
+  InfoLecturas,
+  LecturasFinales,
+  Islas,
+  Mangueras,
+  Liquidaciones,
+  Horarios,
+  empleados,
+  Turnos,
+} = models;
 const { verificar } = auth;
 const controller = {};
 
@@ -144,6 +153,24 @@ controller.buscarInfoLecLimit = async (req, res) => {
   }
 };
 
+controller.buscarLecturasXIdEmpleado = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+
+    const response = await buscarLecturasXIdEmpleado(req.body);
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.updateLecturaInicial = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
@@ -202,6 +229,45 @@ controller.updateLecturaInicial = async (req, res) => {
       res.status(err.code).json(err);
     }
   }
+};
+
+export const buscarLecturasXIdEmpleado = async ({
+  idEmpleado,
+  fechaI,
+  fechaF,
+}) => {
+  LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
+  InfoLecturas.hasMany(LecturasFinales, { foreignKey: "idinfo_lectura" });
+
+  LecturasFinales.belongsTo(Mangueras, { foreignKey: "idmanguera" });
+  Mangueras.hasMany(LecturasFinales, { foreignKey: "idmanguera" });
+
+  Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
+  Islas.hasMany(Mangueras, { foreignKey: "idisla" });
+
+  const response = await Liquidaciones.findAll({
+    where: { capturado: true },
+    include: [
+      {
+        model: Horarios,
+        include: [{ model: empleados }, { model: Turnos }],
+        where: {
+          idempleado: idEmpleado,
+          fechaliquidacion: { [Op.between]: [fechaI, fechaF] },
+        },
+      },
+      {
+        model: InfoLecturas,
+        include: [
+          {
+            model: LecturasFinales,
+            include: [{ model: Mangueras, include: Islas }],
+          },
+        ],
+      },
+    ],
+  });
+  return response;
 };
 
 export default controller;

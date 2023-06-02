@@ -1,6 +1,7 @@
 import xl from "excel4node";
 import models from "../models";
 import { Op } from "sequelize";
+import { buscarLecturasXIdEmpleado } from "../controllers/l.lecturas.controller";
 const { Precios, empleados } = models;
 
 const textHeader = {
@@ -50,7 +51,65 @@ export const preciosCombustible = async (req, res) => {
   }
 };
 
-export const LitrosVendidos = async (req, res) => {
+export const LitrosVendidosXIdempleado = async (req, res) => {
   try {
-  } catch (err) {}
+    const response = await buscarLecturasXIdEmpleado(req.body);
+    const wb = new xl.Workbook();
+    const ws = wb.addWorksheet("Litros por empleado");
+
+    const convert = JSON.stringify(response);
+
+    let reporte = JSON.parse(convert).map((el) => {
+      const lecturasFInales = el.info_lectura.lecturas_finales;
+      return lecturasFInales.map((l) => ({
+        ["idEmpleado"]: el.horario.empleado.idchecador,
+        ["Nombres"]: el.horario.empleado.nombre,
+        ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
+        ["Apellido Materno"]: el.horario.empleado.apellido_materno,
+        ["idManguera"]:
+          l.manguera.direccion === "iz"
+            ? `${l.manguera.idgas}${l.manguera.isla.nisla * 2 - 1}`
+            : `${l.manguera.idgas}${l.manguera.isla.nisla * 2}`,
+        ["idIsla"]: l.manguera.idisla,
+        ["IdEstacionServicio"]: l.manguera.isla.idestacion_servicio,
+        ["idGas"]: l.manguera.idgas,
+        ["Numero de isla"]: l.manguera.isla.nisla,
+        ["Lectura Inicial"]: l.lecturai,
+        ["Lectura Final"]: l.lecturaf,
+        ["Total Litros"]:
+          l.lecturaf >= l.lecturai
+            ? l.lecturaf - l.lecturai
+            : 9999999 - l.lecturai + l.lecturaf + 1,
+        ["Turno"]: el.horario.turno.turno,
+        ["Precio unitario"]: l.precio,
+        ["Importe"]: l.importe,
+      }));
+    });
+    reporte = reporte.flat();
+
+    const columnas = Object.keys(reporte[0]);
+    columnas.forEach((c, i) => {
+      ws.cell(1, i + 1)
+        .string(c)
+        .style(textHeader);
+    });
+
+    reporte.forEach((r, i) => {
+      const columns = Object.keys(r);
+      console.log(columns);
+      columns.forEach((c, j) => ws.cell(i + 2, j + 1).string(String(r[c])));
+    });
+
+    wb.writeToBuffer().then((buf) => {
+      res.writeHead(200, [
+        [
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ],
+      ]);
+      res.end(buf);
+    });
+  } catch (err) {
+    res.status(400).json({ success: false });
+  }
 };
