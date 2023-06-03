@@ -15,11 +15,11 @@ const LecturasFinales = sequelize.define(
       allowNull: false,
     },
     precio: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(19, 2),
       allowNull: false,
     },
     importe: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(19, 2),
       allowNull: false,
     },
   },

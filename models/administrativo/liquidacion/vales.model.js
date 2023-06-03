@@ -10,7 +10,7 @@ const Vales = sequelize.define(
       autoIncrement: true,
     },
     monto: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(19, 2),
       allowNull: false,
     },
     idliquidacion: {
