@@ -37,7 +37,7 @@ controller.insertarLiquidos = async (req, res) => {
       label: el.label,
     }));
 
-    const cuerpoEfectivo = vales.map((el) => ({
+    const cuerpoEfectivo = efectivo.map((el) => ({
       monto: el.monto,
       idliquidacion: folio,
       folio: el.folio,
