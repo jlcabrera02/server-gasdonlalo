@@ -38,7 +38,7 @@ route.get("/pendientes", liquido.liquidacionesPendientes); //
 route.post("/capturar", liquido.insertarLiquidos); //
 route.post("/reservar/:folio", liquido.reservarFolio); //
 route.delete("/noreservar/:folio", liquido.quitarReservarFolio); //
-route.delete("/cancelar", liquido.cancelarLiquido); //
+route.put("/cancelar", liquido.cancelarLiquido); //
 
 route.get("/capturados/:idliquidacion", liquido.consultarLiquido); //
 
