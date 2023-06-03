@@ -11,12 +11,12 @@ model.findEvaluacionesXEmpleado = (id, quincena) =>
     let sql;
     if (quincena) {
       sql = mysql.format(
-        `SELECT * FROM (SELECT emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.estatus, evd.create_time, evd.fecha, evd.identificador, evd.idpaso_despachar, evd.evaluacion, pd.paso, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar evd, empleado emp, paso_despachar pd WHERE evd.idempleado = emp.idempleado AND pd.idpaso_despachar = evd.idpaso_despachar AND identificador = ? ) evd WHERE evd.quincena = ? ORDER BY evd.idpaso_despachar`,
+        `SELECT * FROM (SELECT emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.estatus, evd.create_time, evd.fecha, evd.identificador, evd.idpaso_despachar, evd.evaluacion, pd.paso, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_despachar evd, empleado emp, paso_despachar pd WHERE evd.idempleado = emp.idempleado AND pd.idpaso_despachar = evd.idpaso_despachar AND identificador = ? ) evd WHERE evd.quincena = ? ORDER BY evd.idpaso_despachar`,
         [id, quincena]
       );
     } else {
       sql = mysql.format(
-        `SELECT emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.estatus, evd.create_time, evd.fecha, evd.identificador, evd.idpaso_despachar, evd.evaluacion, pd.paso, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar evd, empleado emp, paso_despachar pd WHERE evd.idempleado = emp.idempleado AND pd.idpaso_despachar = evd.idpaso_despachar AND identificador = ? ORDER BY evd.idpaso_despachar`,
+        `SELECT emp.idempleado, CONCAT(emp.nombre, " ", emp.apellido_paterno, " ", emp.apellido_materno) AS nombre_completo, emp.estatus, evd.create_time, evd.fecha, evd.identificador, evd.idpaso_despachar, evd.evaluacion, pd.paso, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_despachar evd, empleado emp, paso_despachar pd WHERE evd.idempleado = emp.idempleado AND pd.idpaso_despachar = evd.idpaso_despachar AND identificador = ? ORDER BY evd.idpaso_despachar`,
         id
       );
     }
@@ -33,12 +33,12 @@ model.agruparEvaluaciones = (data) =>
     let sql;
     if (data.length > 2) {
       sql = mysql.format(
-        `SELECT evd.*, ev.identificador FROM (SELECT *, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar) ev, (SELECT *, AVG(evd.pro) * 10 promedio FROM (SELECT SUM(evaluacion) total, AVG(evaluacion) pro, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND ? GROUP BY identificador) evd GROUP BY quincena) evd WHERE evd.quincena = ev.quincena AND ev.idempleado = ? AND ev.fecha BETWEEN ? AND ? GROUP BY identificador ORDER BY ev.fecha`,
+        `SELECT evd.*, ev.identificador FROM (SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_despachar) ev, (SELECT *, AVG(evd.pro) * 10 promedio FROM (SELECT SUM(evaluacion) total, AVG(evaluacion) pro, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND ? GROUP BY identificador) evd GROUP BY quincena) evd WHERE evd.quincena = ev.quincena AND ev.idempleado = ? AND ev.fecha BETWEEN ? AND ? GROUP BY identificador ORDER BY ev.fecha`,
         [...data, ...data]
       );
     } else {
       sql = mysql.format(
-        `SELECT evd.*, ev.identificador, suma.total FROM (SELECT *, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar) ev, (SELECT evd.quincena, AVG(evd.pro) * 10 promedio FROM (SELECT SUM(evaluacion) total, AVG(evaluacion) pro, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND LAST_DAY(?) GROUP BY identificador) evd GROUP BY quincena) evd, (SELECT SUM(evaluacion) total, identificador FROM evaluacion_despachar GROUP BY identificador) suma WHERE evd.quincena = ev.quincena AND ev.identificador = suma.identificador AND ev.idempleado = ? AND ev.fecha BETWEEN ? AND LAST_DAY(?) GROUP BY identificador ORDER BY ev.fecha`,
+        `SELECT evd.*, ev.identificador, suma.total FROM (SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_despachar) ev, (SELECT evd.quincena, AVG(evd.pro) * 10 promedio FROM (SELECT SUM(evaluacion) total, AVG(evaluacion) pro, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_despachar WHERE idempleado = ? AND fecha BETWEEN ? AND LAST_DAY(?) GROUP BY identificador) evd GROUP BY quincena) evd, (SELECT SUM(evaluacion) total, identificador FROM evaluacion_despachar GROUP BY identificador) suma WHERE evd.quincena = ev.quincena AND ev.identificador = suma.identificador AND ev.idempleado = ? AND ev.fecha BETWEEN ? AND LAST_DAY(?) GROUP BY identificador ORDER BY ev.fecha`,
         [data[0], data[1], data[1], data[0], data[1], data[1]]
       );
     }
@@ -91,7 +91,7 @@ model.findPasos = (id) =>
 model.findXMesXEmpleadoEv = (data) =>
   new Promise((resolve, reject) => {
     let sql = `
-    SELECT AVG(promedio) promedio FROM (SELECT evd.*, ev.identificador FROM (SELECT *, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar) ev, (SELECT *, AVG(evd.pro) * 10 promedio FROM (SELECT SUM(evaluacion) total, AVG(evaluacion) pro, CASE WHEN DAY(fecha) < 15 THEN 1 WHEN DAY(fecha) > 14 THEN 2 END AS quincena FROM evaluacion_despachar WHERE fecha BETWEEN ? AND ? AND idempleado = ? GROUP BY identificador) evd GROUP BY quincena) evd WHERE evd.quincena = ev.quincena AND ev.fecha BETWEEN ? AND ? AND idempleado = ? GROUP BY identificador ORDER BY ev.fecha) pd`;
+    SELECT AVG(promedio) promedio FROM (SELECT evd.*, ev.identificador FROM (SELECT *, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_despachar) ev, (SELECT *, AVG(evd.pro) * 10 promedio FROM (SELECT SUM(evaluacion) total, AVG(evaluacion) pro, CASE WHEN DAY(fecha) < 16 THEN 1 WHEN DAY(fecha) > 15 THEN 2 END AS quincena FROM evaluacion_despachar WHERE fecha BETWEEN ? AND ? AND idempleado = ? GROUP BY identificador) evd GROUP BY quincena) evd WHERE evd.quincena = ev.quincena AND ev.fecha BETWEEN ? AND ? AND idempleado = ? GROUP BY identificador ORDER BY ev.fecha) pd`;
 
     data = [...data, ...data];
 
