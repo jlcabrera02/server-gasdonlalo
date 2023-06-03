@@ -107,6 +107,9 @@ controller.cancelarLiquido = async (req, res) => {
     const { fecha, idLiquidacion, motivo } = req.body;
 
     const response = await sequelize.transaction(async (t) => {
+      const infoLiq = await Liquidaciones.findByPk(idLiquidacion, {
+        transaction: t,
+      });
       const liquidacion = await Liquidaciones.update(
         {
           cancelado: motivo,
@@ -120,7 +123,11 @@ controller.cancelarLiquido = async (req, res) => {
         { where: { idliquidacion: idLiquidacion }, transaction: t }
       );
 
-      return { liquidacion, lecturasF };
+      const nuevaLiquidacion = await Liquidaciones.create({
+        idhorario: infoLiq.idhorario,
+      });
+
+      return { liquidacion, lecturasF, nuevaLiquidacion };
     });
 
     res.status(200).json({ success: true, response });
@@ -201,7 +208,9 @@ controller.liquidacionesPendientes = async (req, res) => {
       ],
     });
 
-    res.status(200).json({ success: true, response });
+    const totalLiquidaciones = response.filter((liq) => !liq.cancelado).length;
+
+    res.status(200).json({ success: true, response, totalLiquidaciones });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
@@ -232,7 +241,23 @@ controller.consultarLiquido = async (req, res) => {
       ],
     });
 
-    res.status(200).json({ success: true, response });
+    const totalLiquidos = await Liquidaciones.findAll({
+      include: [
+        {
+          model: Horarios,
+          where: {
+            fechaliquidacion:
+              response.dataValues.horario.dataValues.fechaliquidacion,
+            idestacion_servicio:
+              response.dataValues.horario.dataValues.idestacion_servicio,
+          },
+        },
+      ],
+    });
+
+    res
+      .status(200)
+      .json({ success: true, response, total: totalLiquidos.length });
   } catch (err) {
     console.log(err);
     if (!err.code) {

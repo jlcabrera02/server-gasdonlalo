@@ -62,6 +62,20 @@ controller.nuevoHorario = async (req, res) => {
       idestacion_servicio: idEstacion,
     };
 
+    const validar = await Horarios.findOne({
+      where: {
+        idempleado: idEmpleado,
+        idturno: idTurno,
+        fechaturno: fechaTurno,
+      },
+    });
+    if (validar)
+      throw {
+        success: false,
+        code: 400,
+        msg: "Ya existe un horario para este operador",
+      };
+
     const response = await sequelize.transaction(async (tr) => {
       const horarios = await Horarios.create(cuerpo, { transaction: tr });
       const liquidaciones = await Liquidaciones.create({

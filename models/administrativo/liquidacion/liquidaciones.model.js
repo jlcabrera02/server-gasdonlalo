@@ -41,7 +41,7 @@ const Liquidaciones = sequelize.define(
   },
   {
     freezeTableName: true,
-    timestamps: false,
+    // timestamps: false,
   }
 );
 
