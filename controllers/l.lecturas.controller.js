@@ -12,6 +12,7 @@ const {
   Horarios,
   empleados,
   Turnos,
+  ES,
 } = models;
 const { verificar } = auth;
 const controller = {};
@@ -158,7 +159,10 @@ controller.buscarLecturasXIdEmpleado = async (req, res) => {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
 
-    const response = await buscarLecturasXIdEmpleado(req.body);
+    const response = await buscarLecturasXIdEmpleado({
+      ...req.body,
+      cancelado: false,
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -233,6 +237,7 @@ controller.updateLecturaInicial = async (req, res) => {
 
 export const buscarLecturasXIdEmpleado = async ({
   idEmpleado,
+  cancelado,
   fechaI,
   fechaF,
 }) => {
@@ -245,16 +250,21 @@ export const buscarLecturasXIdEmpleado = async ({
   Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
   Islas.hasMany(Mangueras, { foreignKey: "idisla" });
 
+  const querysHorario = {
+    fechaliquidacion: { [Op.between]: [fechaI, fechaF] },
+  };
+  const querys = { capturado: true, lecturas: { [Op.not]: null } };
+
+  if (idEmpleado) querysHorario.idempleado = idEmpleado;
+  if (cancelado) querys.cancelado = cancelado;
+
   const response = await Liquidaciones.findAll({
-    where: { capturado: true },
+    where: querys,
     include: [
       {
         model: Horarios,
-        include: [{ model: empleados }, { model: Turnos }],
-        where: {
-          idempleado: idEmpleado,
-          fechaliquidacion: { [Op.between]: [fechaI, fechaF] },
-        },
+        include: [{ model: empleados }, { model: Turnos }, { model: ES }],
+        where: querysHorario,
       },
       {
         model: InfoLecturas,
@@ -267,6 +277,7 @@ export const buscarLecturasXIdEmpleado = async ({
       },
     ],
   });
+
   return response;
 };
 

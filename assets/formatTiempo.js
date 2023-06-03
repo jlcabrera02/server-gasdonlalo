@@ -67,4 +67,10 @@ export default {
 
     return `${minutos}:${segundo}`;
   },
+
+  formatDinero: (monto) =>
+    Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(monto),
 };

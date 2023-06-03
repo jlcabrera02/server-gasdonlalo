@@ -33,7 +33,7 @@ controller.insertarLiquidos = async (req, res) => {
       monto: el.monto,
       combustible: el.combustible,
       idliquidacion: folio,
-      folio: el.folio,
+      folio: el.folio || null,
       label: el.label,
     }));
 

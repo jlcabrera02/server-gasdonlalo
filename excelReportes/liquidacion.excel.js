@@ -1,6 +1,7 @@
 import xl from "excel4node";
 import models from "../models";
 import { Op } from "sequelize";
+import format from "../assets/formatTiempo";
 import { buscarLecturasXIdEmpleado } from "../controllers/l.lecturas.controller";
 const { Precios, empleados } = models;
 
@@ -63,6 +64,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
       const lecturasFInales = el.info_lectura.lecturas_finales;
       return lecturasFInales.map((l) => ({
         ["idEmpleado"]: el.horario.empleado.idchecador,
+        ["idLiquidacion"]: el.idliquidacion,
         ["Nombres"]: el.horario.empleado.nombre,
         ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
         ["Apellido Materno"]: el.horario.empleado.apellido_materno,
@@ -81,8 +83,12 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
             ? l.lecturaf - l.lecturai
             : 9999999 - l.lecturai + l.lecturaf + 1,
         ["Turno"]: el.horario.turno.turno,
-        ["Precio unitario"]: l.precio,
-        ["Importe"]: l.importe,
+        ["Precio unitario"]: format.formatDinero(l.precio),
+        ["Importe"]: format.formatDinero(l.importe),
+        ["Fecha"]: el.horario.fechaliquidacion,
+        ["Estatus"]: el.cancelado ? "Cancelado" : "Activo",
+        ["Motivo Cancelación"]: el.cancelado ? el.cancelado : "",
+        ["Fecha Cancelacion"]: el.cancelado ? el.fechaCancelado : "",
       }));
     });
     reporte = reporte.flat();
@@ -96,8 +102,19 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
 
     reporte.forEach((r, i) => {
       const columns = Object.keys(r);
-      console.log(columns);
-      columns.forEach((c, j) => ws.cell(i + 2, j + 1).string(String(r[c])));
+      columns.forEach((c, j) => {
+        const dato = r[c];
+        if (typeof dato === "number") {
+          ws.cell(i + 2, j + 1).number(dato);
+        } else {
+          const regExp = /\d\d\d\d-\d\d-\d\d/;
+          if (regExp.test(dato)) {
+            ws.cell(i + 2, j + 1).date(dato);
+          } else {
+            ws.cell(i + 2, j + 1).string(dato);
+          }
+        }
+      });
     });
 
     wb.writeToBuffer().then((buf) => {
@@ -110,6 +127,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
       res.end(buf);
     });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ success: false });
   }
 };
