@@ -242,6 +242,7 @@ controller.consultarLiquido = async (req, res) => {
     });
 
     const totalLiquidos = await Liquidaciones.findAll({
+      where: { cancelado: null },
       include: [
         {
           model: Horarios,
@@ -257,7 +258,7 @@ controller.consultarLiquido = async (req, res) => {
 
     res
       .status(200)
-      .json({ success: true, response, total: totalLiquidos.length });
+      .json({ success: true, response, totalLiquidos: totalLiquidos });
   } catch (err) {
     console.log(err);
     if (!err.code) {
