@@ -2,6 +2,7 @@
 import auth from "../models/auth.model";
 import modelos from "../models/";
 import sequelize from "../config/configdb";
+import { insertarMf } from "./d.montoFaltante.controller";
 const {
   Liquidaciones,
   ES,
@@ -21,7 +22,7 @@ controller.insertarLiquidos = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { lecturas, vales, efectivo, folio } = req.body;
+    const { lecturas, vales, efectivo, folio, checkMF, diferencia } = req.body;
     if (lecturas.length < 1 || efectivo.length < 1) {
       throw {
         code: 400,
@@ -81,18 +82,26 @@ controller.insertarLiquidos = async (req, res) => {
           capturado: true,
           idempleado_captura: user.token.data.datos.idempleado,
         },
-        { where: { idliquidacion: folio } },
-        { transaction: t }
+        {
+          where: { idliquidacion: folio },
+          transaction: t,
+          individualHooks: true,
+        }
       );
 
+      if (checkMF && diferencia > 0) {
+        await insertarMf(req, res, {
+          idempleado: liquidacion.dataValues.horario.dataValues.idempleado,
+          fecha: liquidacion.dataValues.horario.dataValues.fechaliquidacion,
+          cantidad: diferencia,
+        });
+      }
       return { vales, efectivo, infoLect, lectF, liquidaciones };
     });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
-      console.log(err);
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
       res.status(err.code).json(err);
@@ -152,9 +161,11 @@ controller.reservarFolio = async (req, res) => {
 
     const cuerpo = {
       capturado: true,
-      idempleado_autoriza: idempleadoC,
+      idempleado_captura: idempleadoC,
       paginacion: JSON.stringify(req.body),
     };
+
+    console.log(cuerpo);
 
     const response = await Liquidaciones.update(cuerpo, {
       where: { idliquidacion: folio },
@@ -178,9 +189,15 @@ controller.quitarReservarFolio = async (req, res) => {
 
     const cuerpo = { capturado: 0, idempleado_captura: null, paginacion: null };
 
-    const response = await Liquidaciones.update(cuerpo, {
-      where: { idliquidacion: folio },
-    });
+    const liquidacion = await Liquidaciones.findByPk(folio);
+
+    let response = [1];
+
+    if (!liquidacion.lecturas) {
+      response = await Liquidaciones.update(cuerpo, {
+        where: { idliquidacion: folio },
+      });
+    }
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -205,6 +222,7 @@ controller.liquidacionesPendientes = async (req, res) => {
           include: [{ model: empleados }, { model: Turnos }, { model: ES }],
           where: { fechaliquidacion: fecha },
         },
+        { model: empleados, as: "empleado_captura" },
       ],
     });
 

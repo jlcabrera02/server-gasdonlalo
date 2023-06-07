@@ -181,7 +181,8 @@ controller.insert = async (req, res) => {
         "El empleado no pertenece al departamento de despachadores"
       );
 
-    await sncaM.insert([
+    const response = await insertarMf(req, res, cuerpo);
+    /* await sncaM.insert([
       6,
       empleado,
       fecha,
@@ -195,7 +196,7 @@ controller.insert = async (req, res) => {
       user.token.data.datos.idempleado,
       2,
       response.insertId,
-    ]);
+    ]); */
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -263,6 +264,27 @@ controller.delete = async (req, res) => {
       res.status(err.code).json(err);
     }
   }
+};
+
+export const insertarMf = async (req, res, cuerpo) => {
+  let user = verificar(req.headers.authorization, 2);
+
+  const insertar = await sncaM.insert([
+    6,
+    cuerpo.idempleado,
+    cuerpo.fecha,
+    `Inconformidad por la cantidad de $${cuerpo.cantidad} pesos`,
+  ]);
+
+  let response = await montoFaltanteM.insert(cuerpo);
+
+  await guardarBitacora([
+    area,
+    user.token.data.datos.idempleado,
+    2,
+    response.insertId,
+  ]);
+  return insertar;
 };
 
 export default controller;

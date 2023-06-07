@@ -74,6 +74,15 @@ Liquidaciones.hasMany(Efectivo, { foreignKey: "idliquidacion" });
 Liquidaciones.belongsTo(Horarios, { foreignKey: "idhorario" });
 Horarios.hasMany(Liquidaciones, { foreignKey: "idhorario" });
 
+Liquidaciones.belongsTo(empleados, {
+  foreignKey: "idempleado_captura",
+  as: "empleado_captura",
+});
+empleados.hasMany(Liquidaciones, {
+  foreignKey: "idempleado_captura",
+  as: "empleado_captura",
+});
+
 Horarios.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(Horarios, { foreignKey: "idempleado" });
 

@@ -45,4 +45,13 @@ const Liquidaciones = sequelize.define(
   }
 );
 
+Liquidaciones.beforeUpdate((liq) => {
+  if (liq["_previousDataValues"].lecturas) {
+    throw {
+      code: 400,
+      msg: "La liquidación ya se capturo o hay una con el mismo folio, por lo que esta liquidación ya no se aceptara en el sistema.",
+    };
+  }
+});
+
 export default Liquidaciones;
