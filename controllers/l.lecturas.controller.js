@@ -140,7 +140,7 @@ controller.buscarInfoLecLimit = async (req, res) => {
       attributes: ["idinfo_lectura", "idliquidacion"],
       where: { idestacion_servicio: idEstacion, cancelado: false },
       order: [["idinfo_lectura", "DESC"]],
-      limit: [limit, limit + 2],
+      limit: [limit, 2],
     });
 
     res.status(200).json({ success: true, response });
