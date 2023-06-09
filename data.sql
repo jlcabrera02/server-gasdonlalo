@@ -250,7 +250,14 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 (25, "Obtener y capturar", "Orden y limpieza", 2, "Das permiso de que el usuario pueda obtener y crear nuevos datos en el área de orden y limpieza"),
 (48, "Visualizar usuarios", "Permisos", 8, "Das permiso de que el usuario pueda ver enlistada a los empleados y usuarios"),
 (49, "Establecer usuario", "Permisos", 8, "Das permiso de que el usuario pueda crear un usuario a un empleado"),
-(50, "Establecer permisos", "Permisos", 8, "Das permiso de que el usuario establecer permisos a los demas usuarios");
+(50, "Establecer permisos", "Permisos", 8, "Das permiso de que el usuario establecer permisos a los demas usuarios"),
+(51, "Configurar Lecturas Iniciales", "Liquidación", 8, "Das la opción de que el usuario manipule las lecturas iniciales"),(52, "Cancelar Liquidación", "Liquidación", 8, "Das la opción de que el usuario cancele una liquidación"),
+(53, "Configurar Precios de combustible", "Liquidación", 8, "Das la opción de que el usuario configure los precios de combustible"),
+(54, "Configurar turnos", "Liquidación", 8, "Das la opción de que el usuario manipule los turnos de trabajo"),
+(55, "Configurar Llave de acceso", "Liquidación", 8, "Das la opción de que el usuario registre una llave de acceso para el reinicio de lecturas"),
+(56, "Configurar de estaciones", "Liquidación", 8, "Das la opción de que el usuario de de alta o manipule las estaciones de servicio"),
+(57, "Configurar horarios", "Liquidación", 8, "Das la opción de que el usuario registre horarios a los despachadores"),
+(58, "Capturar liquidos", "Liquidación", 8, "Das la opción de que el usuario capture las liquidaciones");
 
 INSERT INTO acceso (user, idpermiso) VALUES 
 ("sralcocer", 1);
