@@ -3,7 +3,21 @@ import models from "../models";
 import { Op } from "sequelize";
 import format from "../assets/formatTiempo";
 import { buscarLecturasXIdEmpleado } from "../controllers/l.lecturas.controller";
-const { Precios, empleados } = models;
+import Decimal from "decimal.js-light";
+const {
+  Precios,
+  empleados,
+  Efectivo,
+  Vales,
+  LecturasFinales,
+  InfoLecturas,
+  Mangueras,
+  Islas,
+  Horarios,
+  Liquidaciones,
+  Turnos,
+  ES,
+} = models;
 
 const textHeader = {
   font: { size: 12, bold: true },
@@ -58,9 +72,11 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
     const wb = new xl.Workbook();
     const ws = wb.addWorksheet("Litros por empleado");
 
-    const convert = JSON.stringify(response);
+    const convert = JSON.parse(JSON.stringify(response));
 
-    let reporte = JSON.parse(convert).map((el) => {
+    console.log(convert);
+
+    let reporte = convert.map((el) => {
       const lecturasFInales = el.info_lectura.lecturas_finales;
       return lecturasFInales.map((l) => ({
         ["idEmpleado"]: el.horario.empleado.idchecador,
@@ -93,29 +109,49 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
     });
     reporte = reporte.flat();
 
-    const columnas = Object.keys(reporte[0]);
-    columnas.forEach((c, i) => {
-      ws.cell(1, i + 1)
-        .string(c)
-        .style(textHeader);
-    });
+    const info = [];
 
-    reporte.forEach((r, i) => {
-      const columns = Object.keys(r);
-      columns.forEach((c, j) => {
-        const dato = r[c];
-        if (typeof dato === "number") {
-          ws.cell(i + 2, j + 1).number(dato);
+    reporte = await Promise.all(
+      reporte.map(async (el) => {
+        const filtrador = (d) => d.idLiquidacion === el.idLiquidacion;
+        const existeInformacion = info.some(filtrador);
+        if (existeInformacion) {
+          const informacion = existeInformacion.find(filtrador);
+          return { ...el, ...informacion };
         } else {
-          const regExp = /\d\d\d\d-\d\d-\d\d/;
-          if (regExp.test(dato)) {
-            ws.cell(i + 2, j + 1).date(dato);
-          } else {
-            ws.cell(i + 2, j + 1).string(dato);
-          }
+          const query = { idLiquidacion: el.idLiquidacion };
+          const calcularTotal = (datos, propiedad) => {
+            const cantidad =
+              datos.length > 0
+                ? datos
+                    .map((el) => el[propiedad])
+                    .reduce((a, b) =>
+                      new Decimal(a).add(new Decimal(b).toNumber(), 0)
+                    )
+                : 0;
+            return Number(cantidad);
+          };
+
+          const efectivos = await Efectivo.findAll({ raw: true, where: query });
+          const vales = await Vales.findAll({ raw: true, where: query });
+
+          const extraccion = {
+            idLiquidacion: el.idLiquidacion,
+            ["Pesos en vales"]: format.formatDinero(
+              calcularTotal(vales, "monto")
+            ),
+            ["Pesos en efectivo"]: format.formatDinero(
+              calcularTotal(efectivos, "monto")
+            ),
+          };
+
+          info.push(extraccion);
+          return { ...el, ...extraccion };
         }
-      });
-    });
+      })
+    );
+
+    generadorTablasExcel(reporte, ws);
 
     wb.writeToBuffer().then((buf) => {
       res.writeHead(200, [
@@ -130,4 +166,161 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
     console.log(err);
     res.status(400).json({ success: false });
   }
+};
+
+export const Liquidacion = async (req, res) => {
+  try {
+    const { idLiquidacion } = req.params;
+    const wb = new xl.Workbook();
+    const lecturas = wb.addWorksheet("Lecturas");
+    const vales = wb.addWorksheet("Vales");
+    const efectivos = wb.addWorksheet("Efectivos");
+
+    const query = { idliquidacion: idLiquidacion };
+
+    LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
+    InfoLecturas.hasMany(LecturasFinales, { foreignKey: "idinfo_lectura" });
+
+    LecturasFinales.belongsTo(Mangueras, { foreignKey: "idmanguera" });
+    Mangueras.hasMany(LecturasFinales, { foreignKey: "idmanguera" });
+
+    Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
+    Islas.hasMany(Mangueras, { foreignKey: "idisla" });
+
+    const querys = { idliquidacion: idLiquidacion };
+
+    let lecturasD = await Liquidaciones.findOne({
+      where: querys,
+      include: [
+        {
+          model: Horarios,
+          include: [{ model: empleados }, { model: Turnos }, { model: ES }],
+        },
+        {
+          model: InfoLecturas,
+          include: [
+            {
+              model: LecturasFinales,
+              include: [{ model: Mangueras, include: Islas }],
+            },
+          ],
+        },
+        { model: Vales },
+        { model: Efectivo },
+      ],
+    });
+
+    lecturasD = JSON.parse(JSON.stringify(lecturasD));
+
+    console.log(lecturasD);
+
+    const lecturasM = lecturasD.info_lectura.lecturas_finales.map((l) => {
+      return {
+        ["idEmpleado"]: lecturasD.horario.empleado.idchecador,
+        ["idLiquidacion"]: lecturasD.idliquidacion,
+        ["Nombres"]: lecturasD.horario.empleado.nombre,
+        ["Apellido Paterno"]: lecturasD.horario.empleado.apellido_paterno,
+        ["Apellido Materno"]: lecturasD.horario.empleado.apellido_materno,
+        ["idManguera"]:
+          l.manguera.direccion === "iz"
+            ? `${l.manguera.idgas}${l.manguera.isla.nisla * 2 - 1}`
+            : `${l.manguera.idgas}${l.manguera.isla.nisla * 2}`,
+        ["idIsla"]: l.manguera.idisla,
+        ["IdEstacionServicio"]: l.manguera.isla.idestacion_servicio,
+        ["idGas"]: l.manguera.idgas,
+        ["Numero de isla"]: l.manguera.isla.nisla,
+        ["Lectura Inicial"]: l.lecturai,
+        ["Lectura Final"]: l.lecturaf,
+        ["Total Litros"]:
+          l.lecturaf >= l.lecturai
+            ? l.lecturaf - l.lecturai
+            : 9999999 - l.lecturai + l.lecturaf + 1,
+        ["Turno"]: lecturasD.horario.turno.turno,
+        ["Precio unitario"]: format.formatDinero(l.precio),
+        ["Importe"]: format.formatDinero(l.importe),
+        ["Fecha"]: lecturasD.horario.fechaliquidacion,
+        ["Estatus"]: lecturasD.cancelado ? "Cancelado" : "Vigente",
+        ["Motivo Cancelación"]: lecturasD.cancelado ? lecturasD.cancelado : "",
+        ["Fecha Cancelacion"]: lecturasD.cancelado
+          ? lecturasD.fechaCancelado
+          : "",
+      };
+    });
+
+    const efectivoM = lecturasD.efectivos.map((el) => {
+      return {
+        ["idEmpleado"]: lecturasD.horario.empleado.idchecador,
+        ["idLiquidacion"]: lecturasD.idliquidacion,
+        ["folio"]: el.folio,
+        ["Nombres"]: lecturasD.horario.empleado.nombre,
+        ["Apellido Paterno"]: lecturasD.horario.empleado.apellido_paterno,
+        ["Apellido Materno"]: lecturasD.horario.empleado.apellido_materno,
+        ["Turno"]: lecturasD.horario.turno.turno,
+        ["Monto"]: format.formatDinero(el.monto),
+        ["Fecha"]: lecturasD.horario.fechaliquidacion,
+        ["Estatus"]: lecturasD.cancelado ? "Cancelado" : "Vigente",
+      };
+    });
+
+    const valesM = lecturasD.vales.map((el) => {
+      return {
+        ["idEmpleado"]: lecturasD.horario.empleado.idchecador,
+        ["idLiquidacion"]: lecturasD.idliquidacion,
+        ["folio"]: el.folio,
+        ["Nombres"]: lecturasD.horario.empleado.nombre,
+        ["Apellido Paterno"]: lecturasD.horario.empleado.apellido_paterno,
+        ["Apellido Materno"]: lecturasD.horario.empleado.apellido_materno,
+        ["Combustible"]: el.label,
+        ["Turno"]: lecturasD.horario.turno.turno,
+        ["Monto"]: format.formatDinero(el.monto),
+        ["Fecha"]: lecturasD.horario.fechaliquidacion,
+        ["Estatus"]: lecturasD.cancelado ? "Cancelado" : "Vigente",
+      };
+    });
+
+    generadorTablasExcel(lecturasM, lecturas);
+    generadorTablasExcel(efectivoM, efectivos);
+    generadorTablasExcel(valesM, vales);
+
+    wb.writeToBuffer().then((buf) => {
+      res.writeHead(200, [
+        [
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ],
+      ]);
+      res.end(buf);
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ success: false });
+  }
+};
+
+const generadorTablasExcel = (datos, sheet) => {
+  const columnas = Object.keys(datos[0]);
+  columnas.forEach((c, i) => {
+    sheet
+      .cell(1, i + 1)
+      .string(c)
+      .style(textHeader);
+  });
+  datos.forEach((r, i) => {
+    const columns = Object.keys(r);
+    columns.forEach((c, j) => {
+      const dato = r[c];
+      if (typeof dato === "number") {
+        sheet.cell(i + 2, j + 1).number(dato);
+      } else {
+        const regExp = /\d\d\d\d-\d\d-\d\d/;
+        if (regExp.test(dato)) {
+          sheet.cell(i + 2, j + 1).date(dato);
+        } else {
+          sheet.cell(i + 2, j + 1).string(dato);
+        }
+      }
+    });
+  });
+
+  return sheet;
 };

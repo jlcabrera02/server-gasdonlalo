@@ -13,6 +13,8 @@ const {
   empleados,
   Turnos,
   ES,
+  Vales,
+  Efectivo,
 } = models;
 const { verificar } = auth;
 const controller = {};
@@ -275,6 +277,8 @@ export const buscarLecturasXIdEmpleado = async ({
           },
         ],
       },
+      { model: Vales },
+      { model: Efectivo },
     ],
   });
 
