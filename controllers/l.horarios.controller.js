@@ -94,6 +94,7 @@ controller.nuevoHorario = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
