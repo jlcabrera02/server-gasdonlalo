@@ -79,15 +79,21 @@ controller.nuevoHorario = async (req, res) => {
 
     const response = await sequelize.transaction(async (tr) => {
       const horarios = await Horarios.create(cuerpo, { transaction: tr });
-      const liquidaciones = await Liquidaciones.create({
-        idhorario: horarios.idhorario,
-      });
-      await Auditoria.create({
-        peticion: area,
-        idempleado: user.token.data.datos.idempleado,
-        accion: 2,
-        idaffectado: horarios.idhorario,
-      });
+      const liquidaciones = await Liquidaciones.create(
+        {
+          idhorario: horarios.idhorario,
+        },
+        { transaction: tr }
+      );
+      await Auditoria.create(
+        {
+          peticion: area,
+          idempleado: user.token.data.datos.idempleado,
+          accion: 2,
+          idaffectado: horarios.idhorario,
+        },
+        { transaction: tr }
+      );
 
       return { horarios, liquidaciones };
     });
