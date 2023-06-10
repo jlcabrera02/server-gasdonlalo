@@ -209,7 +209,7 @@ controller.updateLecturaInicial = async (req, res) => {
           transaction: t,
         });
 
-        const auditoriaC = req.body.map((el) => ({
+        const auditoriaC = data.map((el) => ({
           peticion: "Lectura Inicial",
           idempleado: user.token.data.datos.idempleado,
           accion: 2,
@@ -235,7 +235,7 @@ controller.updateLecturaInicial = async (req, res) => {
       });
     }
 
-    const auditoriaC = req.body.map((el) => ({
+    const auditoriaC = data.map((el) => ({
       peticion: "Lectura Inicial",
       idempleado: user.token.data.datos.idempleado,
       accion: 3,

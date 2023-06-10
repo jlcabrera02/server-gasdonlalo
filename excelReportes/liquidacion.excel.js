@@ -111,8 +111,8 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
             ? l.lecturaf - l.lecturai
             : 9999999 - l.lecturai + l.lecturaf + 1,
         ["Turno"]: el.horario.turno.turno,
-        ["Precio unitario"]: format.formatDinero(l.precio),
-        ["Importe"]: format.formatDinero(l.importe),
+        ["Precio unitario"]: Number(l.precio),
+        ["Importe"]: Number(l.importe),
         ["Vales"]: calcularTotal(el.vales, "monto"),
         ["Efectivo"]: calcularTotal(el.efectivos, "monto"),
         ["Fecha"]: el.horario.fechaliquidacion,
@@ -131,7 +131,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
         ["Nombres"]: el.horario.empleado.nombre,
         ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
         ["Apellido Materno"]: el.horario.empleado.apellido_materno,
-        ["Monto"]: format.formatDinero(efectivo.monto),
+        ["Monto"]: Number(efectivo.monto),
       }));
     });
 
@@ -144,7 +144,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
         ["Nombres"]: el.horario.empleado.nombre,
         ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
         ["Apellido Materno"]: el.horario.empleado.apellido_materno,
-        ["Monto"]: format.formatDinero(vale.monto),
+        ["Monto"]: Number(vale.monto),
       }));
     });
 
@@ -178,8 +178,6 @@ export const Liquidacion = async (req, res) => {
     const lecturas = wb.addWorksheet("Lecturas");
     const vales = wb.addWorksheet("Vales");
     const efectivos = wb.addWorksheet("Efectivos");
-
-    const query = { idliquidacion: idLiquidacion };
 
     LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
     InfoLecturas.hasMany(LecturasFinales, { foreignKey: "idinfo_lectura" });
@@ -239,8 +237,8 @@ export const Liquidacion = async (req, res) => {
             ? l.lecturaf - l.lecturai
             : 9999999 - l.lecturai + l.lecturaf + 1,
         ["Turno"]: lecturasD.horario.turno.turno,
-        ["Precio unitario"]: format.formatDinero(l.precio),
-        ["Importe"]: format.formatDinero(l.importe),
+        ["Precio unitario"]: l.precio,
+        ["Importe"]: Number(l.importe),
         ["Fecha"]: lecturasD.horario.fechaliquidacion,
         ["Estatus"]: lecturasD.cancelado ? "Cancelado" : "Vigente",
         ["Motivo Cancelación"]: lecturasD.cancelado ? lecturasD.cancelado : "",
@@ -259,7 +257,7 @@ export const Liquidacion = async (req, res) => {
         ["Apellido Paterno"]: lecturasD.horario.empleado.apellido_paterno,
         ["Apellido Materno"]: lecturasD.horario.empleado.apellido_materno,
         ["Turno"]: lecturasD.horario.turno.turno,
-        ["Monto"]: format.formatDinero(el.monto),
+        ["Monto"]: Number(el.monto),
         ["Fecha"]: lecturasD.horario.fechaliquidacion,
         ["Estatus"]: lecturasD.cancelado ? "Cancelado" : "Vigente",
       };
@@ -275,7 +273,7 @@ export const Liquidacion = async (req, res) => {
         ["Apellido Materno"]: lecturasD.horario.empleado.apellido_materno,
         ["Combustible"]: el.label,
         ["Turno"]: lecturasD.horario.turno.turno,
-        ["Monto"]: format.formatDinero(el.monto),
+        ["Monto"]: Number(el.monto),
         ["Fecha"]: lecturasD.horario.fechaliquidacion,
         ["Estatus"]: lecturasD.cancelado ? "Cancelado" : "Vigente",
       };
