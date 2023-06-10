@@ -70,23 +70,18 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
   try {
     const response = await buscarLecturasXIdEmpleado(req.body);
     const wb = new xl.Workbook();
+    const liquidacion = wb.addWorksheet("Liquidaciones");
     const ws = wb.addWorksheet("Lecturas");
     const vale = wb.addWorksheet("vales");
     const efecivo = wb.addWorksheet("efectivo");
 
     const convert = JSON.parse(JSON.stringify(response));
 
-    const calcularTotal = (datos, propiedad) => {
-      const cantidad =
-        datos.length > 0
-          ? datos
-              .map((el) => el[propiedad])
-              .reduce((a, b) =>
-                new Decimal(a).add(new Decimal(b).toNumber(), 0)
-              )
-          : 0;
-      return Number(cantidad);
-    };
+    const liquidaciones = convert.map((el) => ({
+      idLiquidacion: el.idliquidacion,
+      idEmpleado: el.horario.idempleado,
+      ["nombre completo"]: `${el.horario.empleado.nombre} ${el.horario.empleado.apellido_paterno} ${el.horario.empleado.apellido_materno}`,
+    }));
 
     let reporte = convert.map((el) => {
       const lecturasFInales = el.info_lectura.lecturas_finales;
@@ -113,8 +108,6 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
         ["Turno"]: el.horario.turno.turno,
         ["Precio unitario"]: Number(l.precio),
         ["Importe"]: Number(l.importe),
-        ["Vales"]: calcularTotal(el.vales, "monto"),
-        ["Efectivo"]: calcularTotal(el.efectivos, "monto"),
         ["Fecha"]: el.horario.fechaliquidacion,
         ["Estatus"]: el.cancelado ? "Cancelado" : "Activo",
         ["Motivo Cancelación"]: el.cancelado ? el.cancelado : "",
@@ -127,11 +120,11 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
       return efectivos.map((efectivo) => ({
         ["idEmpleado"]: el.horario.empleado.idchecador,
         ["idLiquidacion"]: el.idliquidacion,
-        ["Folio"]: efectivo.folio || "",
+        ["Folio Efectivo"]: efectivo.folio || "",
         ["Nombres"]: el.horario.empleado.nombre,
         ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
         ["Apellido Materno"]: el.horario.empleado.apellido_materno,
-        ["Monto"]: Number(efectivo.monto),
+        ["Monto Efectivo"]: Number(efectivo.monto),
       }));
     });
 
@@ -140,11 +133,11 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
       return vales.map((vale) => ({
         ["idEmpleado"]: el.horario.empleado.idchecador,
         ["idLiquidacion"]: el.idliquidacion,
-        ["Folio"]: vale.folio || "",
+        ["Folio Vales"]: vale.folio || "",
         ["Nombres"]: el.horario.empleado.nombre,
         ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
         ["Apellido Materno"]: el.horario.empleado.apellido_materno,
-        ["Monto"]: Number(vale.monto),
+        ["Monto Vales"]: Number(vale.monto),
       }));
     });
 
@@ -152,6 +145,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
     efectivos = efectivos.flat();
     vales = vales.flat();
 
+    generadorTablasExcel(liquidaciones, liquidacion);
     generadorTablasExcel(reporte, ws);
     generadorTablasExcel(efectivos, efecivo);
     generadorTablasExcel(vales, vale);
