@@ -81,6 +81,9 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
       idLiquidacion: el.idliquidacion,
       idEmpleado: el.horario.idempleado,
       ["nombre completo"]: `${el.horario.empleado.nombre} ${el.horario.empleado.apellido_paterno} ${el.horario.empleado.apellido_materno}`,
+      turno: el.horario.turno.turno,
+      ["Estacion servicio"]: el.horario.estacion_servicio.nombre,
+      ["Fecha Liquidacion"]: el.horario.fechaliquidacion,
     }));
 
     let reporte = convert.map((el) => {
