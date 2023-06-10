@@ -13,10 +13,12 @@ const {
   Efectivo,
   InfoLecturas,
   LecturasFinales,
+  Auditoria,
 } = modelos;
 const { verificar } = auth;
 
 const controller = {};
+const area = "Liquidación";
 
 controller.insertarLiquidos = async (req, res) => {
   try {
@@ -96,6 +98,13 @@ controller.insertarLiquidos = async (req, res) => {
           cantidad: diferencia,
         });
       }
+
+      await Auditoria.create({
+        peticion: area,
+        idempleado: user.token.data.datos.idempleado,
+        accion: 2,
+        idaffectado: folio,
+      });
       return { vales, efectivo, infoLect, lectF, liquidaciones };
     });
 
@@ -136,6 +145,13 @@ controller.cancelarLiquido = async (req, res) => {
         idhorario: infoLiq.idhorario,
       });
 
+      await Auditoria.create({
+        peticion: "Cancelar Liquidación",
+        idempleado: user.token.data.datos.idempleado,
+        accion: 4,
+        idaffectado: idLiquidacion,
+      });
+
       return { liquidacion, lecturasF, nuevaLiquidacion };
     });
 
@@ -171,6 +187,13 @@ controller.reservarFolio = async (req, res) => {
       where: { idliquidacion: folio },
     });
 
+    await Auditoria.create({
+      peticion: "Reservar Liquidación",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 3,
+      idaffectado: folio,
+    });
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -198,6 +221,13 @@ controller.quitarReservarFolio = async (req, res) => {
         where: { idliquidacion: folio },
       });
     }
+
+     await Auditoria.create({
+       peticion: "Reservar Liquidación",
+       idempleado: user.token.data.datos.idempleado,
+       accion: 4,
+       idaffectado: folio,
+     });
 
     res.status(200).json({ success: true, response });
   } catch (err) {

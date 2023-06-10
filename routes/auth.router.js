@@ -1,22 +1,23 @@
 import router from "express-promise-router";
-import estacionService from "../controllers/auth.controller";
+import auth from "../controllers/auth.controller";
 
 const route = router();
 
-route.get("/", estacionService.validarTiempoSesion); //Me valida el tiempo en sesion
-route.get("/usuarios/:idChecador", estacionService.findByIdEmpleado);
-route.get("/usuarios", estacionService.findAll);
-route.get("/permisos/:idChecador", estacionService.findPermisosXEmpleado);
-route.get("/permisos", estacionService.findPermisos);
-route.get("/listAccessKey", estacionService.ListLlaveAcceso);
-route.post("/accessKey", estacionService.AccessLlaveAcceso);
-route.delete("/deleteAccessKey/:key", estacionService.RemoveLlaveAcceso);
-route.post("/createAccessKey", estacionService.CreateLlaveAcceso);
-route.post("/login", estacionService.login);
-route.post("/registrar/permiso", estacionService.registerPermisos);
-route.post("/registrar", estacionService.register);
-route.put("/changePass", estacionService.changePass);
-route.put("/changePassA", estacionService.changePassAdmin);
-route.put("/quitar/permiso", estacionService.quitarPermisos);
+route.get("/", auth.validarTiempoSesion); //Me valida el tiempo en sesion
+route.get("/usuarios/:idChecador", auth.findByIdEmpleado);
+route.get("/usuarios", auth.findAll);
+route.get("/permisos/:idChecador", auth.findPermisosXEmpleado);
+route.get("/permisos", auth.findPermisos);
+route.get("/listAccessKey", auth.ListLlaveAcceso);
+route.get("/auditorias", auth.infoAuditorias);
+route.post("/accessKey", auth.AccessLlaveAcceso);
+route.delete("/deleteAccessKey/:key", auth.RemoveLlaveAcceso);
+route.post("/createAccessKey", auth.CreateLlaveAcceso);
+route.post("/login", auth.login);
+route.post("/registrar/permiso", auth.registerPermisos);
+route.post("/registrar", auth.register);
+route.put("/changePass", auth.changePass);
+route.put("/changePassA", auth.changePassAdmin);
+route.put("/quitar/permiso", auth.quitarPermisos);
 
 export default route;

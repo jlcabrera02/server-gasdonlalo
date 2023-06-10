@@ -1,9 +1,7 @@
-import preM from "../models/l.preciogas.model";
-import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import models from "../models/";
 import { Op } from "sequelize";
-const { Precios } = models;
+const { Precios, Auditoria } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -22,6 +20,15 @@ controller.insertarPrecios = async (req, res) => {
     ];
 
     const response = await Precios.bulkCreate(cuerpo);
+
+    const auditoriaC = response.map((el) => ({
+      peticion: "Precios Combustible",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 2,
+      idaffectado: el.dataValues.idprecio,
+    }));
+
+    await Auditoria.bulkCreate(auditoriaC);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -98,6 +105,13 @@ controller.actualizarPrecios = async (req, res) => {
 
     const response = await Precios.update(cuerpo, {
       where: { idprecio: idPrecio },
+    });
+
+    await Auditoria.create({
+      peticion: "Precios combustible",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 3,
+      idaffectado: idPrecio,
     });
 
     res.status(200).json({ success: true, response });

@@ -70,11 +70,23 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
   try {
     const response = await buscarLecturasXIdEmpleado(req.body);
     const wb = new xl.Workbook();
-    const ws = wb.addWorksheet("Litros por empleado");
+    const ws = wb.addWorksheet("Lecturas");
+    const vale = wb.addWorksheet("vales");
+    const efecivo = wb.addWorksheet("efectivo");
 
     const convert = JSON.parse(JSON.stringify(response));
 
-    console.log(convert);
+    const calcularTotal = (datos, propiedad) => {
+      const cantidad =
+        datos.length > 0
+          ? datos
+              .map((el) => el[propiedad])
+              .reduce((a, b) =>
+                new Decimal(a).add(new Decimal(b).toNumber(), 0)
+              )
+          : 0;
+      return Number(cantidad);
+    };
 
     let reporte = convert.map((el) => {
       const lecturasFInales = el.info_lectura.lecturas_finales;
@@ -101,57 +113,48 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
         ["Turno"]: el.horario.turno.turno,
         ["Precio unitario"]: format.formatDinero(l.precio),
         ["Importe"]: format.formatDinero(l.importe),
+        ["Vales"]: calcularTotal(el.vales, "monto"),
+        ["Efectivo"]: calcularTotal(el.efectivos, "monto"),
         ["Fecha"]: el.horario.fechaliquidacion,
         ["Estatus"]: el.cancelado ? "Cancelado" : "Activo",
         ["Motivo Cancelación"]: el.cancelado ? el.cancelado : "",
         ["Fecha Cancelacion"]: el.cancelado ? el.fechaCancelado : "",
       }));
     });
+
+    let efectivos = convert.map((el) => {
+      const efectivos = el.efectivos;
+      return efectivos.map((efectivo) => ({
+        ["idEmpleado"]: el.horario.empleado.idchecador,
+        ["idLiquidacion"]: el.idliquidacion,
+        ["Folio"]: efectivo.folio || "",
+        ["Nombres"]: el.horario.empleado.nombre,
+        ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
+        ["Apellido Materno"]: el.horario.empleado.apellido_materno,
+        ["Monto"]: format.formatDinero(efectivo.monto),
+      }));
+    });
+
+    let vales = convert.map((el) => {
+      const vales = el.vales;
+      return vales.map((vale) => ({
+        ["idEmpleado"]: el.horario.empleado.idchecador,
+        ["idLiquidacion"]: el.idliquidacion,
+        ["Folio"]: vale.folio || "",
+        ["Nombres"]: el.horario.empleado.nombre,
+        ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
+        ["Apellido Materno"]: el.horario.empleado.apellido_materno,
+        ["Monto"]: format.formatDinero(vale.monto),
+      }));
+    });
+
     reporte = reporte.flat();
-
-    const info = [];
-
-    reporte = await Promise.all(
-      reporte.map(async (el) => {
-        const filtrador = (d) => d.idLiquidacion === el.idLiquidacion;
-        const existeInformacion = info.some(filtrador);
-        if (existeInformacion) {
-          const informacion = existeInformacion.find(filtrador);
-          return { ...el, ...informacion };
-        } else {
-          const query = { idLiquidacion: el.idLiquidacion };
-          const calcularTotal = (datos, propiedad) => {
-            const cantidad =
-              datos.length > 0
-                ? datos
-                    .map((el) => el[propiedad])
-                    .reduce((a, b) =>
-                      new Decimal(a).add(new Decimal(b).toNumber(), 0)
-                    )
-                : 0;
-            return Number(cantidad);
-          };
-
-          const efectivos = await Efectivo.findAll({ raw: true, where: query });
-          const vales = await Vales.findAll({ raw: true, where: query });
-
-          const extraccion = {
-            idLiquidacion: el.idLiquidacion,
-            ["Pesos en vales"]: format.formatDinero(
-              calcularTotal(vales, "monto")
-            ),
-            ["Pesos en efectivo"]: format.formatDinero(
-              calcularTotal(efectivos, "monto")
-            ),
-          };
-
-          info.push(extraccion);
-          return { ...el, ...extraccion };
-        }
-      })
-    );
+    efectivos = efectivos.flat();
+    vales = vales.flat();
 
     generadorTablasExcel(reporte, ws);
+    generadorTablasExcel(efectivos, efecivo);
+    generadorTablasExcel(vales, vale);
 
     wb.writeToBuffer().then((buf) => {
       res.writeHead(200, [

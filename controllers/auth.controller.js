@@ -1,7 +1,10 @@
 import auth from "../models/auth.model";
 import mysql from "mysql2";
 import models from "../models";
-const { LlaveAcceso, empleados } = models;
+import formatTiempo from "../assets/formatTiempo";
+import { Op } from "sequelize";
+import sequelize from "../config/configdb";
+const { LlaveAcceso, empleados, Auditoria } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -14,6 +17,14 @@ controller.login = async (req, res) => {
     const permisos = await auth.findPermisosByUser(user);
     const permisosId = permisos.map((el) => [el.idpermiso, el.idarea_trabajo]);
     const token = auth.generarToken(userData, permisosId);
+
+    await Auditoria.create({
+      peticion: "Inicio de sesión",
+      idempleado: userData.idempleado,
+      accion: 1,
+      idaffectado: userData.idempleado,
+    });
+
     res.status(200).json({
       success: true,
       auth: userData,
@@ -33,12 +44,23 @@ controller.login = async (req, res) => {
 
 controller.AccessLlaveAcceso = async (req, res) => {
   try {
-    const { key } = req.body;
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { key, mangueras } = req.body;
     const response = await LlaveAcceso.findOne({
       where: { key },
       include: empleados,
     });
     if (!response) throw { code: 403, msg: "No autorizado", success: false };
+
+    const auditoriaC = mangueras.map((el) => ({
+      peticion: "Autorización Reinicio Lectura",
+      idempleado: response.dataValues.empleado.idempleado,
+      accion: 2,
+      idaffectado: el,
+    }));
+
+    await Auditoria.bulkCreate(auditoriaC);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -51,12 +73,23 @@ controller.AccessLlaveAcceso = async (req, res) => {
 
 controller.RemoveLlaveAcceso = async (req, res) => {
   try {
+    let user = verificar(req.headers.authorization, 1);
+    if (!user.success) throw user;
     const { key } = req.params;
     const response = await LlaveAcceso.destroy({
       where: { key },
     });
+
+    await Auditoria.create({
+      peticion: "Llave de acceso",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 4,
+      idaffectado: key,
+    });
+
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -86,6 +119,12 @@ controller.CreateLlaveAcceso = async (req, res) => {
     if (!user.success) throw user;
     const { key, idempleado } = req.body;
     const response = await LlaveAcceso.create({ idempleado, key });
+    await Auditoria.create({
+      peticion: "Llave de acceso",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 2,
+      idaffectado: response.key,
+    });
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -246,6 +285,44 @@ controller.changePassAdmin = async (req, res) => {
   }
 };
 
+controller.infoAuditorias = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { nDias } = req.query;
+    const hoy = new Date(),
+      year = hoy.getFullYear(),
+      month = hoy.getMonth(),
+      date = hoy.getDate();
+    const fecha = new Date(year, month, date);
+
+    if (nDias) {
+      fecha.setDate(fecha.getDate() - nDias);
+    }
+
+    const response = await Auditoria.findAll({
+      where: {
+        create_time: sequelize.where(
+          sequelize.fn("DATE", sequelize.col("create_time")),
+          {
+            [Op.gte]: fecha,
+          }
+        ),
+      },
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      console.log(err);
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+/* 
 controller.update = async (req, res) => {
   try {
     const { id } = req.params;
@@ -266,6 +343,6 @@ controller.update = async (req, res) => {
       res.status(err.code).json(err);
     }
   }
-};
+}; */
 
 export default controller;

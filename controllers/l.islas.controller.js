@@ -1,12 +1,11 @@
-import islaM from "../models/l.islas.model";
-import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import models from "../models";
 import sequelize from "../config/configdb";
-const { Islas, Mangueras } = models;
+const { Islas, Mangueras, Auditoria } = models;
 const { verificar } = auth;
 
 const controller = {};
+const area = "Islas";
 
 controller.findIslas = async (req, res) => {
   try {
@@ -20,17 +19,11 @@ controller.findIslas = async (req, res) => {
     });
     for (let i = 0; i < islas.length; i++) {
       const el = islas[i];
-      // const mangueras = await islaM.findManguerasByIsla(el.idisla);
-      // islas[i].positionL = mangueras.filter((el) => el.direccion === "iz");
-      // islas[i].positionR = mangueras.filter((el) => el.direccion === "dr");
       const isla = await Islas.findByPk(el.idisla);
       const gas = await isla.getGas();
 
       response.push({ ...el.dataValues, gas });
     }
-
-    // const gasolinas = [];
-    // for (let i = 0; i < islas.length; i++) {}
 
     res.status(200).json({ success: true, response: response });
   } catch (err) {
@@ -79,6 +72,13 @@ controller.insertIslas = async (req, res) => {
         transaction: t,
       });
 
+      await Auditoria.create({
+        peticion: area,
+        idempleado: user.token.data.datos.idempleado,
+        accion: 2,
+        idaffectado: islas.idisla,
+      });
+
       return { mangueras, islas };
     });
 
@@ -110,6 +110,15 @@ controller.updateMangueras = async (req, res) => {
       updateOnDuplicate: ["tiene"],
     });
 
+    const auditoriaC = req.body.map((el) => ({
+      peticion: "Manguera",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 3,
+      idaffectado: el.idmanguera,
+    }));
+
+    await Auditoria.bulkCreate(auditoriaC);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
@@ -137,14 +146,12 @@ controller.updateIsla = async (req, res) => {
 
     const response = await Islas.update(cuerpo, { where: { idisla: idIsla } });
 
-    /* for (let i = 0; i < cuerpo.length; i++) {
-      await guardarBitacora([
-        "Modificar Isla",
-        user.token.data.datos.idempleado,
-        3,
-        idIsla,
-      ]);
-    } */
+    await Auditoria.create({
+      peticion: area,
+      idempleado: user.token.data.datos.idempleado,
+      accion: 3,
+      idaffectado: idIsla,
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {

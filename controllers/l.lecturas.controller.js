@@ -1,4 +1,3 @@
-import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import models from "../models";
 import sequelize from "../config/configdb";
@@ -15,6 +14,7 @@ const {
   ES,
   Vales,
   Efectivo,
+  Auditoria,
 } = models;
 const { verificar } = auth;
 const controller = {};
@@ -209,6 +209,15 @@ controller.updateLecturaInicial = async (req, res) => {
           transaction: t,
         });
 
+        const auditoriaC = req.body.map((el) => ({
+          peticion: "Lectura Inicial",
+          idempleado: user.token.data.datos.idempleado,
+          accion: 2,
+          idaffectado: el.idmanguera,
+        }));
+
+        await Auditoria.bulkCreate(auditoriaC);
+
         return { infoLect, lecturasFinales };
       });
     } else {
@@ -225,6 +234,15 @@ controller.updateLecturaInicial = async (req, res) => {
         updateOnDuplicate: ["lecturaf"],
       });
     }
+
+    const auditoriaC = req.body.map((el) => ({
+      peticion: "Lectura Inicial",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 3,
+      idaffectado: ` ${el.idmanguera} folio_${folio}`,
+    }));
+
+    await Auditoria.bulkCreate(auditoriaC);
 
     res.status(200).json({ success: true, response });
   } catch (err) {

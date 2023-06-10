@@ -21,6 +21,7 @@ import Efectivo from "./administrativo/liquidacion/efectivo.model";
 import Liquidaciones from "./administrativo/liquidacion/liquidaciones.model";
 import Precios from "./administrativo/liquidacion/precios.model";
 import LlaveAcceso from "./administrativo/llavesAcceso.model";
+import Auditoria from "./administrativo/auditoria.model";
 
 nominas.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(nominas, { foreignKey: "idempleado" });
@@ -118,4 +119,5 @@ export default {
   Vales,
   Liquidaciones,
   LlaveAcceso,
+  Auditoria,
 };

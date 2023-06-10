@@ -4,11 +4,12 @@ import tp from "../assets/formatTiempo";
 import models from "../models/";
 import { Op } from "sequelize";
 import sequelize from "../config/configdb";
-const { Horarios, empleados, Liquidaciones, Turnos } = models;
+const { Horarios, empleados, Liquidaciones, Turnos, Auditoria } = models;
 const { diff, tiempoDB, tiempoHorario } = tp;
 const { verificar } = auth;
 
 const controller = {};
+const area = "Horarios";
 
 controller.obtenerHorario = async (req, res) => {
   try {
@@ -81,6 +82,13 @@ controller.nuevoHorario = async (req, res) => {
       const liquidaciones = await Liquidaciones.create({
         idhorario: horarios.idhorario,
       });
+      await Auditoria.create({
+        peticion: area,
+        idempleado: user.token.data.datos.idempleado,
+        accion: 2,
+        idaffectado: horarios.idhorario,
+      });
+
       return { horarios, liquidaciones };
     });
 
@@ -125,6 +133,13 @@ controller.actualizarHorario = async (req, res) => {
       where: { idhorario: idHorario },
     });
 
+    await Auditoria.create({
+      peticion: area,
+      idempleado: user.token.data.datos.idempleado,
+      accion: 3,
+      idaffectado: idHorario,
+    });
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -167,6 +182,13 @@ controller.eliminarHorario = async (req, res) => {
       );
 
       return { liquidacion, horario };
+    });
+
+    await Auditoria.create({
+      peticion: area,
+      idempleado: user.token.data.datos.idempleado,
+      accion: 4,
+      idaffectado: idHorario,
     });
 
     res.status(200).json({ success: true, response });
