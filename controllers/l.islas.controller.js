@@ -72,12 +72,15 @@ controller.insertIslas = async (req, res) => {
         transaction: t,
       });
 
-      await Auditoria.create({
-        peticion: area,
-        idempleado: user.token.data.datos.idempleado,
-        accion: 2,
-        idaffectado: islas.idisla,
-      });
+      await Auditoria.create(
+        {
+          peticion: area,
+          idempleado: user.token.data.datos.idempleado,
+          accion: 2,
+          idaffectado: islas.idisla,
+        },
+        { transaction: t }
+      );
 
       return { mangueras, islas };
     });

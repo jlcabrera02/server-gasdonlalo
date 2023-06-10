@@ -216,7 +216,7 @@ controller.updateLecturaInicial = async (req, res) => {
           idaffectado: el.idmanguera,
         }));
 
-        await Auditoria.bulkCreate(auditoriaC);
+        await Auditoria.bulkCreate(auditoriaC, { transaction: t });
 
         return { infoLect, lecturasFinales };
       });

@@ -99,12 +99,15 @@ controller.insertarLiquidos = async (req, res) => {
         });
       }
 
-      await Auditoria.create({
-        peticion: area,
-        idempleado: user.token.data.datos.idempleado,
-        accion: 2,
-        idaffectado: folio,
-      });
+      await Auditoria.create(
+        {
+          peticion: area,
+          idempleado: user.token.data.datos.idempleado,
+          accion: 2,
+          idaffectado: folio,
+        },
+        { transaction: t }
+      );
       return { vales, efectivo, infoLect, lectF, liquidaciones };
     });
 
@@ -141,16 +144,22 @@ controller.cancelarLiquido = async (req, res) => {
         { where: { idliquidacion: idLiquidacion }, transaction: t }
       );
 
-      const nuevaLiquidacion = await Liquidaciones.create({
-        idhorario: infoLiq.idhorario,
-      });
+      const nuevaLiquidacion = await Liquidaciones.create(
+        {
+          idhorario: infoLiq.idhorario,
+        },
+        { transaction: t }
+      );
 
-      await Auditoria.create({
-        peticion: "Cancelar Liquidación",
-        idempleado: user.token.data.datos.idempleado,
-        accion: 4,
-        idaffectado: idLiquidacion,
-      });
+      await Auditoria.create(
+        {
+          peticion: "Cancelar Liquidación",
+          idempleado: user.token.data.datos.idempleado,
+          accion: 4,
+          idaffectado: idLiquidacion,
+        },
+        { transaction: t }
+      );
 
       return { liquidacion, lecturasF, nuevaLiquidacion };
     });
@@ -222,12 +231,12 @@ controller.quitarReservarFolio = async (req, res) => {
       });
     }
 
-     await Auditoria.create({
-       peticion: "Reservar Liquidación",
-       idempleado: user.token.data.datos.idempleado,
-       accion: 4,
-       idaffectado: folio,
-     });
+    await Auditoria.create({
+      peticion: "Reservar Liquidación",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 4,
+      idaffectado: folio,
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
