@@ -5,6 +5,25 @@ import formatTiempo from "../assets/formatTiempo";
 
 const controller = {};
 
+const guardarArchivo = (req) =>
+  new Promise((resolve, rejects) => {
+    const archivo = req.files.dataReloj;
+
+    const pathSave = path.join(
+      __dirname,
+      "../public/excel/",
+      "relojChecador.xls"
+    );
+
+    archivo.mv(pathSave, (err) => {
+      if (err) {
+        rejects(err);
+      } else {
+        resolve(true);
+      }
+    });
+  });
+
 controller.relojChecador = async (req, res) => {
   try {
     await guardarArchivo(req)
@@ -64,6 +83,7 @@ controller.relojChecador = async (req, res) => {
 
     res.status(200).json(nuevo);
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

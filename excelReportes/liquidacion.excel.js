@@ -74,6 +74,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
     const ws = wb.addWorksheet("Lecturas");
     const vale = wb.addWorksheet("vales");
     const efecivo = wb.addWorksheet("efectivo");
+    const generalS = wb.addWorksheet("general");
 
     const convert = JSON.parse(JSON.stringify(response));
 
@@ -85,6 +86,79 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
       ["Estacion servicio"]: el.horario.estacion_servicio.nombre,
       ["Fecha Liquidacion"]: el.horario.fechaliquidacion,
     }));
+
+    const datos = [];
+    convert.forEach((el) => {
+      const stack = [];
+      const lecturasFInales = el.info_lectura.lecturas_finales;
+      const data = {
+        ["idEmpleado"]: el.horario.empleado.idchecador,
+        ["idLiquidacion"]: el.idliquidacion,
+        ["Nombres"]: el.horario.empleado.nombre,
+        ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
+        ["Apellido Materno"]: el.horario.empleado.apellido_materno,
+        ["idManguera"]: "",
+        ["idIsla"]: "",
+        ["IdEstacionServicio"]: "",
+        ["idGas"]: "",
+        ["Numero de isla"]: "",
+        ["Lectura Inicial"]: "",
+        ["Lectura Final"]: "",
+        ["Total Litros"]: 0,
+        ["Turno"]: el.horario.turno.turno,
+        ["Precio unitario"]: "",
+        ["Importe"]: 0,
+        ["Folio Vale"]: "",
+        ["Combustible vale"]: "",
+        ["Monto Vale"]: 0,
+        ["Folio Efectivo"]: "",
+        ["Monto Efectivo"]: 0,
+        ["Fecha"]: el.horario.fechaliquidacion,
+        ["Estatus"]: el.cancelado ? "Cancelado" : "Activo",
+        ["Motivo Cancelación"]: el.cancelado ? el.cancelado : "",
+        ["Fecha Cancelacion"]: el.cancelado ? el.fechaCancelado : "",
+      };
+
+      lecturasFInales.forEach((l) => {
+        const local = [];
+        local["idManguera"] =
+          l.manguera.direccion === "iz"
+            ? `${l.manguera.idgas}${l.manguera.isla.nisla * 2 - 1}`
+            : `${l.manguera.idgas}${l.manguera.isla.nisla * 2}`;
+        local["idIsla"] = l.manguera.idisla;
+        local["IdEstacionServicio"] = l.manguera.isla.idestacion_servicio;
+        local["idGas"] = l.manguera.idgas;
+        local["Numero de isla"] = l.manguera.isla.nisla;
+        local["Lectura Inicial"] = l.lecturai;
+        local["Lectura Final"] = l.lecturaf;
+        local["Total Litros"] =
+          l.lecturaf >= l.lecturai
+            ? l.lecturaf - l.lecturai
+            : 9999999 - l.lecturai + l.lecturaf + 1;
+        local["Precio unitario"] = Number(l.precio);
+        local["Importe"] = Number(l.importe);
+        stack.push({ ...data, ...local });
+      });
+
+      el.vales.forEach((v) => {
+        const local = [];
+        data["Folio Vale"] = v.folio || "";
+        data["Combustible vale"] = v.label;
+        data["Monto Vale"] = Number(v.monto);
+
+        stack.push({ ...data, ...local });
+      });
+
+      el.efectivos.forEach((f) => {
+        const local = [];
+        data["Folio Efectivo"] = f.folio || "";
+        data["Monto Efectivo"] = Number(f.monto);
+
+        stack.push({ ...data, ...local });
+      });
+
+      datos.push(...stack);
+    });
 
     let reporte = convert.map((el) => {
       const lecturasFInales = el.info_lectura.lecturas_finales;
@@ -152,6 +226,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
     generadorTablasExcel(reporte, ws);
     generadorTablasExcel(efectivos, efecivo);
     generadorTablasExcel(vales, vale);
+    generadorTablasExcel(datos, generalS);
 
     wb.writeToBuffer().then((buf) => {
       res.writeHead(200, [
