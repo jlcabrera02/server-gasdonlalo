@@ -139,9 +139,15 @@ controller.buscarInfoLecLimit = async (req, res) => {
     const limit = Number(num);
 
     const response = await InfoLecturas.findAll({
-      attributes: ["idinfo_lectura", "idliquidacion"],
+      // attributes: ["idinfo_lectura", "idliquidacion"],
       where: { idestacion_servicio: idEstacion, cancelado: false },
       order: [["idinfo_lectura", "DESC"]],
+      include: [
+        {
+          model: Liquidaciones,
+          include: [{ model: Horarios, include: empleados }],
+        },
+      ],
       limit: [limit, 2],
     });
 
