@@ -73,7 +73,7 @@ controller.AccessLlaveAcceso = async (req, res) => {
 
 controller.RemoveLlaveAcceso = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization, 1);
+    let user = verificar(req.headers.authorization, 55);
     if (!user.success) throw user;
     const { key } = req.params;
     const response = await LlaveAcceso.destroy({
@@ -115,7 +115,7 @@ controller.ListLlaveAcceso = async (req, res) => {
 
 controller.CreateLlaveAcceso = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization, 1);
+    let user = verificar(req.headers.authorization, 55);
     if (!user.success) throw user;
     const { key, idempleado } = req.body;
     const response = await LlaveAcceso.create({ idempleado, key });
