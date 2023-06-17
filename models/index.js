@@ -95,6 +95,11 @@ ES.belongsTo(Horarios, {
   foreignKey: "idestacion_servicio",
 });
 
+Islas.belongsTo(ES, { foreignKey: "idestacion_servicio" });
+ES.hasMany(Islas, {
+  foreignKey: "idestacion_servicio",
+});
+
 empleados.hasOne(LlaveAcceso, { foreignKey: "idempleado" });
 LlaveAcceso.belongsTo(empleados, { foreignKey: "idempleado" });
 

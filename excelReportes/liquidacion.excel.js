@@ -92,7 +92,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
       const stack = [];
       const lecturasFInales = el.info_lectura.lecturas_finales;
       const data = {
-        ["idEmpleado"]: el.horario.empleado.idchecador,
+        ["idEmpleado"]: el.horario.empleado.idchecador || "",
         ["idLiquidacion"]: el.idliquidacion,
         ["Nombres"]: el.horario.empleado.nombre,
         ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
@@ -100,8 +100,10 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
         ["idManguera"]: "",
         ["idIsla"]: "",
         ["IdEstacionServicio"]: "",
+        ["Estación Servicio"]: "null",
         ["idGas"]: "",
-        ["Numero de isla"]: "",
+        ["Combustible"]: "null",
+        ["Numero de isla"]: "null",
         ["Lectura Inicial"]: "",
         ["Lectura Final"]: "",
         ["Total Litros"]: 0,
@@ -127,6 +129,9 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
             : `${l.manguera.idgas}${l.manguera.isla.nisla * 2}`;
         local["idIsla"] = l.manguera.idisla;
         local["IdEstacionServicio"] = l.manguera.isla.idestacion_servicio;
+        local["Estación Servicio"] = l.manguera.isla.estacion_servicio.nombre;
+        local["Combustible"] = l.manguera.ga.nombre;
+        console.log(l.manguera);
         local["idGas"] = l.manguera.idgas;
         local["Numero de isla"] = l.manguera.isla.nisla;
         local["Lectura Inicial"] = l.lecturai;
@@ -386,8 +391,11 @@ const generadorTablasExcel = (datos, sheet) => {
         sheet.cell(i + 2, j + 1).number(dato);
       } else {
         const regExp = /\d\d\d\d-\d\d-\d\d/;
+
         if (regExp.test(dato)) {
           sheet.cell(i + 2, j + 1).date(dato);
+        } else if (dato === "null") {
+          sheet.cell(i + 2, j + 1).string();
         } else {
           sheet.cell(i + 2, j + 1).string(dato);
         }

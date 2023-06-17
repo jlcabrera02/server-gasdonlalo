@@ -15,6 +15,7 @@ const {
   Vales,
   Efectivo,
   Auditoria,
+  Gas,
 } = models;
 const { verificar } = auth;
 const controller = {};
@@ -276,6 +277,9 @@ export const buscarLecturasXIdEmpleado = async ({
   Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
   Islas.hasMany(Mangueras, { foreignKey: "idisla" });
 
+  Gas.hasMany(Mangueras, { foreignKey: "idgas" });
+  Mangueras.belongsTo(Gas, { foreignKey: "idgas" });
+
   const querysHorario = {
     fechaliquidacion: { [Op.between]: [fechaI, fechaF] },
   };
@@ -297,7 +301,12 @@ export const buscarLecturasXIdEmpleado = async ({
         include: [
           {
             model: LecturasFinales,
-            include: [{ model: Mangueras, include: Islas }],
+            include: [
+              {
+                model: Mangueras,
+                include: [{ model: Islas, include: ES }, { model: Gas }],
+              },
+            ],
           },
         ],
       },
