@@ -313,6 +313,7 @@ controller.infoAuditorias = async (req, res) => {
         ),
       },
       include: empleados,
+      order: [["idauditoria", "DESC"]],
     });
 
     res.status(200).json({ success: true, response });
