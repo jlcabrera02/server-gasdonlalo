@@ -300,6 +300,9 @@ controller.infoAuditorias = async (req, res) => {
       fecha.setDate(fecha.getDate() - nDias);
     }
 
+    Auditoria.belongsTo(empleados, { foreignKey: "idempleado" });
+    empleados.hasMany(Auditoria, { foreignKey: "idempleado" });
+
     const response = await Auditoria.findAll({
       where: {
         create_time: sequelize.where(
@@ -309,6 +312,7 @@ controller.infoAuditorias = async (req, res) => {
           }
         ),
       },
+      include: empleados,
     });
 
     res.status(200).json({ success: true, response });
