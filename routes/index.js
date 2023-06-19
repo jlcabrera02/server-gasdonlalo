@@ -32,6 +32,8 @@ import rhr from "./recursosHumanos";
 import auth from "./auth.router";
 //Excel
 import excel from "./excel.route";
+//PDF
+import pdf from "./pdf.router";
 const route = Router();
 
 //Complementos adicionales
@@ -77,6 +79,8 @@ route.use("/auth", auth);
 route.use("/com", com);
 //exceles
 route.use("/excel", excel);
+//pdf
+route.use("/pdf", pdf);
 // Vistas
 route.use("/view", indexV);
 //Lisquidacion
