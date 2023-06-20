@@ -4,7 +4,7 @@ import tp from "../assets/formatTiempo";
 import models from "../models/";
 import { Op } from "sequelize";
 import sequelize from "../config/configdb";
-const { Horarios, empleados, Liquidaciones, Turnos, Auditoria } = models;
+const { Horarios, empleados, Liquidaciones, Turnos, Auditoria, ES } = models;
 const { diff, tiempoDB, tiempoHorario } = tp;
 const { verificar } = auth;
 
@@ -24,7 +24,7 @@ controller.obtenerHorario = async (req, res) => {
       where: {
         fechaturno: { [Op.between]: [fechaI, fechaFinal] },
       },
-      include: [{ model: empleados }, { model: Turnos }],
+      include: [{ model: empleados }, { model: Turnos }, { model: ES }],
     });
 
     res.status(200).json({ success: true, response });
