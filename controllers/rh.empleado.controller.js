@@ -9,9 +9,10 @@ const area = "Empleados";
 
 controller.find = async (req, res) => {
   try {
+    //Se comento respecto las rutas que no necesitan autenticancion
     let user = verificar(req.headers.authorization);
-    if (!user.success) throw user;
-    const { departamento, todo } = req.query;
+    const { departamento, todo, auth } = req.query;
+    if (!user.success && !auth) throw user;
     let response;
     if (todo) {
       response = await empleadoM.findTodo(departamento);

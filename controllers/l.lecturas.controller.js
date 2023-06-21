@@ -23,7 +23,8 @@ const controller = {};
 controller.lecturasIniciales = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
-    if (!user.success) throw user;
+    const { auth } = req.query;
+    if (!user.success && !auth) throw user;
     const { idEstacion } = req.params;
 
     Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
