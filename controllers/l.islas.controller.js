@@ -10,7 +10,7 @@ const area = "Islas";
 controller.findIslas = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
-    if (!user.success) throw user;
+    // if (!user.success) throw user;
     const { idEstacion } = req.params;
     const response = [];
 
