@@ -24,10 +24,11 @@ app.set("views", path.join(__dirname, "views"));
 app.use("/static", express.static(path.join(__dirname, "public")));
 app.use("/", indexV);
 app.use(express.raw());
+// app.use(express.bodyParser({ limit: "50mb" }));
 
 //Uso de bodyParse.json y bodyParse.urlencode para poder recibir desde el navegador datos json y poder utilizar el req.body
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "50mb" }));
 app.use(cors());
 app.use(morgan("dev"));
 app.use(fileUpload()); //Para subir archivos
