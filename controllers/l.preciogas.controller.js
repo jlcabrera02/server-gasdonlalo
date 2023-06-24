@@ -43,7 +43,7 @@ controller.insertarPrecios = async (req, res) => {
 
 controller.obtenerPrecios = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization);
+    // let user = verificar(req.headers.authorization);
     // if (!user.success) throw user;
     const { fecha } = req.query;
     let response;
