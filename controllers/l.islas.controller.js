@@ -167,4 +167,35 @@ controller.updateIsla = async (req, res) => {
   }
 };
 
+controller.eliminarIsla = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+
+    const { idIsla } = req.params;
+
+    await Mangueras.destroy({ where: { idisla: idIsla } });
+    const response = await Islas.destroy({ where: { idisla: idIsla } });
+
+    await Auditoria.create({
+      peticion: area,
+      idempleado: user.token.data.datos.idempleado,
+      accion: 4,
+      idaffectado: idIsla,
+    });
+
+    if (response === 0)
+      throw { msg: "No se encontro la isla a eliminar", code: 400 };
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 export default controller;

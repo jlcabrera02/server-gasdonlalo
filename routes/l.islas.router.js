@@ -10,6 +10,7 @@ const route = router();
 //Configuracion de bombas
 route.get("/islas/:idEstacion", islas.findIslas); //
 route.post("/islas/insertar", islas.insertIslas); //
+route.delete("/islas/eliminar/:idIsla", islas.eliminarIsla); //
 route.put("/islas/habilitar/mangueras", islas.updateMangueras); //
 route.put("/islas/edit/:idIsla", islas.updateIsla); //
 
