@@ -335,7 +335,7 @@ controller.deleteUser = async (req, res) => {
     await auth.deleteAccesos(username);
     const response = await auth.deleteUser(username);
     await Auditoria.create({
-      accion: "Eliminar usuario",
+      peticion: "Eliminar usuario",
       idempleado: user.token.data.datos.idempleado,
       accion: 4,
       idaffectado: response.insertId,

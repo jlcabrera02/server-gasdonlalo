@@ -41,7 +41,7 @@ controller.nuevoHorario = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { idEmpleado, idTurno, fechaTurno, idEstacion } = req.body;
+    const { idEmpleado, idTurno, fechaTurno, idEstacion, idIslas } = req.body;
     const turno = await estSerM.findTurnoById(idTurno);
     const { hora_empiezo, hora_termino } = turno;
 
@@ -82,6 +82,7 @@ controller.nuevoHorario = async (req, res) => {
       const liquidaciones = await Liquidaciones.create(
         {
           idhorario: horarios.idhorario,
+          idislas: idIslas,
         },
         { transaction: tr }
       );

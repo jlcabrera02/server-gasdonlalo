@@ -13,6 +13,10 @@ const Liquidaciones = sequelize.define(
       type: DataTypes.JSON,
       allowNull: true,
     },
+    idislas: {
+      type: DataTypes.JSON,
+      allowNull: false,
+    },
     paginacion: {
       type: DataTypes.JSON,
       allowNull: true,
