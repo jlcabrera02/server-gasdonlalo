@@ -211,4 +211,24 @@ model.verificar = (header, idPer = null) => {
   return response;
 };
 
+model.deleteUser = (userName) =>
+  new Promise((resolve, reject) => {
+    let sql = "DELETE FROM user WHERE username = ?";
+
+    connection.query(sql, userName, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
+model.deleteAccesos = (userName) =>
+  new Promise((resolve, reject) => {
+    let sql = "DELETE FROM acceso WHERE user = ?";
+
+    connection.query(sql, userName, (err, res) => {
+      if (err) return reject(errorDB());
+      if (res) return resolve(res);
+    });
+  });
+
 export default model;

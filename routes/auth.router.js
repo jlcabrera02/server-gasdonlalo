@@ -19,5 +19,6 @@ route.post("/registrar", auth.register);
 route.put("/changePass", auth.changePass);
 route.put("/changePassA", auth.changePassAdmin);
 route.put("/quitar/permiso", auth.quitarPermisos);
+route.delete("/eliminar", auth.deleteUser);
 
 export default route;

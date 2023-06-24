@@ -327,19 +327,13 @@ controller.infoAuditorias = async (req, res) => {
   }
 };
 
-/* 
-controller.update = async (req, res) => {
+controller.deleteUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { numBomba, bomba, estacionServicio } = req.body;
-
-    const cuerpo = {
-      num_bomba: numBomba,
-      bomba,
-      idestacion_servicio: Number(estacionServicio),
-    };
-    const data = [cuerpo, id];
-    let response = await auth.update(data);
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { username } = req.query;
+    await auth.deleteAccesos(username);
+    const response = await auth.deleteUser(username);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -348,6 +342,6 @@ controller.update = async (req, res) => {
       res.status(err.code).json(err);
     }
   }
-}; */
+};
 
 export default controller;
