@@ -1,4 +1,6 @@
 import nodemailer from "nodemailer";
+import fs from "fs";
+import path from "path";
 
 const send = async ({ filename, content, text, subject, to }) => {
   const config = {
@@ -31,8 +33,21 @@ const send = async ({ filename, content, text, subject, to }) => {
 
 export const pdfArchivo = async (req, res) => {
   try {
-    const response = await send(req.body);
-    res.status(200).json({ success: true, response });
+    const ruta = path.join(__dirname, "../../../", req.body.filename);
+    fs.writeFile(
+      `/home/aj3amdua/Descargas/hola.pdf`,
+      req.body.content.replace("data:application/pdf;base64,", ""),
+      "base64",
+      (err) => {
+        if (err)
+          throw {
+            code: 400,
+            msg: "Error al guardar documento",
+            success: false,
+          };
+      }
+    );
+    res.status(200).json({ success: true, response: "Documento guardados" });
   } catch (err) {
     console.log(err);
     res.status(400).json({ err });
