@@ -33,21 +33,23 @@ const send = async ({ filename, content, text, subject, to }) => {
 
 export const pdfArchivo = async (req, res) => {
   try {
-    const ruta = path.join(__dirname, "../../../", req.body.filename);
-    fs.writeFile(
-      `/home/aj3amdua/Descargas/hola.pdf`,
+    const ruta = path.join(__dirname, "../documentos", req.body.filename);
+    console.log(ruta);
+    fs.writeFileSync(
+      ruta,
       req.body.content.replace("data:application/pdf;base64,", ""),
       "base64",
-      (err) => {
-        if (err)
+      (err, res) => {
+        if (err) {
           throw {
             code: 400,
             msg: "Error al guardar documento",
             success: false,
           };
+        }
       }
     );
-    res.status(200).json({ success: true, response: "Documento guardados" });
+    res.status(200).json({ success: true, response: "Documento guardado" });
   } catch (err) {
     console.log(err);
     res.status(400).json({ err });
