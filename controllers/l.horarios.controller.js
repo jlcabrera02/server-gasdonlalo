@@ -24,7 +24,13 @@ controller.obtenerHorario = async (req, res) => {
       where: {
         fechaturno: { [Op.between]: [fechaI, fechaFinal] },
       },
-      include: [{ model: empleados }, { model: Turnos }, { model: ES }],
+      include: [
+        { model: empleados },
+        { model: Turnos },
+        { model: ES },
+        { model: Liquidaciones },
+      ],
+      order: [[Liquidaciones, "idliquidacion", "DESC"]],
     });
 
     res.status(200).json({ success: true, response });

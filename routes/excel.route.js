@@ -10,9 +10,9 @@ const route = router();
 
 route.post("/relojChecador", excel.relojChecador);
 
+route.get("/liquidacion/preciosCombustible", preciosCombustible);
 //Liquidacion
 route.get("/liquidacion/:idLiquidacion", Liquidacion);
-route.get("/liquidacion/preciosCombustible", preciosCombustible);
 route.post("/liquidacion/litrosXidEmpleado", LitrosVendidosXIdempleado);
 
 export default route;

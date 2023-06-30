@@ -45,16 +45,21 @@ controller.obtenerPrecios = async (req, res) => {
   try {
     // let user = verificar(req.headers.authorization);
     // if (!user.success) throw user;
-    const { fecha } = req.query;
-    let response;
-    if (fecha) {
-      response = await Precios.findAll({ where: { fecha } });
-    } else {
-      response = await Precios.findAll({
-        order: [["createdAt", "DESC"]],
-        limit: 3,
-      });
+    const { fechaAnterior } = req.query;
+    const querys = {};
+
+    if (fechaAnterior) {
+      querys.fecha = { [Op.lte]: fechaAnterior };
     }
+
+    const response = await Precios.findAll({
+      where: querys,
+      order: [
+        ["fecha", "DESC"],
+        ["createdAt", "DESC"],
+      ],
+      limit: 3,
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -114,6 +119,36 @@ controller.actualizarPrecios = async (req, res) => {
       accion: 3,
       idaffectado: idPrecio,
     });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.eliminarPrecios = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { idPrecios } = req.query;
+
+    const response = await Precios.destroy({
+      where: { idprecio: { [Op.in]: idPrecios } },
+    });
+
+    const cuerpo = idPrecios.map((el) => ({
+      peticion: "Precios combustible",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 4,
+      idaffectado: el,
+    }));
+
+    await Auditoria.bulkCreate(cuerpo);
 
     res.status(200).json({ success: true, response });
   } catch (err) {

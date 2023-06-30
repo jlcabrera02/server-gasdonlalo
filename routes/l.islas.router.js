@@ -32,7 +32,8 @@ route.delete("/horarios/delete/:idHorario", horarios.eliminarHorario); //
 route.get("/preciosCombustible/Historico", precio.obtenerPreciosHistoricos); //
 route.get("/preciosCombustible", precio.obtenerPrecios); //
 route.post("/preciosCombustible", precio.insertarPrecios); //
-route.put("/preciosCombustible/edit/:idPrecio", precio.actualizarPrecios); //
+route.put("/preciosCombustible/edit/:idPrecio", precio.actualizarPrecios); //eliminarPrecios
+route.delete("/preciosCombustible/eliminar", precio.eliminarPrecios); //eliminarPrecios
 
 //captura de liquidacion
 route.get("/pendientes", liquido.liquidacionesPendientes); //

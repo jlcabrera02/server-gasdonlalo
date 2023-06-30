@@ -3,6 +3,7 @@ import auth from "../models/auth.model";
 import modelos from "../models/";
 import sequelize from "../config/configdb";
 import { insertarMf } from "./d.montoFaltante.controller";
+import { Op } from "sequelize";
 const {
   Liquidaciones,
   ES,
@@ -127,10 +128,54 @@ controller.cancelarLiquido = async (req, res) => {
     if (!user.success) throw user;
     const { fecha, idLiquidacion, motivo } = req.body;
 
+    const infoLiq = await Liquidaciones.findByPk(idLiquidacion, {
+      include: Horarios,
+    });
+
+    const lecturas = await LecturasFinales.findAll({
+      include: [
+        { model: InfoLecturas, where: { idliquidacion: idLiquidacion } },
+      ],
+    });
+
+    const mangueras = lecturas.map((el) => el.dataValues.idmanguera);
+
+    LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
+    InfoLecturas.hasMany(LecturasFinales, { foreignKey: "idinfo_lectura" });
+
+    //Estas liquidaciones comprueban si hay liquidaciones siguientes a esta liquidacion, si hay entonces no puedo cancelar la liquidacion por las lecturas finales.
+    const liquidacionesSiguientes = await Liquidaciones.findAll({
+      where: { capturado: true },
+      include: [
+        {
+          model: InfoLecturas,
+          include: [
+            {
+              model: LecturasFinales,
+              where: { idmanguera: { [Op.in]: mangueras } },
+            },
+          ],
+        },
+        {
+          model: Horarios,
+          where: {
+            fechaturno: {
+              [Op.gt]: infoLiq.dataValues.horario.dataValues.fechaturno,
+            },
+          },
+        },
+      ],
+    });
+
+    if (liquidacionesSiguientes.length > 0) {
+      throw {
+        code: 417,
+        msg: "Liquidaciones dependientes",
+        liquidacionesSiguientes,
+      };
+    }
+
     const response = await sequelize.transaction(async (t) => {
-      const infoLiq = await Liquidaciones.findByPk(idLiquidacion, {
-        transaction: t,
-      });
       const liquidacion = await Liquidaciones.update(
         {
           cancelado: motivo,
@@ -147,6 +192,7 @@ controller.cancelarLiquido = async (req, res) => {
       const nuevaLiquidacion = await Liquidaciones.create(
         {
           idhorario: infoLiq.idhorario,
+          idislas: infoLiq.idislas,
         },
         { transaction: t }
       );
@@ -189,8 +235,6 @@ controller.reservarFolio = async (req, res) => {
       idempleado_captura: idempleadoC,
       paginacion: JSON.stringify(req.body),
     };
-
-    console.log(cuerpo);
 
     const response = await Liquidaciones.update(cuerpo, {
       where: { idliquidacion: folio },
@@ -253,21 +297,39 @@ controller.liquidacionesPendientes = async (req, res) => {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
     const { fecha } = req.query;
+    let fechasAnteriores = new Date(fecha);
+    fechasAnteriores = new Date(
+      fechasAnteriores.setDate(fechasAnteriores.getDate() - 1)
+    )
+      .toISOString()
+      .split("T")[0];
 
     const response = await Liquidaciones.findAll({
       include: [
         {
           model: Horarios,
           include: [{ model: empleados }, { model: Turnos }, { model: ES }],
-          where: { fechaliquidacion: fecha },
+          where: { fechaturno: fecha },
         },
         { model: empleados, as: "empleado_captura" },
       ],
     });
 
+    const anteriores = await Liquidaciones.findAll({
+      where: { lecturas: null },
+      include: [
+        {
+          model: Horarios,
+          where: { fechaturno: { [Op.lte]: fechasAnteriores } },
+        },
+      ],
+    });
+
     const totalLiquidaciones = response.filter((liq) => !liq.cancelado).length;
 
-    res.status(200).json({ success: true, response, totalLiquidaciones });
+    res
+      .status(200)
+      .json({ success: true, response, totalLiquidaciones, anteriores });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
@@ -304,8 +366,7 @@ controller.consultarLiquido = async (req, res) => {
         {
           model: Horarios,
           where: {
-            fechaliquidacion:
-              response.dataValues.horario.dataValues.fechaliquidacion,
+            fechaturno: response.dataValues.horario.dataValues.fechaturno,
             idestacion_servicio:
               response.dataValues.horario.dataValues.idestacion_servicio,
           },

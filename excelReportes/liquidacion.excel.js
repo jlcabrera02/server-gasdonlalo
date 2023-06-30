@@ -62,7 +62,7 @@ export const preciosCombustible = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).json({ status: false });
+    res.status(400).json({ status: false, msg: err });
   }
 };
 
