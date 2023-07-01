@@ -13,6 +13,10 @@ const Precios = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
+    hora_accionar: {
+      type: DataTypes.TIME,
+      allowNull: false,
+    },
     idgas: {
       type: DataTypes.CHAR,
       allowNull: false,

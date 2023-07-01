@@ -10,13 +10,31 @@ controller.insertarPrecios = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { P, M, D, fecha } = req.body;
+    const { P, M, D, fecha, horaAccionar } = req.body;
     const idempleadoC = user.token.data.datos.idempleado;
 
     const cuerpo = [
-      { idgas: "M", fecha, idempleado_captura: idempleadoC, precio: M },
-      { idgas: "P", fecha, idempleado_captura: idempleadoC, precio: P },
-      { idgas: "D", fecha, idempleado_captura: idempleadoC, precio: D },
+      {
+        idgas: "M",
+        fecha,
+        idempleado_captura: idempleadoC,
+        precio: M,
+        hora_accionar: horaAccionar,
+      },
+      {
+        idgas: "P",
+        fecha,
+        idempleado_captura: idempleadoC,
+        precio: P,
+        hora_accionar: horaAccionar,
+      },
+      {
+        idgas: "D",
+        fecha,
+        idempleado_captura: idempleadoC,
+        precio: D,
+        hora_accionar: horaAccionar,
+      },
     ];
 
     const response = await Precios.bulkCreate(cuerpo);
@@ -45,11 +63,15 @@ controller.obtenerPrecios = async (req, res) => {
   try {
     // let user = verificar(req.headers.authorization);
     // if (!user.success) throw user;
-    const { fechaAnterior } = req.query;
+    const { fechaAnterior, hora } = req.query;
     const querys = {};
 
     if (fechaAnterior) {
       querys.fecha = { [Op.lte]: fechaAnterior };
+    }
+
+    if (hora) {
+      querys.hora_accionar = { [Op.lte]: hora };
     }
 
     const response = await Precios.findAll({
@@ -63,6 +85,7 @@ controller.obtenerPrecios = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
