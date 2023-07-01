@@ -71,7 +71,7 @@ controller.obtenerPrecios = async (req, res) => {
     }
 
     if (hora) {
-      querys.hora_accionar = { [Op.lte]: hora };
+      querys.hora_accionar = { [Op.lt]: hora };
     }
 
     const response = await Precios.findAll({
