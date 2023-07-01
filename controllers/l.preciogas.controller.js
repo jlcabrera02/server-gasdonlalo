@@ -14,6 +14,7 @@ controller.insertarPrecios = async (req, res) => {
     const idempleadoC = user.token.data.datos.idempleado;
 
     const newFecha = `${fecha} ${horaAccionar}`;
+    console.log(newFecha);
 
     const cuerpo = [
       {
@@ -65,12 +66,12 @@ controller.obtenerPrecios = async (req, res) => {
     const { fechaAnterior, hora } = req.query;
     const querys = {};
 
-    if (fechaAnterior) {
+    if (fechaAnterior && !hora) {
       querys.fecha = { [Op.lte]: fechaAnterior };
     }
 
     if (hora) {
-      querys.hora_accionar = { [Op.lt]: hora };
+      querys.fecha = { [Op.lt]: `${fechaAnterior} ${hora}` };
     }
 
     const response = await Precios.findAll({
