@@ -13,27 +13,26 @@ controller.insertarPrecios = async (req, res) => {
     const { P, M, D, fecha, horaAccionar } = req.body;
     const idempleadoC = user.token.data.datos.idempleado;
 
+    const newFecha = `${fecha} ${horaAccionar}`;
+
     const cuerpo = [
       {
         idgas: "M",
-        fecha,
+        fecha: newFecha,
         idempleado_captura: idempleadoC,
         precio: M,
-        hora_accionar: horaAccionar,
       },
       {
         idgas: "P",
-        fecha,
+        fecha: newFecha,
         idempleado_captura: idempleadoC,
         precio: P,
-        hora_accionar: horaAccionar,
       },
       {
         idgas: "D",
-        fecha,
+        fecha: newFecha,
         idempleado_captura: idempleadoC,
         precio: D,
-        hora_accionar: horaAccionar,
       },
     ];
 

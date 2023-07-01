@@ -10,11 +10,7 @@ const Precios = sequelize.define(
       autoIncrement: true,
     },
     fecha: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-    },
-    hora_accionar: {
-      type: DataTypes.TIME,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     idgas: {
