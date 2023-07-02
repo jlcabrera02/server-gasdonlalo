@@ -191,7 +191,13 @@ controller.eliminarIsla = async (req, res) => {
   } catch (err) {
     console.log(err);
     if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
+      if (err.parent.errno === 1451) {
+        res.status(400).json({
+          msg: "Error al eliminar la isla, hay lecturas que dependen de esta isla.",
+        });
+      } else {
+        res.status(400).json({ msg: "datos no enviados correctamente" });
+      }
     } else {
       res.status(err.code).json(err);
     }
