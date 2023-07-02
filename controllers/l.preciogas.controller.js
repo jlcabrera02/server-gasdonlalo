@@ -13,8 +13,10 @@ controller.insertarPrecios = async (req, res) => {
     const { P, M, D, fecha, horaAccionar } = req.body;
     const idempleadoC = user.token.data.datos.idempleado;
 
+    if (!horaAccionar)
+      throw { success: false, msg: "Falta el campo de turno", code: 400 };
+
     const newFecha = `${fecha} ${horaAccionar}`;
-    console.log(newFecha);
 
     const cuerpo = [
       {
@@ -52,7 +54,13 @@ controller.insertarPrecios = async (req, res) => {
   } catch (err) {
     console.log(err);
     if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
+      if (err.parent.errno === 1292) {
+        res
+          .status(400)
+          .json({ msg: "Al parecer estas enviando una fecha invalida" });
+      } else {
+        res.status(400).json({ msg: "datos no enviados correctamente" });
+      }
     } else {
       res.status(err.code).json(err);
     }
