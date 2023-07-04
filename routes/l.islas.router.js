@@ -37,6 +37,7 @@ route.delete("/preciosCombustible/eliminar", precio.eliminarPrecios); //eliminar
 
 //captura de liquidacion
 route.get("/pendientes", liquido.liquidacionesPendientes); //
+route.get("/historial", liquido.consultarLiquidoHistorial); //
 route.post("/capturar", liquido.insertarLiquidos); //
 route.post("/reservar/:folio", liquido.reservarFolio); //
 route.delete("/noreservar/:folio", liquido.quitarReservarFolio); //

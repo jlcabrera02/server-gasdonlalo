@@ -388,4 +388,51 @@ controller.consultarLiquido = async (req, res) => {
   }
 };
 
+controller.consultarLiquidoHistorial = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { fechaI, fechaF, cancelado } = req.query;
+    const querysL = {};
+    const querys = { capturado: true };
+
+    if (fechaI && fechaF) {
+      querysL.fechaturno = {
+        [Op.between]: [fechaI, fechaF],
+      };
+    }
+
+    if (cancelado) {
+      console.log(cancelado);
+      querys.cancelado = cancelado === "true" ? false : null;
+    }
+
+    LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
+    InfoLecturas.hasMany(LecturasFinales, { foreignKey: "idinfo_lectura" });
+
+    const response = await Liquidaciones.findAll({
+      where: querys,
+      include: [
+        {
+          model: Horarios,
+          where: querysL,
+          include: [{ model: empleados }, { model: Turnos }, { model: ES }],
+        },
+        { model: Efectivo },
+        { model: Vales },
+        { model: InfoLecturas, include: LecturasFinales },
+      ],
+    });
+    console.log(querys);
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 export default controller;
