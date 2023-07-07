@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import fs from "fs";
-import path from "path";
+import { config } from "dotenv";
+config();
 
 const send = async ({ filename, content, text, subject, to }) => {
   const config = {
@@ -33,21 +34,17 @@ const send = async ({ filename, content, text, subject, to }) => {
 
 export const pdfArchivo = async (req, res) => {
   try {
-    //Para el de pruebas
-    const ruta = path.join(
-      __dirname,
-      "../public/sistemaGDL-prueba/preliquidaciones",
-      req.body.filename
-    );
-    //Ruta de normal
-    /*  const ruta = path.join(
+    //Para el servidor
+    const ruta = process.env.RUTAFICHERO_PRELIQUIDACION;
+    const rutaArchivo = ruta + "/" + req.body.filename;
+    /* const ruta = path.join(
+      //Ruta de desarrollo
       __dirname,
       "../public/sistemaGDL-prueba/preliquidaciones",
       req.body.filename
     ); */
-    console.log(ruta);
     fs.writeFileSync(
-      ruta,
+      rutaArchivo,
       req.body.content.replace("data:application/pdf;base64,", ""),
       "base64",
       (err, res) => {
