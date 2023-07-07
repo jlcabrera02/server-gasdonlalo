@@ -3,5 +3,6 @@
 4000.vbs
 /public/excel/relojChecador.xls
 /documentos
+/socket
 actualizador.cmd
 .env
