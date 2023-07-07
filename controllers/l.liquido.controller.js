@@ -422,8 +422,12 @@ controller.consultarLiquidoHistorial = async (req, res) => {
         { model: Vales },
         { model: InfoLecturas, include: LecturasFinales },
       ],
+      order: [
+        [Horarios, "fechaturno", "ASC"],
+        ["updatedAt", "ASC"],
+      ],
     });
-    console.log(querys);
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
