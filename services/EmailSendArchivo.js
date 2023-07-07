@@ -33,7 +33,18 @@ const send = async ({ filename, content, text, subject, to }) => {
 
 export const pdfArchivo = async (req, res) => {
   try {
-    const ruta = path.join(__dirname, "../documentos", req.body.filename);
+    //Para el de pruebas
+    const ruta = path.join(
+      __dirname,
+      "../public/sistemaGDL-prueba/preliquidaciones",
+      req.body.filename
+    );
+    //Ruta de normal
+    /*  const ruta = path.join(
+      __dirname,
+      "../public/sistemaGDL-prueba/preliquidaciones",
+      req.body.filename
+    ); */
     console.log(ruta);
     fs.writeFileSync(
       ruta,
