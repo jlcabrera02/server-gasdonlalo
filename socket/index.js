@@ -1,6 +1,8 @@
 import { Server } from "socket.io";
+import { config } from "dotenv";
+config();
 
-const io = new Server(4001, { cors: { origin: "*" } });
+const io = new Server(process.env.PORT_SOCKET, { cors: { origin: "*" } });
 
 io.on("connection", (socket) => {
   console.log("usuario conectado", socket.id);
