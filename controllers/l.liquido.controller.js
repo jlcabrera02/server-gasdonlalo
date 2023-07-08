@@ -372,7 +372,7 @@ controller.consultarLiquido = async (req, res) => {
           },
         },
       ],
-      order: [["updatedAt", "DESC"]],
+      order: [["updatedAt", "ASC"]],
     });
 
     res
