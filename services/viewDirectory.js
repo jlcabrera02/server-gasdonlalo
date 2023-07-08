@@ -50,8 +50,12 @@ export function backupdb(req, res) {
     "-u",
     process.env.USER_DB,
     `-p${process.env.PASSWORD_DB}`,
-    "gasdonlalo",
+    process.env.DATABASE,
   ]);
+
+  dump.stderr.on("data", (err) => {
+    console.log(err.toString());
+  });
 
   dump.stdout
     .pipe(writeStream)
