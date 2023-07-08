@@ -115,7 +115,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
         ["Monto Vale"]: 0,
         ["Folio Efectivo"]: "",
         ["Monto Efectivo"]: 0,
-        ["Fecha"]: el.horario.fechaliquidacion,
+        ["Fecha"]: el.horario.fechaturno,
         ["Estatus"]: el.cancelado ? "Cancelado" : "Activo",
         ["Motivo Cancelación"]: el.cancelado ? el.cancelado : "",
         ["Fecha Cancelacion"]: el.cancelado ? el.fechaCancelado : "",
@@ -316,7 +316,7 @@ export const Liquidacion = async (req, res) => {
         ["Turno"]: lecturasD.horario.turno.turno,
         ["Precio unitario"]: l.precio,
         ["Importe"]: Number(l.importe),
-        ["Fecha"]: lecturasD.horario.fechaliquidacion,
+        ["Fecha"]: lecturasD.horario.fechaturno,
         ["Estatus"]: lecturasD.cancelado ? "Cancelado" : "Vigente",
         ["Motivo Cancelación"]: lecturasD.cancelado ? lecturasD.cancelado : "",
         ["Fecha Cancelacion"]: lecturasD.cancelado
