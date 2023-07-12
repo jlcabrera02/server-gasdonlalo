@@ -4,7 +4,13 @@ const { Turnos } = models;
 
 export async function obtenerTurnos(req, res) {
   try {
-    const response = await Turnos.findAll({ where: { mostrar: true } });
+    const { mostrarTodo } = req.query;
+    const querys = { mostrar: true };
+    console.log({ mostrarTodo });
+    if (mostrarTodo) {
+      delete querys.mostrar;
+    }
+    const response = await Turnos.findAll({ where: querys });
     res.status(200).json({ success: true, response });
   } catch (err) {
     res
