@@ -48,7 +48,6 @@ export const pdfArchivo = async (req, res) => {
       req.body.content.replace("data:application/pdf;base64,", ""),
       "base64",
       (err, res) => {
-        console.log(err, res);
         if (err) {
           throw {
             code: 400,
@@ -60,7 +59,6 @@ export const pdfArchivo = async (req, res) => {
     );
     res.status(200).json({ success: true, response: "Documento guardado" });
   } catch (err) {
-    console.log(err);
     if (err.errno === -2) {
       res.status(400).json({
         success: false,
