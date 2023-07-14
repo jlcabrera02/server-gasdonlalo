@@ -323,7 +323,7 @@ controller.liquidacionesPendientes = async (req, res) => {
           where: { fechaturno: { [Op.lte]: fechasAnteriores } },
         },
       ],
-      order: [[Horarios, "fechaturno", "DESC"]],
+      order: [[Horarios, "fechaturno", "ASC"]],
     });
 
     const totalLiquidaciones = response.filter((liq) => !liq.cancelado).length;
