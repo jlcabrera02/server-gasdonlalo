@@ -69,6 +69,32 @@ controller.nuevoHorario = async (req, res) => {
       idestacion_servicio: idEstacion,
     };
 
+    //Valido si no existe una liquidacion capturada para el siguiente turno
+    const liquidacion = await Liquidaciones.findAll({
+      include: [
+        {
+          model: Horarios,
+          where: {
+            fechaturno: { [Op.gt]: fecha },
+          },
+        },
+      ],
+      where: {
+        capturado: true,
+      },
+    });
+
+    if (liquidacion.length > 0) {
+      const liquidacionP = JSON.parse(JSON.stringify(liquidacion))
+        .map((el) => el.idliquidacion)
+        .join(",");
+      throw {
+        success: false,
+        code: 400,
+        msg: `Se detectaron liquidaciones capturadas con una fecha mayor a la actual, los folios son: ${liquidacionP}`,
+      };
+    }
+
     const validar = await Horarios.findOne({
       where: {
         idempleado: idEmpleado,
@@ -76,6 +102,7 @@ controller.nuevoHorario = async (req, res) => {
         fechaturno: fechaTurno,
       },
     });
+
     if (validar)
       throw {
         success: false,
