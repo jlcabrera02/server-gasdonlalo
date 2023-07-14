@@ -373,7 +373,7 @@ controller.consultarLiquido = async (req, res) => {
           },
         },
       ],
-      order: [["updatedAt", "ASC"]],
+      order: [["createdAt", "ASC"]], //Esto afecta el folio de la liquidacion **
     });
 
     res
