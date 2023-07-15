@@ -185,6 +185,24 @@ controller.buscarLecturasXIdEmpleado = async (req, res) => {
   }
 };
 
+controller.jsonExcel = async (req, res) => {
+  try {
+    const response = await buscarLecturasXIdEmpleado({
+      ...req.params,
+      cancelado: false,
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.updateLecturaInicial = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
@@ -266,6 +284,7 @@ controller.updateLecturaInicial = async (req, res) => {
 export const buscarLecturasXIdEmpleado = async ({
   idEmpleado,
   cancelado,
+  estacionS,
   fechaI,
   fechaF,
 }) => {
@@ -280,14 +299,17 @@ export const buscarLecturasXIdEmpleado = async ({
 
   Gas.hasMany(Mangueras, { foreignKey: "idgas" });
   Mangueras.belongsTo(Gas, { foreignKey: "idgas" });
+  const querysHorario = {};
 
-  const querysHorario = {
-    fechaliquidacion: { [Op.between]: [fechaI, fechaF] },
-  };
+  if (fechaI && fechaF) {
+    querysHorario.fechaliquidacion = { [Op.between]: [fechaI, fechaF] };
+  }
+
   const querys = { capturado: true, lecturas: { [Op.not]: null } };
 
   if (idEmpleado) querysHorario.idempleado = idEmpleado;
   if (cancelado) querys.cancelado = cancelado;
+  if (estacionS) querysHorario.idestacion_servicio = estacionS;
 
   const response = await Liquidaciones.findAll({
     where: querys,
