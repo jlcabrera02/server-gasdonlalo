@@ -1,7 +1,7 @@
 import auth from "../models/auth.model";
 import models from "../models/";
 import { Op } from "sequelize";
-const { Precios, Auditoria } = models;
+const { Precios, Auditoria, Gas } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -84,6 +84,7 @@ controller.obtenerPrecios = async (req, res) => {
 
     const response = await Precios.findAll({
       where: querys,
+      include: Gas,
       order: [
         ["fecha", "DESC"],
         ["createdAt", "DESC"],
