@@ -257,7 +257,7 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 (55, "Configurar Llave de acceso", "Liquidación", 8, "Das la opción de que el usuario registre una llave de acceso para el reinicio de lecturas"),
 (56, "Configurar de estaciones", "Liquidación", 8, "Das la opción de que el usuario de de alta o manipule las estaciones de servicio"),
 (57, "Configurar horarios", "Liquidación", 8, "Das la opción de que el usuario registre horarios a los despachadores"),
-(58, "Capturar liquidos", "Liquidación", 8, "Das la opción de que el usuario capture las liquidaciones");
+(58, "Capturar liquidos", "Liquidación", 8, "Das la opción de que el usuario capture las liquidaciones"),
 (59, "Copia de seguridad", "Permisos", 8, "Das la opción de que el usuario pueda generar una copia de seguridad que se alojara en el servidor");
 
 INSERT INTO acceso (user, idpermiso) VALUES 
