@@ -30,8 +30,12 @@ controller.lecturasIniciales = async (req, res) => {
     Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
     Islas.hasMany(Mangueras, { foreignKey: "idisla" });
 
+    Mangueras.belongsTo(Gas, { foreignKey: "idgas" });
+    Gas.hasMany(Mangueras, { foreignKey: "idgas" });
+
     const response = await Mangueras.findAll({
       include: [
+        { model: Gas },
         {
           model: InfoLecturas,
           where: { cancelado: false, idestacion_servicio: idEstacion },
@@ -54,6 +58,7 @@ controller.lecturasIniciales = async (req, res) => {
 
     res.status(200).json({ success: true, response, folio });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
