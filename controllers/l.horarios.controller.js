@@ -192,6 +192,7 @@ controller.actualizarHorario = async (req, res) => {
 };
 
 controller.eliminarHorario = async (req, res) => {
+  //Si hay errores con esta peticion, recordar cambiar las llaves foreaneas onDelete a CASCADE
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;

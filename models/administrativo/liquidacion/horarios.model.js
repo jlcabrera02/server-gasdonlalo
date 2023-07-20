@@ -33,6 +33,8 @@ const Horarios = sequelize.define(
   {
     freezeTableName: true,
     timestamps: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   }
 );
 
