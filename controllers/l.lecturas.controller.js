@@ -192,10 +192,7 @@ controller.buscarLecturasXIdEmpleado = async (req, res) => {
 
 controller.jsonExcel = async (req, res) => {
   try {
-    const response = await buscarLecturasXIdEmpleado({
-      ...req.params,
-      cancelado: false,
-    });
+    const response = await buscarLecturasXIdEmpleado(req.query);
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -311,9 +308,10 @@ export const buscarLecturasXIdEmpleado = async ({
   }
 
   const querys = { capturado: true, lecturas: { [Op.not]: null } };
-
+  //Checar si no hay problemas con el historial o el de ventas
   if (idEmpleado) querysHorario.idempleado = idEmpleado;
   if (cancelado) querys.cancelado = cancelado;
+  if (cancelado === "false") querys.cancelado = { [Op.is]: null };
   if (estacionS) querysHorario.idestacion_servicio = estacionS;
 
   const response = await Liquidaciones.findAll({
