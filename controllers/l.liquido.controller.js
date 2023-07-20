@@ -72,6 +72,7 @@ controller.insertarLiquidos = async (req, res) => {
         lecturai: el.lecturaInicial,
         lecturaf: el.lecturaFinal,
         precio: el.precioUnitario,
+        combustible: el.combustible,
         importe: el.importe,
       }));
 
