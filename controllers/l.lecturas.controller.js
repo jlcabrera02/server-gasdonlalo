@@ -1,7 +1,7 @@
 import auth from "../models/auth.model";
 import models from "../models";
 import sequelize from "../config/configdb";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 const {
   InfoLecturas,
   LecturasFinales,
@@ -319,8 +319,15 @@ export const buscarLecturasXIdEmpleado = async ({
   if (cancelado === "false") querys.cancelado = { [Op.is]: null };
   if (estacionS) querysHorario.idestacion_servicio = estacionS;
 
-  const response = await Liquidaciones.findAll({
-    where: querys,
+  /* models.Comment.findAll({
+    where: {
+        action: 'xyz',
+        [Op.and] = [
+            sequelize.literal(`reference->"$.orderItemId" IN (${orderItemIdsArray})`)
+        ] */
+
+  let response = await Liquidaciones.findAll({
+    where: { ...querys, [Op.and]: [Sequelize.literal(`lecturas`)] },
     include: [
       {
         model: Horarios,
@@ -346,7 +353,51 @@ export const buscarLecturasXIdEmpleado = async ({
     ],
   });
 
+  if (idIsla) {
+    response = filtrarIslas(
+      response,
+      [...idIsla].map((id) => Number(id))
+    );
+  }
+  if (combustible) {
+    response = filtrarCombustible(response, [...combustible]);
+  }
+
   return response;
+};
+
+const filtrarIslas = (datos, idIslas) => {
+  const data = JSON.parse(JSON.stringify(datos));
+  const newData = [];
+  data.forEach((liq) => {
+    const tempLect = [];
+    const lecturas = JSON.parse(liq.lecturas);
+    lecturas.forEach((lect) => {
+      const test = idIslas.includes(lect.idisla);
+      if (test) {
+        tempLect.push(lect);
+      }
+    });
+    newData.push({ ...liq, lecturas: JSON.stringify(tempLect) });
+  });
+  return newData;
+};
+
+const filtrarCombustible = (datos, combustible) => {
+  const data = JSON.parse(JSON.stringify(datos));
+  const newData = [];
+  data.forEach((liq) => {
+    const tempLect = [];
+    const lecturas = JSON.parse(liq.lecturas);
+    lecturas.forEach((lect) => {
+      const test = combustible.includes(lect.idgas);
+      if (test) {
+        tempLect.push(lect);
+      }
+    });
+    newData.push({ ...liq, lecturas: JSON.stringify(tempLect) });
+  });
+  return newData;
 };
 
 export default controller;
