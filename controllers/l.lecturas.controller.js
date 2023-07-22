@@ -284,6 +284,10 @@ controller.updateLecturaInicial = async (req, res) => {
 };
 
 export const buscarLecturasXIdEmpleado = async ({
+  idTurno,
+  idIsla,
+  combustible,
+  posicion,
   idEmpleado,
   cancelado,
   estacionS,
@@ -310,6 +314,7 @@ export const buscarLecturasXIdEmpleado = async ({
   const querys = { capturado: true, lecturas: { [Op.not]: null } };
   //Checar si no hay problemas con el historial o el de ventas
   if (idEmpleado) querysHorario.idempleado = idEmpleado;
+  if (idTurno) querysHorario.idturno = idTurno;
   if (cancelado) querys.cancelado = cancelado;
   if (cancelado === "false") querys.cancelado = { [Op.is]: null };
   if (estacionS) querysHorario.idestacion_servicio = estacionS;
