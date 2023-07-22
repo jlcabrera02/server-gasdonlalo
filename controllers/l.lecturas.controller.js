@@ -319,13 +319,6 @@ export const buscarLecturasXIdEmpleado = async ({
   if (cancelado === "false") querys.cancelado = { [Op.is]: null };
   if (estacionS) querysHorario.idestacion_servicio = estacionS;
 
-  /* models.Comment.findAll({
-    where: {
-        action: 'xyz',
-        [Op.and] = [
-            sequelize.literal(`reference->"$.orderItemId" IN (${orderItemIdsArray})`)
-        ] */
-
   let response = await Liquidaciones.findAll({
     where: { ...querys, [Op.and]: [Sequelize.literal(`lecturas`)] },
     include: [
@@ -354,43 +347,36 @@ export const buscarLecturasXIdEmpleado = async ({
   });
 
   if (idIsla) {
-    response = filtrarIslas(
+    response = filtrarDatos(
       response,
-      [...idIsla].map((id) => Number(id))
+      [...idIsla].map((id) => Number(id)),
+      "idisla"
     );
   }
+
   if (combustible) {
-    response = filtrarCombustible(response, [...combustible]);
+    response = filtrarDatos(response, [...combustible], "idgas");
+  }
+  if (posicion) {
+    response = filtrarDatos(
+      response,
+      [...posicion].map((p) => Number(p)),
+      "posicion"
+    );
   }
 
   return response;
 };
 
-const filtrarIslas = (datos, idIslas) => {
+//Me sirve para poder filtrar combustible, islas y posiciones
+const filtrarDatos = (datos, filtros, propiedad) => {
   const data = JSON.parse(JSON.stringify(datos));
   const newData = [];
   data.forEach((liq) => {
     const tempLect = [];
     const lecturas = JSON.parse(liq.lecturas);
     lecturas.forEach((lect) => {
-      const test = idIslas.includes(lect.idisla);
-      if (test) {
-        tempLect.push(lect);
-      }
-    });
-    newData.push({ ...liq, lecturas: JSON.stringify(tempLect) });
-  });
-  return newData;
-};
-
-const filtrarCombustible = (datos, combustible) => {
-  const data = JSON.parse(JSON.stringify(datos));
-  const newData = [];
-  data.forEach((liq) => {
-    const tempLect = [];
-    const lecturas = JSON.parse(liq.lecturas);
-    lecturas.forEach((lect) => {
-      const test = combustible.includes(lect.idgas);
+      const test = filtros.includes(lect[propiedad]);
       if (test) {
         tempLect.push(lect);
       }
