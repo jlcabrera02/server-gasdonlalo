@@ -1,9 +1,9 @@
 import xl from "excel4node";
 import models from "../models";
 import { Op } from "sequelize";
-import format from "../assets/formatTiempo";
+// import format from "../assets/formatTiempo";
 import { buscarLecturasXIdEmpleado } from "../controllers/l.lecturas.controller";
-import Decimal from "decimal.js-light";
+// import Decimal from "decimal.js-light";
 const {
   Precios,
   empleados,
@@ -20,7 +20,7 @@ const {
 } = models;
 
 const textHeader = {
-  font: { size: 12, bold: true },
+  font: { size: 12, bold: false },
 };
 
 export const preciosCombustible = async (req, res) => {
@@ -74,7 +74,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
     const ws = wb.addWorksheet("Lecturas");
     const vale = wb.addWorksheet("vales");
     const efecivo = wb.addWorksheet("efectivo");
-    const generalS = wb.addWorksheet("general");
+    // const generalS = wb.addWorksheet("general");
 
     const convert = JSON.parse(JSON.stringify(response));
 
@@ -90,20 +90,19 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
     const datos = [];
     convert.forEach((el) => {
       const stack = [];
-      const lecturasFInales = el.info_lectura.lecturas_finales;
+      const lecturasFinales = JSON.parse(el.lecturas);
       const data = {
         ["idEmpleado"]: el.horario.empleado.idchecador || "",
         ["idLiquidacion"]: el.idliquidacion,
         ["Nombres"]: el.horario.empleado.nombre,
         ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
         ["Apellido Materno"]: el.horario.empleado.apellido_materno,
-        ["idManguera"]: "",
-        ["idIsla"]: "",
-        ["IdEstacionServicio"]: "",
+        ["Idmanguera"]: "",
         ["Estación Servicio"]: "null",
-        ["idGas"]: "",
+        ["Número isla"]: "",
+        ["Posición"]: "",
+        ["Idgas"]: "",
         ["Combustible"]: "null",
-        ["Numero de isla"]: "null",
         ["Lectura Inicial"]: "",
         ["Lectura Final"]: "",
         ["Total Litros"]: 0,
@@ -121,26 +120,20 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
         ["Fecha Cancelacion"]: el.cancelado ? el.fechaCancelado : "",
       };
 
-      lecturasFInales.forEach((l) => {
+      lecturasFinales.forEach((l) => {
         const local = [];
-        local["idManguera"] =
-          l.manguera.direccion === "iz"
-            ? `${l.manguera.idgas}${l.manguera.isla.nisla * 2 - 1}`
-            : `${l.manguera.idgas}${l.manguera.isla.nisla * 2}`;
-        local["idIsla"] = l.manguera.idisla;
-        local["IdEstacionServicio"] = l.manguera.isla.idestacion_servicio;
-        local["Estación Servicio"] = l.manguera.isla.estacion_servicio.nombre;
-        local["Combustible"] = l.manguera.ga.nombre;
-        console.log(l.manguera);
-        local["idGas"] = l.manguera.idgas;
-        local["Numero de isla"] = l.manguera.isla.nisla;
-        local["Lectura Inicial"] = l.lecturai;
-        local["Lectura Final"] = l.lecturaf;
-        local["Total Litros"] =
-          l.lecturaf >= l.lecturai
-            ? l.lecturaf - l.lecturai
-            : 9999999 - l.lecturai + l.lecturaf + 1;
-        local["Precio unitario"] = Number(l.precio);
+        local["Idmanguera"] = l.idmangueraGenerico;
+        local["Estación Servicio"] = el.horario.estacion_servicio.nombre;
+        local["Número isla"] = el.idislas.find(
+          (is) => is.idisla === l.idisla
+        ).nisla;
+        local["Posición"] = el.posicion || "ACTUALIZAR";
+        local["Combustible"] = l.combustible;
+        local["Idgas"] = l.idgas;
+        local["Lectura Inicial"] = l.lecturaInicial;
+        local["Lectura Final"] = l.lecturaFinal;
+        local["Total Litros"] = l.litrosVendidos;
+        local["Precio unitario"] = Number(l.precioUnitario);
         local["Importe"] = Number(l.importe);
         stack.push({ ...data, ...local });
       });
@@ -166,32 +159,25 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
     });
 
     let reporte = convert.map((el) => {
-      const lecturasFInales = el.info_lectura.lecturas_finales;
-      return lecturasFInales.map((l) => ({
+      const lecturasFinales = JSON.parse(el.lecturas);
+      return lecturasFinales.map((l) => ({
         ["idEmpleado"]: el.horario.empleado.idchecador,
         ["idLiquidacion"]: el.idliquidacion,
         ["Nombres"]: el.horario.empleado.nombre,
         ["Apellido Paterno"]: el.horario.empleado.apellido_paterno,
         ["Apellido Materno"]: el.horario.empleado.apellido_materno,
-        ["idManguera"]:
-          l.manguera.direccion === "iz"
-            ? `${l.manguera.idgas}${l.manguera.isla.nisla * 2 - 1}`
-            : `${l.manguera.idgas}${l.manguera.isla.nisla * 2}`,
-        ["idIsla"]: l.manguera.idisla,
-        ["IdEstacionServicio"]: l.manguera.isla.idestacion_servicio,
-        ["idGas"]: l.manguera.idgas,
-        ["Numero de isla"]: l.manguera.isla.nisla,
-        ["Lectura Inicial"]: l.lecturai,
-        ["Lectura Final"]: l.lecturaf,
-        ["Total Litros"]:
-          l.lecturaf >= l.lecturai
-            ? l.lecturaf - l.lecturai
-            : 9999999 - l.lecturai + l.lecturaf + 1,
+        ["idManguera"]: l.idmangueraGenerico,
+        ["Estación Servicio"]: el.horario.estacion_servicio.nombre,
+        ["Número isla"]: el.idislas.find((is) => is.idisla === l.idisla).nisla,
+        ["Idgas"]: l.manguera.idgas,
+        ["Lectura Inicial"]: l.lecturaInicial,
+        ["Lectura Final"]: l.lecturaFinal,
+        ["Total Litros"]: l.litrosVendidos,
         ["Turno"]: el.horario.turno.turno,
-        ["Precio unitario"]: Number(l.precio),
+        ["Precio unitario"]: l.precioUnitario,
         ["Importe"]: Number(l.importe),
         ["Fecha"]: el.horario.fechaliquidacion,
-        ["Estatus"]: el.cancelado ? "Cancelado" : "Activo",
+        ["Estatus"]: el.cancelado ? "Cancelado" : "Vigente",
         ["Motivo Cancelación"]: el.cancelado ? el.cancelado : "",
         ["Fecha Cancelacion"]: el.cancelado ? el.fechaCancelado : "",
       }));
@@ -231,7 +217,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
     generadorTablasExcel(reporte, ws);
     generadorTablasExcel(efectivos, efecivo);
     generadorTablasExcel(vales, vale);
-    generadorTablasExcel(datos, generalS);
+    // generadorTablasExcel(datos, generalS);
 
     wb.writeToBuffer().then((buf) => {
       res.writeHead(200, [
@@ -369,6 +355,22 @@ export const Liquidacion = async (req, res) => {
       ]);
       res.end(buf);
     });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ success: false });
+  }
+};
+
+//Esta peticion la uso en el boton de exportar del dashboard de reportes de liquidación
+export const exportLiquidacionGeneral = async (req, res) => {
+  try {
+    const response = await buscarLecturasXIdEmpleado(req.body);
+    const wb = new xl.Workbook();
+    const liquidacion = wb.addWorksheet("Liquidaciones");
+    const ws = wb.addWorksheet("Lecturas");
+    const vale = wb.addWorksheet("vales");
+    const efecivo = wb.addWorksheet("efectivo");
+    const generalS = wb.addWorksheet("general");
   } catch (err) {
     console.log(err);
     res.status(400).json({ success: false });
