@@ -15,6 +15,8 @@ const {
   InfoLecturas,
   LecturasFinales,
   Auditoria,
+  Mangueras,
+  Gas,
 } = modelos;
 const { verificar } = auth;
 
@@ -159,6 +161,8 @@ controller.cancelarLiquido = async (req, res) => {
         {
           model: Horarios,
           where: {
+            idestacion_servicio:
+              infoLiq.dataValues.horario.dataValues.idestacion_servicio,
             fechaturno: {
               [Op.gt]: infoLiq.dataValues.horario.dataValues.fechaturno,
             },
@@ -166,6 +170,8 @@ controller.cancelarLiquido = async (req, res) => {
         },
       ],
     });
+
+    console.log(JSON.parse(JSON.stringify(infoLiq)));
 
     if (liquidacionesSiguientes.length > 0) {
       throw {
