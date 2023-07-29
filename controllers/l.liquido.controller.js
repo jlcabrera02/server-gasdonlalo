@@ -171,8 +171,6 @@ controller.cancelarLiquido = async (req, res) => {
       ],
     });
 
-    console.log(JSON.parse(JSON.stringify(infoLiq)));
-
     if (liquidacionesSiguientes.length > 0) {
       throw {
         code: 417,

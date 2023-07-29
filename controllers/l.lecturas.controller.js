@@ -308,7 +308,7 @@ export const buscarLecturasXIdEmpleado = async ({
   const querysHorario = {};
 
   if (fechaI && fechaF) {
-    querysHorario.fechaliquidacion = { [Op.between]: [fechaI, fechaF] };
+    querysHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
   }
 
   const querys = { capturado: true, lecturas: { [Op.not]: null } };
