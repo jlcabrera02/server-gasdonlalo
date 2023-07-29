@@ -276,7 +276,13 @@ export const Liquidacion = async (req, res) => {
 
     lecturasD = JSON.parse(JSON.stringify(lecturasD));
 
-    console.log(lecturasD);
+    if (lecturasD.length === 0) {
+      throw {
+        success: false,
+        code: 400,
+        msg: "No se encontraron datos en el periodo de tiempo",
+      };
+    }
 
     const lecturasM = lecturasD.info_lectura.lecturas_finales.map((l) => {
       return {
@@ -355,22 +361,6 @@ export const Liquidacion = async (req, res) => {
       ]);
       res.end(buf);
     });
-  } catch (err) {
-    console.log(err);
-    res.status(400).json({ success: false });
-  }
-};
-
-//Esta peticion la uso en el boton de exportar del dashboard de reportes de liquidación
-export const exportLiquidacionGeneral = async (req, res) => {
-  try {
-    const response = await buscarLecturasXIdEmpleado(req.body);
-    const wb = new xl.Workbook();
-    const liquidacion = wb.addWorksheet("Liquidaciones");
-    const ws = wb.addWorksheet("Lecturas");
-    const vale = wb.addWorksheet("vales");
-    const efecivo = wb.addWorksheet("efectivo");
-    const generalS = wb.addWorksheet("general");
   } catch (err) {
     console.log(err);
     res.status(400).json({ success: false });
