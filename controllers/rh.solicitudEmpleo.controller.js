@@ -71,7 +71,7 @@ controller.insert = async (req, res) => {
       },
     });
 
-    if (buscarCoincidencia) {
+    if (buscarCoincidencia && !req.query.hasOwnProperty("forzar")) {
       throw {
         success: false,
         code: 428,
