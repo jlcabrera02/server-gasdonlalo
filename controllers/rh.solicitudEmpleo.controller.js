@@ -2,7 +2,9 @@ import seM from "../models/rh.solicitudEmpleo.model";
 import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 const { verificar } = auth;
+import models from "../models";
 import resErr from "../respuestas/error.respuestas";
+const { empleados } = models;
 
 const controller = {};
 const area = "Solicitudes de empleo y empleados";
@@ -60,6 +62,23 @@ controller.insert = async (req, res) => {
       motivo,
     } = req.body;
 
+    //Aqui valido si el nombre y apellidos no coinciden con otro similar en la BD
+    const buscarCoincidencia = await empleados.findOne({
+      where: {
+        nombre,
+        apellido_paterno: apellidoPaterno,
+        apellido_materno: apellidoMaterno,
+      },
+    });
+
+    if (buscarCoincidencia) {
+      throw {
+        success: false,
+        code: 428,
+        msg: "Se encontró un empleado con el mismo nombre en la base de datos",
+      };
+    }
+
     const ns = Number(estatus);
     if (ns === 3)
       throw peticionImposible(
@@ -99,6 +118,7 @@ controller.insert = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
