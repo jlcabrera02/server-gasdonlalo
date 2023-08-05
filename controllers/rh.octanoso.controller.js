@@ -4,6 +4,11 @@ import empM from "../models/rh.empleado.model";
 import salidaNCM from "../models/s.salidaNoConforme.model";
 import formatTiempo from "../assets/formatTiempo";
 import auth from "../models/auth.model";
+import models from "../models";
+import sequelize from "../config/configdb";
+import agruparArr from "../assets/agrupar";
+import { Op } from "sequelize";
+const { Liquidaciones, Horarios, empleados } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -195,6 +200,108 @@ controller.findVentasLXestacionXIntervaloTiempo = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.octanosoC = async (req, res) => {
+  try {
+    const { fechaInicio, fechaFinal, idEstacionServicio } = req.body;
+    const diaI = formatTiempo.tiempoLocal(fechaInicio).getDate();
+    const milisegundos =
+      new Date(fechaFinal).getTime() - new Date(fechaInicio).getTime();
+    const dias = milisegundos / (1000 * 60 * 60 * 24);
+    //Empleados que se encontraron en ese rango de fechas
+    const liq = await Liquidaciones.findAll({
+      attributes: {
+        include: [
+          [
+            sequelize.literal(
+              `JSON_ARRAYAGG(JSON_EXTRACT(JSON_UNQUOTE(lecturas), "$[*].litrosVendidos"))`
+            ),
+            "importes",
+          ],
+        ],
+      },
+      include: [
+        {
+          model: Horarios,
+          where: {
+            idestacion_servicio: idEstacionServicio,
+            fechaturno: { [Op.between]: [fechaInicio, fechaFinal] },
+          },
+          include: empleados,
+        },
+      ],
+      where: { cancelado: null },
+      group: ["horario.idempleado", "horario.fechaturno"],
+    });
+
+    const liqParse = JSON.parse(JSON.stringify(liq));
+    if (liqParse.length === 0) {
+      throw {
+        success: false,
+        code: 400,
+        msg: "No se encontraron registros en la Base de datos",
+      };
+    }
+    //Agrupo por el id de los empleados para saber cuantos empleados estan involucrados
+    const ids = agruparArr(liqParse, (el) => el.horario.idempleado).values();
+
+    const response = [];
+
+    for (let i = 0; i < ids.length; i++) {
+      let dat = [];
+      const { idempleado } = ids[i][0].horario;
+      for (let j = diaI; j <= dias + diaI; j++) {
+        let fecha = new Date(
+          new Date(formatTiempo.tiempoLocal(fechaInicio)).setDate(j)
+        )
+          .toISOString()
+          .split("T")[0];
+        const data = liqParse.find(
+          (liq) =>
+            liq.horario.idempleado === idempleado &&
+            liq.horario.fechaturno === fecha
+        );
+        // const data = await octM.findVentasLXestacion(cuerpo);
+        const salida = await salidaNCM.findTotalSalidasXDiaXEmpleado([
+          idempleado,
+          fecha,
+          2, //Este es el id del concurso
+        ]);
+
+        const temp = {
+          fecha,
+          idempleado,
+          idestacion_servicio: Number(idEstacionServicio),
+          cantidad: 0,
+          salidaNC: salida.total_salidas,
+        };
+
+        if (data) {
+          dat.push({
+            ...temp,
+            cantidad: data.importes.flat().reduce((a, b) => a + b, 0),
+          });
+        } else {
+          dat.push(temp);
+        }
+      }
+
+      response.push({
+        empleado: ids[i][0].horario.empleado,
+        datos: dat,
+      });
+    }
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
