@@ -3,6 +3,7 @@ import models from "../models";
 import { Op } from "sequelize";
 // import format from "../assets/formatTiempo";
 import { buscarLecturasXIdEmpleado } from "../controllers/l.lecturas.controller";
+import calcularTotal from "../assets/sumarAlgo";
 // import Decimal from "decimal.js-light";
 const {
   Precios,
@@ -85,6 +86,10 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
       turno: el.horario.turno.turno,
       ["Estacion servicio"]: el.horario.estacion_servicio.nombre,
       ["Fecha Liquidacion"]: el.horario.fechaliquidacion,
+      "Importes en efectivo": calcularTotal(el.efectivos, "monto"),
+      "Importes en vales": calcularTotal(el.vales, "monto"),
+      "Importe Total": calcularTotal(JSON.parse(el.lecturas), "importe"),
+      Estatus: el.cancelado ? "Cancelado" : "Vigente",
     }));
 
     const datos = [];
