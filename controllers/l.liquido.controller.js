@@ -273,6 +273,11 @@ controller.quitarReservarFolio = async (req, res) => {
 
     let response = [1];
 
+    if (!liquidacion) {
+      res.status(200).json({ success: true, response });
+      return;
+    }
+
     if (!liquidacion.lecturas) {
       response = await Liquidaciones.update(cuerpo, {
         where: { idliquidacion: folio },
@@ -288,6 +293,7 @@ controller.quitarReservarFolio = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
