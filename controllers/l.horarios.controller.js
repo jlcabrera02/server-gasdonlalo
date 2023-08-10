@@ -76,6 +76,7 @@ controller.nuevoHorario = async (req, res) => {
           model: Horarios,
           where: {
             fechaturno: { [Op.gt]: fecha },
+            idestacion_servicio: idEstacion,
           },
         },
       ],

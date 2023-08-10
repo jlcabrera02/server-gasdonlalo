@@ -306,7 +306,7 @@ controller.liquidacionesPendientes = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { fecha } = req.query;
+    const { fecha, idEstacion } = req.query;
     let fechasAnteriores = new Date(fecha);
     fechasAnteriores = new Date(
       fechasAnteriores.setDate(fechasAnteriores.getDate() - 1)
@@ -319,7 +319,7 @@ controller.liquidacionesPendientes = async (req, res) => {
         {
           model: Horarios,
           include: [{ model: empleados }, { model: Turnos }, { model: ES }],
-          where: { fechaturno: fecha },
+          where: { fechaturno: fecha, idestacion_servicio: idEstacion },
         },
         { model: empleados, as: "empleado_captura" },
       ],
