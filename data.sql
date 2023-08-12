@@ -220,7 +220,8 @@ INSERT INTO area_trabajo VALUES
 (7, "Recursos Humanos"),
 (8, "Administrativos"),
 (9, "Seguridad"),
-(10, "Documentos SGG");
+(10, "Documentos SGG"),
+(11, "Liquidación");
 
 INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) VALUES 
 (1, "Universal", "Universal", 1, "Permiso para el superusuario"),
@@ -251,14 +252,16 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 (48, "Visualizar usuarios", "Permisos", 8, "Das permiso de que el usuario pueda ver enlistada a los empleados y usuarios"),
 (49, "Establecer usuario", "Permisos", 8, "Das permiso de que el usuario pueda crear un usuario a un empleado"),
 (50, "Establecer permisos", "Permisos", 8, "Das permiso de que el usuario establecer permisos a los demas usuarios"),
-(51, "Configurar Lecturas Iniciales", "Liquidación", 8, "Das la opción de que el usuario manipule las lecturas iniciales"),(52, "Cancelar Liquidación", "Liquidación", 8, "Das la opción de que el usuario cancele una liquidación"),
-(53, "Configurar Precios de combustible", "Liquidación", 8, "Das la opción de que el usuario configure los precios de combustible"),
-(54, "Configurar turnos", "Liquidación", 8, "Das la opción de que el usuario manipule los turnos de trabajo"),
-(55, "Configurar Llave de acceso", "Liquidación", 8, "Das la opción de que el usuario registre una llave de acceso para el reinicio de lecturas"),
-(56, "Configurar de estaciones", "Liquidación", 8, "Das la opción de que el usuario de de alta o manipule las estaciones de servicio"),
-(57, "Configurar horarios", "Liquidación", 8, "Das la opción de que el usuario registre horarios a los despachadores"),
-(58, "Capturar liquidos", "Liquidación", 8, "Das la opción de que el usuario capture las liquidaciones"),
-(59, "Copia de seguridad", "Permisos", 8, "Das la opción de que el usuario pueda generar una copia de seguridad que se alojara en el servidor");
+(51, "Configurar Lecturas Iniciales", "Configuraciones", 11, "Das la opción de que el usuario manipule las lecturas iniciales"),
+(52, "Cancelar Liquidación", "Captura", 11, "Das la opción de que el usuario cancele una liquidación"),
+(53, "Configurar Precios de combustible", "Configuraciones", 11, "Das la opción de que el usuario configure los precios de combustible"),
+(54, "Configurar turnos", "Configuraciones", 11, "Das la opción de que el usuario manipule los turnos de trabajo"),
+(55, "Configurar Llave de acceso", "Configuraciones", 11, "Das la opción de que el usuario registre una llave de acceso para el reinicio de lecturas"),
+(56, "Configurar de estaciones", "Configuraciones", 11, "Das la opción de que el usuario de de alta o manipule las estaciones de servicio"),
+(57, "Configurar horarios", "Configuraciones", 11, "Das la opción de que el usuario registre horarios a los despachadores"),
+(58, "Capturar liquidos", "Captura", 11, "Das la opción de que el usuario capture las liquidaciones"),
+(59, "Copia de seguridad", "Permisos", 8, "Das la opción de que el usuario pueda generar una copia de seguridad que se alojara en el servidor"),
+(60, "Visualizar Reportes", "Reportes", 11, "Das la opción de que el usuario pueda ver los reportes del modulo de liquidación");
 
 INSERT INTO acceso (user, idpermiso) VALUES 
 ("sralcocer", 1);
