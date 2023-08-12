@@ -434,8 +434,8 @@ controller.consultarLiquidoHistorial = async (req, res) => {
         { model: InfoLecturas, include: LecturasFinales },
       ],
       order: [
-        [Horarios, "fechaturno", "ASC"],
-        ["updatedAt", "ASC"],
+        [Horarios, "fechaturno", "DESC"],
+        ["updatedAt", "DESC"],
       ],
     });
 
