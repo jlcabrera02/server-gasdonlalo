@@ -1,10 +1,10 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/configdb";
 
-const Vales = sequelize.define(
-  "vales",
+const EfectivoTienda = sequelize.define(
+  "efectivo_tienda",
   {
-    idvale: {
+    idefectivo: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -13,21 +13,13 @@ const Vales = sequelize.define(
       type: DataTypes.DECIMAL(19, 2),
       allowNull: false,
     },
-    idliquidacion: {
-      type: DataTypes.INTEGER,
+    fecha: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     folio: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
-    },
-    combustible: {
-      type: DataTypes.CHAR,
-      allowNull: false,
-    },
-    label: {
-      type: DataTypes.STRING(8),
-      allowNull: false,
     },
     idcodigo_uso: {
       type: DataTypes.INTEGER,
@@ -36,8 +28,7 @@ const Vales = sequelize.define(
   },
   {
     freezeTableName: true,
-    timestamps: false,
   }
 );
 
-export default Vales;
+export default EfectivoTienda;

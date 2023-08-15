@@ -42,6 +42,11 @@ const Liquidaciones = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    num_impresiones: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
   },
   {
     freezeTableName: true,

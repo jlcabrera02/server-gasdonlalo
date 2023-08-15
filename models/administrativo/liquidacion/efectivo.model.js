@@ -21,6 +21,10 @@ const Efectivo = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    idcodigo_uso: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
   {
     freezeTableName: true,
