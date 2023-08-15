@@ -30,7 +30,7 @@ const Vales = sequelize.define(
       allowNull: false,
     },
     idcodigo_uso: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.CHAR(2),
       allowNull: false,
     },
   },

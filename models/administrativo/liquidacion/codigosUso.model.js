@@ -5,9 +5,8 @@ const CodigosUso = sequelize.define(
   "codigos_uso",
   {
     idcodigo_uso: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.CHAR(2),
       primaryKey: true,
-      autoIncrement: true,
     },
     descripcion: {
       type: DataTypes.TEXT,

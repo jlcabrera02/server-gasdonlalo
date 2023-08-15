@@ -15,8 +15,6 @@ const {
   InfoLecturas,
   LecturasFinales,
   Auditoria,
-  Mangueras,
-  Gas,
 } = modelos;
 const { verificar } = auth;
 
