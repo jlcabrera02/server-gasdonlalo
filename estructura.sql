@@ -647,10 +647,10 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `codigos_uso` ;
 
 CREATE TABLE IF NOT EXISTS `codigos_uso` (
-  `idcodigos_uso` CHAR(2) NOT NULL,
+  `idcodigo_uso` CHAR(2) NOT NULL,
   `descripcion` TEXT NOT NULL,
   `createdAt` DATETIME NOT NULL,
-  `updateAt` DATETIME NOT NULL,
+  `updatedAt` DATETIME NOT NULL,
   PRIMARY KEY (`idcodigos_uso`))
 ENGINE = InnoDB;
 

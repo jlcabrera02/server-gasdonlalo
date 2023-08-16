@@ -44,6 +44,7 @@ route.put("/codigo-uso/editar/:idCodigoUso", codigoUso.editarCodigoUso); //
 route.delete("/codigo-uso/eliminar/:idCodigoUso", codigoUso.eliminarCodigoUso); //
 
 //captura de liquidacion
+route.post("/capturar", liquido.insertarLiquidos); //
 route.get("/pendientes", liquido.liquidacionesPendientes); //
 route.get("/historial", liquido.consultarLiquidoHistorial); //
 route.post("/reservar/:folio", liquido.reservarFolio); //

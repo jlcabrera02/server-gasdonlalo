@@ -39,12 +39,14 @@ controller.insertarLiquidos = async (req, res) => {
       idliquidacion: folio,
       folio: el.folio || null,
       label: el.label,
+      idcodigo_uso: el.codigoUso,
     }));
 
     const cuerpoEfectivo = efectivo.map((el) => ({
       monto: el.monto,
       idliquidacion: folio,
       folio: el.folio,
+      idcodigo_uso: el.codigoUso,
     }));
 
     const response = await sequelize.transaction(async (t) => {
