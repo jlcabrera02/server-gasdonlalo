@@ -3,6 +3,7 @@ import islas from "../controllers/l.islas.controller";
 import lecturas from "../controllers/l.lecturas.controller";
 import horarios from "../controllers/l.horarios.controller";
 import liquido from "../controllers/l.liquido.controller";
+import codigoUso from "../controllers/l.codigoUso.controller";
 import precio from "../controllers/l.preciogas.controller";
 
 const route = router();
@@ -36,10 +37,15 @@ route.post("/preciosCombustible", precio.insertarPrecios); //
 route.put("/preciosCombustible/edit/:idPrecio", precio.actualizarPrecios); //eliminarPrecios
 route.delete("/preciosCombustible/eliminar", precio.eliminarPrecios); //eliminarPrecios
 
+//Codigos de uso
+route.get("/codigo-uso/obtener", codigoUso.obtenerCodigoUso); //
+route.post("/codigo-uso/nuevo", codigoUso.nuevoCodigoUso); //
+route.put("/codigo-uso/editar/:idCodigoUso", codigoUso.editarCodigoUso); //
+route.delete("/codigo-uso/eliminar/:idCodigoUso", codigoUso.eliminarCodigoUso); //
+
 //captura de liquidacion
 route.get("/pendientes", liquido.liquidacionesPendientes); //
 route.get("/historial", liquido.consultarLiquidoHistorial); //
-route.post("/capturar", liquido.insertarLiquidos); //
 route.post("/reservar/:folio", liquido.reservarFolio); //
 route.delete("/noreservar/:folio", liquido.quitarReservarFolio); //
 route.put("/cancelar", liquido.cancelarLiquido); //
