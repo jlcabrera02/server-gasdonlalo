@@ -147,7 +147,7 @@ controller.cancelarLiquido = async (req, res) => {
 
     //Estas liquidaciones comprueban si hay liquidaciones siguientes a esta liquidacion, si hay entonces no puedo cancelar la liquidacion por las lecturas finales.
     const liquidacionesSiguientes = await Liquidaciones.findAll({
-      where: { capturado: true },
+      where: { capturado: true, cancelado: { [Op.is]: null } },
       include: [
         {
           model: InfoLecturas,
@@ -218,7 +218,6 @@ controller.cancelarLiquido = async (req, res) => {
   } catch (err) {
     console.log(err);
     if (!err.code) {
-      console.log(err);
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
       res.status(err.code).json(err);
