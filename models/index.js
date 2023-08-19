@@ -105,14 +105,38 @@ ES.hasMany(Islas, {
 empleados.hasOne(LlaveAcceso, { foreignKey: "idempleado" });
 LlaveAcceso.belongsTo(empleados, { foreignKey: "idempleado" });
 
-CodigosUso.belongsTo(Efectivo, { foreignKey: "idcodigo_uso" });
-Efectivo.belongsTo(CodigosUso, { foreignKey: "idcodigo_uso" });
+CodigosUso.belongsTo(Efectivo, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+Efectivo.hasMany(CodigosUso, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
 
-CodigosUso.belongsTo(EfectivoTienda, { foreignKey: "idcodigo_uso" });
-EfectivoTienda.belongsTo(CodigosUso, { foreignKey: "idcodigo_uso" });
+CodigosUso.belongsTo(EfectivoTienda, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+EfectivoTienda.hasMany(CodigosUso, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
 
-CodigosUso.belongsTo(Vales, { foreignKey: "idcodigo_uso" });
-Vales.belongsTo(CodigosUso, { foreignKey: "idcodigo_uso" });
+CodigosUso.belongsTo(Vales, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+Vales.hasMany(CodigosUso, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
 
 export default {
   nominas,

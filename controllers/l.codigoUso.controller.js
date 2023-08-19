@@ -1,15 +1,10 @@
-import estSerM from "../models/ad.estacionService.model";
 import auth from "../models/auth.model";
-import tp from "../assets/formatTiempo";
 import models from "../models/";
-import { Op } from "sequelize";
-import sequelize from "../config/configdb";
-const { CodigosUso } = models;
-const { diff, tiempoDB, tiempoHorario } = tp;
+const { CodigosUso, Auditoria } = models;
 const { verificar } = auth;
 
 const controller = {};
-const area = "Horarios";
+const area = "Codigos de uso";
 
 controller.obtenerCodigoUso = async (req, res) => {
   try {
@@ -37,6 +32,13 @@ controller.nuevoCodigoUso = async (req, res) => {
     const response = await CodigosUso.create({
       idcodigo_uso: id,
       descripcion: descripcion.trim(),
+    });
+
+    await Auditoria.create({
+      peticion: area,
+      idempleado: user.token.data.datos.idempleado,
+      accion: 2,
+      idaffectado: response.dataValues.idcodigo_uso,
     });
 
     res.status(200).json({ success: true, response });
@@ -68,6 +70,13 @@ controller.editarCodigoUso = async (req, res) => {
       }
     );
 
+    await Auditoria.create({
+      peticion: area,
+      idempleado: user.token.data.datos.idempleado,
+      accion: 3,
+      idaffectado: idCodigoUso,
+    });
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
@@ -89,6 +98,13 @@ controller.eliminarCodigoUso = async (req, res) => {
       where: {
         idcodigo_uso: idCodigoUso,
       },
+    });
+
+    await Auditoria.create({
+      peticion: area,
+      idempleado: user.token.data.datos.idempleado,
+      accion: 4,
+      idaffectado: idCodigoUso,
     });
 
     res.status(200).json({ success: true, response });
