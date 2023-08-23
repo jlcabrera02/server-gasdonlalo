@@ -650,7 +650,7 @@ CREATE TABLE IF NOT EXISTS `codigos_uso` (
   `idcodigo_uso` CHAR(2) NOT NULL,
   `descripcion` TEXT NOT NULL,
   `createdAt` DATETIME NOT NULL,
-  `updateAt` DATETIME NOT NULL,
+  `updatedAt` DATETIME NOT NULL,
   PRIMARY KEY (`idcodigo_uso`))
 ENGINE = InnoDB;
 

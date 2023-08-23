@@ -147,7 +147,7 @@ controller.cancelarLiquido = async (req, res) => {
 
     //Estas liquidaciones comprueban si hay liquidaciones siguientes a esta liquidacion, si hay entonces no puedo cancelar la liquidacion por las lecturas finales.
     const liquidacionesSiguientes = await Liquidaciones.findAll({
-      where: { capturado: true },
+      where: { capturado: true, cancelado: { [Op.is]: null } },
       include: [
         {
           model: InfoLecturas,
@@ -218,7 +218,6 @@ controller.cancelarLiquido = async (req, res) => {
   } catch (err) {
     console.log(err);
     if (!err.code) {
-      console.log(err);
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
       res.status(err.code).json(err);
@@ -288,6 +287,39 @@ controller.quitarReservarFolio = async (req, res) => {
       peticion: "Reservar Liquidación",
       idempleado: user.token.data.datos.idempleado,
       accion: 4,
+      idaffectado: folio,
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.imprimir = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { folio } = req.params;
+
+    const response = await Liquidaciones.findByPk(folio, {
+      attributes: ["num_impresiones"],
+    });
+
+    await Liquidaciones.update(
+      { num_impresiones: response.dataValues.num_impresiones + 1 },
+      { where: { idliquidacion: folio } }
+    );
+
+    await Auditoria.create({
+      peticion: "Impresión Liquidación",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 1,
       idaffectado: folio,
     });
 
