@@ -8,6 +8,9 @@ import SNC from "./snc/snc.model";
 import Incumplimientos from "./snc/incumplimientos";
 
 //Administrativo
+import Auditoria from "./administrativo/auditoria.model";
+
+//Liquidacion
 import Turnos from "./administrativo/turnos.model";
 import ES from "./administrativo/estacionServicios.model";
 import Gas from "./administrativo/liquidacion/gas.model";
@@ -21,9 +24,10 @@ import Efectivo from "./administrativo/liquidacion/efectivo.model";
 import Liquidaciones from "./administrativo/liquidacion/liquidaciones.model";
 import Precios from "./administrativo/liquidacion/precios.model";
 import LlaveAcceso from "./administrativo/llavesAcceso.model";
-import Auditoria from "./administrativo/auditoria.model";
 import CodigosUso from "./administrativo/liquidacion/codigosUso.model";
 import EfectivoTienda from "./administrativo/liquidacion/efectivoTienda.model";
+import ControlVol from "./administrativo/liquidacion/control_volumetrico";
+import Preliquidaciones from "./administrativo/liquidacion/preliquidaciones.model";
 
 nominas.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(nominas, { foreignKey: "idempleado" });
@@ -114,6 +118,9 @@ EfectivoTienda.belongsTo(CodigosUso, { foreignKey: "idcodigo_uso" });
 CodigosUso.belongsTo(Vales, { foreignKey: "idcodigo_uso" });
 Vales.belongsTo(CodigosUso, { foreignKey: "idcodigo_uso" });
 
+ControlVol.belongsTo(ES, { foreignKey: "idestacion_servicio" });
+ES.hasMany(ControlVol, { foreignKey: "idestacion_servicio" });
+
 export default {
   nominas,
   tiposNominas,
@@ -138,4 +145,6 @@ export default {
   Auditoria,
   CodigosUso,
   EfectivoTienda,
+  ControlVol,
+  Preliquidaciones,
 };
