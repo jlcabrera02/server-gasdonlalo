@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import fs from "fs";
 import { config } from "dotenv";
+import models from "../models";
 config();
 
 const send = async ({ filename, content, text, subject, to }) => {
@@ -34,20 +35,23 @@ const send = async ({ filename, content, text, subject, to }) => {
 
 export const pdfArchivo = async (req, res) => {
   try {
-    //Para el servidor
+    //Para guardar el documento PDF preliquidacion en el servidor junto con los datos a la BD
+    const {
+      lecturas,
+      vales,
+      efectivo,
+      idEmpleado,
+      idTurno,
+      fechaTurno,
+      idEstacionServicio,
+    } = req.body;
     const ruta = process.env.RUTAFICHERO_PRELIQUIDACION;
     const rutaArchivo = ruta + "/" + req.body.filename;
-    /* const ruta = path.join(
-      //Ruta de desarrollo
-      __dirname,
-      "../public/sistemaGDL-prueba/preliquidaciones",
-      req.body.filename
-    ); */
     fs.writeFileSync(
       rutaArchivo,
       req.body.content.replace("data:application/pdf;base64,", ""),
       "base64",
-      (err, res) => {
+      async (err, res) => {
         if (err) {
           throw {
             code: 400,
@@ -57,7 +61,17 @@ export const pdfArchivo = async (req, res) => {
         }
       }
     );
-    res.status(200).json({ success: true, response: "Documento guardado" });
+
+    const response = await models.Preliquidaciones.create({
+      lecturas,
+      vales,
+      efectivo,
+      idempleado: idEmpleado,
+      idturno: idTurno,
+      fechaturno: fechaTurno,
+      idestacion_servicio: idEstacionServicio,
+    });
+    res.status(200).json({ success: true, response });
   } catch (err) {
     if (err.errno === -2) {
       res.status(400).json({
