@@ -15,6 +15,7 @@ const {
   InfoLecturas,
   LecturasFinales,
   Auditoria,
+  Precios,
 } = modelos;
 const { verificar } = auth;
 
@@ -403,6 +404,14 @@ controller.consultarLiquido = async (req, res) => {
       ],
     });
 
+    const { fechaturno, turno } = response.dataValues.horario.dataValues;
+
+    const cambioPrecios = await Precios.findOne({
+      where: { fecha: `${fechaturno} ${turno.dataValues.hora_empiezo}` },
+    });
+
+    console.log(cambioPrecios);
+
     const totalLiquidos = await Liquidaciones.findAll({
       where: { cancelado: null },
       include: [
@@ -418,9 +427,12 @@ controller.consultarLiquido = async (req, res) => {
       order: [["createdAt", "ASC"]], //Esto afecta el folio de la liquidacion **
     });
 
-    res
-      .status(200)
-      .json({ success: true, response, totalLiquidos: totalLiquidos });
+    res.status(200).json({
+      success: true,
+      response,
+      totalLiquidos: totalLiquidos,
+      cambioPrecios: cambioPrecios ? true : false,
+    });
   } catch (err) {
     console.log(err);
     if (!err.code) {
