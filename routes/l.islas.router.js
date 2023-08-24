@@ -5,6 +5,7 @@ import horarios from "../controllers/l.horarios.controller";
 import liquido from "../controllers/l.liquido.controller";
 import codigoUso from "../controllers/l.codigoUso.controller";
 import precio from "../controllers/l.preciogas.controller";
+import preliquidaciones from "../controllers/administrativo/preliquidaciones.controller";
 
 const route = router();
 
@@ -46,6 +47,7 @@ route.delete("/codigo-uso/eliminar/:idCodigoUso", codigoUso.eliminarCodigoUso); 
 //captura de liquidacion
 route.post("/capturar", liquido.insertarLiquidos); //
 route.get("/pendientes", liquido.liquidacionesPendientes); //
+route.get("/buscar-preliquidacion", preliquidaciones.buscarPreliquidacion); //
 route.get("/historial", liquido.consultarLiquidoHistorial); //
 route.post("/reservar/:folio", liquido.reservarFolio); //
 route.delete("/noreservar/:folio", liquido.quitarReservarFolio); //
