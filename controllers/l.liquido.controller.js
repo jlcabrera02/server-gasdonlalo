@@ -435,9 +435,9 @@ controller.consultarLiquidoHistorial = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { fechaI, fechaF, cancelado } = req.query;
+    const { fechaI, fechaF, filtro } = req.query;
     const querysL = {};
-    const querys = { capturado: true };
+    const querys = {};
 
     if (fechaI && fechaF) {
       querysL.fechaturno = {
@@ -445,9 +445,28 @@ controller.consultarLiquidoHistorial = async (req, res) => {
       };
     }
 
-    if (cancelado) {
-      console.log(cancelado);
-      querys.cancelado = cancelado === "true" ? false : null;
+    if (filtro) {
+      switch (filtro) {
+        case "capturado":
+          querys.cancelado = { [Op.is]: null };
+          querys.lecturas = { [Op.not]: null };
+          querys.capturado = true;
+          break;
+        case "capturando":
+          querys.lecturas = { [Op.is]: null };
+          querys.capturado = true;
+          break;
+        case "por capturar":
+          querys.lecturas = null;
+          querys.capturado = false;
+          break;
+        case "cancelado":
+          querys.cancelado = { [Op.not]: null };
+          break;
+
+        default:
+          break;
+      }
     }
 
     LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
@@ -464,6 +483,7 @@ controller.consultarLiquidoHistorial = async (req, res) => {
         { model: Efectivo },
         { model: Vales },
         { model: InfoLecturas, include: LecturasFinales },
+        { model: empleados, as: "empleado_captura" },
       ],
       order: [
         [Horarios, "fechaturno", "DESC"],
