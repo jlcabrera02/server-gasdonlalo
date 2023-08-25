@@ -289,7 +289,7 @@ export const buscarLecturasXIdEmpleado = async ({
   combustible,
   posicion,
   idEmpleado,
-  // cancelado,
+  orderLiquidaciones,
   filtro,
   estacionS,
   fechaI,
@@ -371,6 +371,7 @@ export const buscarLecturasXIdEmpleado = async ({
       { model: Vales },
       { model: Efectivo },
     ],
+    order: ["idliquidacion", orderLiquidaciones === "DESC" ? "DESC" : "ASC"],
   });
 
   if (idIsla) {
