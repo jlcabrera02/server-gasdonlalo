@@ -783,7 +783,7 @@ CREATE TABLE IF NOT EXISTS `efectivo_tienda` (
   `idcodigo_uso` CHAR(2) NOT NULL,
   `folio` VARCHAR(45) NULL,
   `createdAt` DATETIME NOT NULL,
-  `updateAt` DATETIME NOT NULL,
+  `updatedAt` DATETIME NOT NULL,
   PRIMARY KEY (`idefectivo`),
   INDEX `fk_efectivo_tienda_codigos_uso1_idx` (`idcodigo_uso` ASC) VISIBLE)
 ENGINE = InnoDB;
