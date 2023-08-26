@@ -314,7 +314,7 @@ controller.imprimir = async (req, res) => {
 
     await Liquidaciones.update(
       { num_impresiones: response.dataValues.num_impresiones + 1 },
-      { where: { idliquidacion: folio } }
+      { where: { idliquidacion: folio }, silent: true }
     );
 
     await Auditoria.create({
