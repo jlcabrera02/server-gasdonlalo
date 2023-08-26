@@ -777,7 +777,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `efectivo_tienda` ;
 
 CREATE TABLE IF NOT EXISTS `efectivo_tienda` (
-  `idefectivo` INT NOT NULL,
+  `idefectivo` INT NOT NULL AUTO_INCREMENT,
   `fecha` DATE NOT NULL,
   `monto` DECIMAL(19,2) NOT NULL,
   `idcodigo_uso` CHAR(2) NOT NULL,
