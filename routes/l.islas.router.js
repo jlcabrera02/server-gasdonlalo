@@ -5,9 +5,15 @@ import horarios from "../controllers/l.horarios.controller";
 import liquido from "../controllers/l.liquido.controller";
 import codigoUso from "../controllers/l.codigoUso.controller";
 import precio from "../controllers/l.preciogas.controller";
+import efectivoT from "../controllers/l.efectivoTienda.controller";
 import preliquidaciones from "../controllers/administrativo/preliquidaciones.controller";
 
 const route = router();
+
+route.get("/tienda/efectivo/obtener", efectivoT.obtenerEfectivoTienda);
+route.post("/tienda/efectivo", efectivoT.capturarEfectivoTienda);
+route.put("/tienda/editar/:idefectivo", efectivoT.editarEfectivo);
+route.delete("/tienda/eliminar/:idefectivo", efectivoT.eliminarEfectivo);
 
 //Configuracion de bombas
 route.get("/islas/:idEstacion", islas.findIslas); //

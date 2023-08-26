@@ -349,6 +349,7 @@ export const buscarLecturasXIdEmpleado = async ({
   let response = await Liquidaciones.findAll({
     where: { ...querys },
     include: [
+      { model: empleados, as: "empleado_captura" },
       {
         model: Horarios,
         include: [{ model: empleados }, { model: Turnos }, { model: ES }],
@@ -371,7 +372,7 @@ export const buscarLecturasXIdEmpleado = async ({
       { model: Vales },
       { model: Efectivo },
     ],
-    order: ["idliquidacion", orderLiquidaciones === "DESC" ? "DESC" : "ASC"],
+    order: [["idliquidacion", orderLiquidaciones === "DESC" ? "DESC" : "ASC"]],
   });
 
   if (idIsla) {
