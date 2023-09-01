@@ -12,8 +12,13 @@ controller.obtenerEfectivoTienda = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
+    const { order, limit, offset } = req.query;
 
-    const response = await EfectivoTienda.findAll();
+    const response = await EfectivoTienda.findAndCountAll({
+      order: [["idefectivo", order || "DESC"]],
+      offset: offset ? Number(offset) : null,
+      limit: limit ? Number(limit) || 10 : null,
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -63,7 +68,7 @@ controller.editarEfectivo = async (req, res) => {
     const { idCodigoUso, monto, folio, fecha } = req.body;
     const { idefectivo } = req.params;
 
-    const response = await CodigosUso.update(
+    const response = await EfectivoTienda.update(
       {
         idcodigo_uso: idCodigoUso,
         monto,
