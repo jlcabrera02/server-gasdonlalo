@@ -131,6 +131,27 @@ EfectivoTienda.hasMany(CodigosUso, {
   onUpdate: "CASCADE",
 });
 
+empleados.hasMany(EfectivoTienda, {
+  foreignKey: "idempleado",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+EfectivoTienda.belongsTo(empleados, {
+  foreignKey: "idempleado",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+ES.hasMany(EfectivoTienda, {
+  foreignKey: "idestacion_servicio",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+EfectivoTienda.belongsTo(ES, {
+  foreignKey: "idestacion_servicio",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
 CodigosUso.belongsTo(Vales, {
   foreignKey: "idcodigo_uso",
   onDelete: "RESTRICT",

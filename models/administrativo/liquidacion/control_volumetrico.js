@@ -4,7 +4,7 @@ import sequelize from "../../../config/configdb";
 const ControlVol = sequelize.define(
   "control_volumetrico",
   {
-    idpreliquidacion: {
+    idcontrol_volumetrico: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,

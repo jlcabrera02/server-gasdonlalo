@@ -1,36 +1,23 @@
 import auth from "../models/auth.model";
 import models from "../models";
-const {
-  EfectivoTienda,
-  Auditoria,
-  empleados,
-  ES,
-  Vales,
-  Efectivo,
-  Horarios,
-  Liquidaciones,
-} = models;
+import { buscarLecturasXIdEmpleado } from "./l.lecturas.controller";
+const { Auditoria, ES, ControlVol } = models;
 const { verificar } = auth;
 
-//Controlador para capturar efectivos de tienda.
+//Controlador para datos de control volumetrico
 
 const controller = {};
-const area = "Efectivo Tienda";
+const area = "Control Volumérico";
 
-controller.obtenerEfectivoTienda = async (req, res) => {
+controller.obtenerControlV = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
     const { order, limit, offset } = req.query;
 
-    const response = await EfectivoTienda.findAndCountAll({
-      order: [["idefectivo", order || "DESC"]],
-      include: [
-        {
-          model: ES,
-        },
-        { model: empleados },
-      ],
+    const response = await ControlVol.findAndCountAll({
+      order: [["idcontrol_volumetrico", order || "DESC"]],
+      include: [{ model: ES }],
       offset: offset ? Number(offset) : null,
       limit: limit ? Number(limit) || 10 : null,
     });
@@ -45,73 +32,51 @@ controller.obtenerEfectivoTienda = async (req, res) => {
   }
 };
 
-controller.obtenerReporte = async (req, res) => {
+controller.comparacion = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { idEmpleado, fecha } = req.query;
-    const querysHorario = {};
-    const querysHorarioEfectivoT = {};
+    const { fecha } = req.query;
 
-    if (fecha) {
-      querysHorario.fechaturno = fecha;
-      querysHorarioEfectivoT.fecha = fecha;
-    }
-
-    if (idEmpleado) {
-      querysHorario.idempleado = idEmpleado;
-      querysHorarioEfectivoT.idempleado = idEmpleado;
-    }
-
-    const efectivoTiendas = await EfectivoTienda.findAll({
-      where: querysHorarioEfectivoT,
+    const controlV = await ControlVol.findAll({
+      where: { fecha },
+    });
+    const liquidaciones = await buscarLecturasXIdEmpleado({
+      filtro: "capturado",
+      fechaF: fecha,
+      fechaI: fecha,
     });
 
-    const efectivosYVales = await Liquidaciones.findAll({
-      include: [
-        {
-          model: Horarios,
-          where: querysHorario,
-        },
-        { model: Vales },
-        { model: Efectivo },
-      ],
-    });
-
-    const response = [efectivoTiendas, efectivosYVales];
+    const response = { controlvolumetrico: controlV, liquidaciones };
 
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
     if (!err.code) {
-      res.status(400).json({ msg: "datos no enviados correctamente" });
+      res.status(400).json({ msg: "Error al obtener la consulta" });
     } else {
       res.status(err.code).json(err);
     }
   }
 };
 
-controller.capturarEfectivoTienda = async (req, res) => {
+controller.capturarControlV = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { idCodigoUso, monto, folio, fecha, idEmpleado, idEstacion } =
-      req.body;
+    const { litros, fecha, idEstacion } = req.body;
 
-    const response = await EfectivoTienda.create({
-      idcodigo_uso: idCodigoUso,
+    const response = await ControlVol.create({
       fecha,
-      idempleado: idEmpleado,
       idestacion_servicio: idEstacion,
-      monto,
-      folio,
+      litros,
     });
 
     await Auditoria.create({
       peticion: area,
       idempleado: user.token.data.datos.idempleado,
       accion: 2,
-      idaffectado: response.dataValues.idefectivo,
+      idaffectado: response.dataValues.idcontrol_volumetrico,
     });
 
     res.status(200).json({ success: true, response });
@@ -125,26 +90,22 @@ controller.capturarEfectivoTienda = async (req, res) => {
   }
 };
 
-controller.editarEfectivo = async (req, res) => {
+controller.editarControlV = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { idCodigoUso, monto, folio, fecha, idEmpleado, idEstacion } =
-      req.body;
-    const { idefectivo } = req.params;
+    const { fecha, litros, idEstacion } = req.body;
+    const { idControl } = req.params;
 
-    const response = await EfectivoTienda.update(
+    const response = await ControlVol.update(
       {
-        idcodigo_uso: idCodigoUso,
-        monto,
-        folio,
-        idempleado: idEmpleado,
+        litros,
         idestacion_servicio: idEstacion,
         fecha,
       },
       {
         where: {
-          idefectivo,
+          idcontrol_volumetrico: idControl,
         },
       }
     );
@@ -153,7 +114,7 @@ controller.editarEfectivo = async (req, res) => {
       peticion: area,
       idempleado: user.token.data.datos.idempleado,
       accion: 3,
-      idaffectado: idefectivo,
+      idaffectado: idControl,
     });
 
     res.status(200).json({ success: true, response });
@@ -167,15 +128,15 @@ controller.editarEfectivo = async (req, res) => {
   }
 };
 
-controller.eliminarEfectivo = async (req, res) => {
+controller.eliminarControlV = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { idefectivo } = req.params;
+    const { idControl } = req.params;
 
-    const response = await EfectivoTienda.destroy({
+    const response = await ControlVol.destroy({
       where: {
-        idefectivo,
+        idcontrol_volumetrico: idControl,
       },
     });
 
@@ -183,7 +144,7 @@ controller.eliminarEfectivo = async (req, res) => {
       peticion: area,
       idempleado: user.token.data.datos.idempleado,
       accion: 4,
-      idaffectado: idefectivo,
+      idaffectado: idControl,
     });
 
     res.status(200).json({ success: true, response });

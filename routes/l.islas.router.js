@@ -1,5 +1,6 @@
 import router from "express-promise-router";
 import islas from "../controllers/l.islas.controller";
+import controlV from "../controllers/l.controlvolumetrico.controller";
 import lecturas from "../controllers/l.lecturas.controller";
 import horarios from "../controllers/l.horarios.controller";
 import liquido from "../controllers/l.liquido.controller";
@@ -21,6 +22,13 @@ route.post("/islas/insertar", islas.insertIslas); //
 route.delete("/islas/eliminar/:idIsla", islas.eliminarIsla); //
 route.put("/islas/habilitar/mangueras", islas.updateMangueras); //
 route.put("/islas/edit/:idIsla", islas.updateIsla); //
+
+//Control Volumetrico
+route.get("/controlv/obtener", controlV.obtenerControlV); //
+route.get("/controlv/comparaciones", controlV.comparacion); //
+route.post("/controlv/insertar", controlV.capturarControlV); //
+route.put("/controlv/editar/:idControl", controlV.editarControlV); //
+route.delete("/controlv/eliminar/:idControl", controlV.eliminarControlV); //
 
 //Lectura de bombas
 route.get("/lectura/inicial/:idEstacion", lecturas.lecturasIniciales); //
@@ -46,6 +54,7 @@ route.delete("/preciosCombustible/eliminar", precio.eliminarPrecios); //eliminar
 
 //Codigos de uso
 route.get("/codigo-uso/obtener", codigoUso.obtenerCodigoUso); //
+route.get("/codigo-uso/reporte/obtener", efectivoT.obtenerReporte); //
 route.post("/codigo-uso/nuevo", codigoUso.nuevoCodigoUso); //
 route.put("/codigo-uso/editar/:idCodigoUso", codigoUso.editarCodigoUso); //
 route.delete("/codigo-uso/eliminar/:idCodigoUso", codigoUso.eliminarCodigoUso); //

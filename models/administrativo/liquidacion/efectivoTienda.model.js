@@ -25,6 +25,14 @@ const EfectivoTienda = sequelize.define(
       type: DataTypes.CHAR(2),
       allowNull: false,
     },
+    idempleado: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    idestacion_servicio: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
   {
     freezeTableName: true,
