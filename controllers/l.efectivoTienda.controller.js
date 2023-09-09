@@ -1,15 +1,6 @@
 import auth from "../models/auth.model";
 import models from "../models";
-const {
-  EfectivoTienda,
-  Auditoria,
-  empleados,
-  ES,
-  Vales,
-  Efectivo,
-  Horarios,
-  Liquidaciones,
-} = models;
+const { EfectivoTienda, Auditoria, empleados, ES, CodigosUso } = models;
 const { verificar } = auth;
 
 //Controlador para capturar efectivos de tienda.
@@ -49,36 +40,31 @@ controller.obtenerReporte = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { idEmpleado, fecha } = req.query;
-    const querysHorario = {};
-    const querysHorarioEfectivoT = {};
+    const { idEmpleado, fecha, idEstacion } = req.query;
+    const querys = {};
 
     if (fecha) {
-      querysHorario.fechaturno = fecha;
-      querysHorarioEfectivoT.fecha = fecha;
+      querys.fecha = fecha;
     }
 
     if (idEmpleado) {
-      querysHorario.idempleado = idEmpleado;
-      querysHorarioEfectivoT.idempleado = idEmpleado;
+      querys.idempleado = idEmpleado;
     }
 
-    const efectivoTiendas = await EfectivoTienda.findAll({
-      where: querysHorarioEfectivoT,
-    });
+    if (idEstacion) {
+      querys.idestacion_servicio = idEstacion;
+    }
 
-    const efectivosYVales = await Liquidaciones.findAll({
+    const response = await EfectivoTienda.findAll({
+      where: querys,
       include: [
         {
-          model: Horarios,
-          where: querysHorario,
+          model: empleados,
         },
-        { model: Vales },
-        { model: Efectivo },
+        { model: ES },
+        { model: CodigosUso },
       ],
     });
-
-    const response = [efectivoTiendas, efectivosYVales];
 
     res.status(200).json({ success: true, response });
   } catch (err) {

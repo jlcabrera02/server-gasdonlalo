@@ -16,6 +16,7 @@ const {
   Efectivo,
   Auditoria,
   Gas,
+  CodigosUso,
 } = models;
 const { verificar } = auth;
 const controller = {};
@@ -369,8 +370,8 @@ export const buscarLecturasXIdEmpleado = async ({
           },
         ],
       },
-      { model: Vales },
-      { model: Efectivo },
+      { model: Vales, include: { model: CodigosUso } },
+      { model: Efectivo, include: { model: CodigosUso } },
     ],
     order: [["idliquidacion", orderLiquidaciones === "DESC" ? "DESC" : "ASC"]],
   });

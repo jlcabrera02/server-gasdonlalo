@@ -12,6 +12,7 @@ import preliquidaciones from "../controllers/administrativo/preliquidaciones.con
 const route = router();
 
 route.get("/tienda/efectivo/obtener", efectivoT.obtenerEfectivoTienda);
+route.get("/tienda/efectivo/reporte/obtener", efectivoT.obtenerReporte);
 route.post("/tienda/efectivo", efectivoT.capturarEfectivoTienda);
 route.put("/tienda/editar/:idefectivo", efectivoT.editarEfectivo);
 route.delete("/tienda/eliminar/:idefectivo", efectivoT.eliminarEfectivo);
@@ -54,7 +55,7 @@ route.delete("/preciosCombustible/eliminar", precio.eliminarPrecios); //eliminar
 
 //Codigos de uso
 route.get("/codigo-uso/obtener", codigoUso.obtenerCodigoUso); //
-route.get("/codigo-uso/reporte/obtener", efectivoT.obtenerReporte); //
+// route.get("/codigo-uso/reporte/obtener", efectivoT.obtenerReporte); //
 route.post("/codigo-uso/nuevo", codigoUso.nuevoCodigoUso); //
 route.put("/codigo-uso/editar/:idCodigoUso", codigoUso.editarCodigoUso); //
 route.delete("/codigo-uso/eliminar/:idCodigoUso", codigoUso.eliminarCodigoUso); //
