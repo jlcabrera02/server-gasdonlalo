@@ -149,7 +149,7 @@ controller.actualizarHorario = async (req, res) => {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
     const { idHorario } = req.params;
-    const { idEmpleado, idTurno, fechaTurno, idEstacion } = req.body;
+    const { idEmpleado, idTurno, fechaTurno, idEstacion, idIslas } = req.body;
     const turno = await estSerM.findTurnoById(idTurno);
     const { hora_empiezo, hora_termino } = turno;
 
@@ -174,6 +174,11 @@ controller.actualizarHorario = async (req, res) => {
     const response = await Horarios.update(cuerpo, {
       where: { idhorario: idHorario },
     });
+
+    await Liquidaciones.update(
+      { idislas: idIslas },
+      { where: { idhorario: idHorario }, silent: true }
+    );
 
     await Auditoria.create({
       peticion: area,
