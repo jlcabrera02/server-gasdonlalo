@@ -78,7 +78,7 @@ controller.obtenerPrecios = async (req, res) => {
       querys.fecha = { [Op.lte]: fechaAnterior };
     }
 
-    if (hora) {
+    if (fechaAnterior && hora) {
       querys.fecha = { [Op.lt]: `${fechaAnterior} ${hora}` };
     }
 
