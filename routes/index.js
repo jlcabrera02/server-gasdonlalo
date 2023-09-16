@@ -46,6 +46,9 @@ import indexV from "./view.index.router";
 import islas from "./l.islas.router";
 import dir from "./documentos.router";
 
+//Pagara
+import pagare from "./p.pagares.router";
+
 //Salidas no conformes
 route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/incumplimiento", incumplimientoRouter);
@@ -88,5 +91,6 @@ route.use("/view", indexV);
 route.use("/liquidacion", islas);
 route.use("/administrativo", administrativo);
 route.use("/documentos", dir);
+route.use("/pagare", pagare);
 
 export default route;
