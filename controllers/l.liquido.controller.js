@@ -3,6 +3,7 @@ import auth from "../models/auth.model";
 import modelos from "../models/";
 import sequelize from "../config/configdb";
 import { insertarMf } from "./d.montoFaltante.controller";
+import sncaM from "../models/s.acumular.model";
 import { Op } from "sequelize";
 const {
   Liquidaciones,
@@ -103,6 +104,16 @@ controller.insertarLiquidos = async (req, res) => {
         });
       }
 
+      console.log(liquidacion);
+      if (diferencia > 0) {
+        await sncaM.insert([
+          6,
+          liquidacion.dataValues.horario.dataValues.idempleado,
+          liquidacion.dataValues.horario.dataValues.fechaturno,
+          `Registro un Monto Faltante de $${diferencia}`,
+        ]);
+      }
+
       await Auditoria.create(
         {
           peticion: area,
@@ -112,11 +123,13 @@ controller.insertarLiquidos = async (req, res) => {
         },
         { transaction: t }
       );
+
       return { vales, efectivo, infoLect, lectF, liquidaciones };
     });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
