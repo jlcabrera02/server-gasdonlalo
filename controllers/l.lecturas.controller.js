@@ -289,7 +289,8 @@ export const buscarLecturasXIdEmpleado = async ({
   combustible,
   posicion,
   idEmpleado,
-  cancelado,
+  orderLiquidaciones,
+  filtro,
   estacionS,
   fechaI,
   fechaF,
@@ -311,39 +312,53 @@ export const buscarLecturasXIdEmpleado = async ({
     querysHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
   }
 
-  const querys = { capturado: true, lecturas: { [Op.not]: null } };
-  //Checar si no hay problemas con el historial o el de ventas
+  const querys = {};
+  if (filtro) {
+    switch (filtro) {
+      case "capturado":
+        querys.cancelado = { [Op.is]: null };
+        querys.lecturas = { [Op.not]: null };
+        querys.capturado = true;
+        break;
+      case "capturando":
+        querys.lecturas = { [Op.is]: null };
+        querys.capturado = true;
+        break;
+      case "por capturar":
+        querys.lecturas = null;
+        querys.capturado = false;
+        break;
+      case "cancelado":
+        querys.cancelado = { [Op.not]: null };
+        break;
+      case "reporte":
+        querys.capturado = true;
+        querys.lecturas = { [Op.not]: null };
+        break;
+
+      default:
+        break;
+    }
+  }
   if (idEmpleado) querysHorario.idempleado = idEmpleado;
   if (idTurno) querysHorario.idturno = idTurno;
-  if (cancelado) querys.cancelado = cancelado;
-  if (cancelado === "false") querys.cancelado = { [Op.is]: null };
+  // if (cancelado) querys.cancelado = cancelado;
+  // if (cancelado === "false") querys.cancelado = { [Op.is]: null };
   if (estacionS) querysHorario.idestacion_servicio = estacionS;
 
   let response = await Liquidaciones.findAll({
-    where: { ...querys, [Op.and]: [Sequelize.literal(`lecturas`)] },
+    where: { ...querys },
     include: [
+      { model: empleados, as: "empleado_captura" },
       {
         model: Horarios,
         include: [{ model: empleados }, { model: Turnos }, { model: ES }],
         where: querysHorario,
       },
-      {
-        model: InfoLecturas,
-        include: [
-          {
-            model: LecturasFinales,
-            include: [
-              {
-                model: Mangueras,
-                include: [{ model: Islas, include: ES }, { model: Gas }],
-              },
-            ],
-          },
-        ],
-      },
       { model: Vales },
       { model: Efectivo },
     ],
+    order: [["idliquidacion", orderLiquidaciones === "DESC" ? "DESC" : "ASC"]],
   });
 
   if (idIsla) {
