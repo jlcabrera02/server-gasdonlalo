@@ -377,20 +377,27 @@ export const buscarLecturasXIdEmpleado = async ({
   });
 
   if (idIsla) {
+    const multiple = Array.isArray(idIsla);
     response = filtrarDatos(
       response,
-      [...idIsla].map((id) => Number(id)),
+      multiple ? idIsla.map((id) => Number(id)) : [Number(idIsla)],
       "idisla"
     );
   }
 
   if (combustible) {
-    response = filtrarDatos(response, [...combustible], "idgas");
-  }
-  if (posicion) {
+    const multiple = Array.isArray(combustible);
     response = filtrarDatos(
       response,
-      [...posicion].map((p) => Number(p)),
+      multiple ? [...combustible] : [combustible],
+      "idgas"
+    );
+  }
+  if (posicion) {
+    const multiple = Array.isArray(posicion);
+    response = filtrarDatos(
+      response,
+      multiple ? posicion.map((p) => Number(p)) : [Number(posicion)],
       "posicion"
     );
   }
