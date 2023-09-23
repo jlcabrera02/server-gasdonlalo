@@ -356,20 +356,6 @@ export const buscarLecturasXIdEmpleado = async ({
         include: [{ model: empleados }, { model: Turnos }, { model: ES }],
         where: querysHorario,
       },
-      // {
-      //   model: InfoLecturas,
-      //   include: [
-      //     {
-      //       model: LecturasFinales,
-      //       include: [
-      //         {
-      //           model: Mangueras,
-      //           include: [{ model: Islas, include: ES }, { model: Gas }],
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
       { model: Vales, include: { model: CodigosUso } },
       { model: Efectivo, include: { model: CodigosUso } },
     ],
