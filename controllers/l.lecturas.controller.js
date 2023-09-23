@@ -369,8 +369,8 @@ export const buscarLecturasXIdEmpleado = async ({
       //     },
       //   ],
       // },
-      { model: Vales, include: { model: CodigosUso } },
-      { model: Efectivo, include: { model: CodigosUso } },
+      { model: Vales },
+      { model: Efectivo },
     ],
     order: [["idliquidacion", orderLiquidaciones === "DESC" ? "DESC" : "ASC"]],
   });
