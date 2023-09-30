@@ -22,7 +22,7 @@ const Efectivo = sequelize.define(
       allowNull: true,
     },
     idcodigo_uso: {
-      type: DataTypes.CHAR(2),
+      type: DataTypes.STRING(2),
       allowNull: false,
     },
   },
