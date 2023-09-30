@@ -119,7 +119,7 @@ controller.deletePagares = async (req, res) => {
     if (!user.success) throw user;
     const { idPagare } = req.params;
 
-    const response = await Pagares.destroy({ where: idPagare });
+    const response = await Pagares.destroy({ where: { idpagare: idPagare } });
 
     await Auditoria.create({
       peticion: area,
