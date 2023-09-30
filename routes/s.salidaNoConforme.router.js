@@ -3,6 +3,7 @@ import salidaNoConforme from "../controllers/s.salidaNoConforme.controller";
 
 const route = router();
 
+route.get("/buscarxcoincidenciadatos", salidaNoConforme.buscarUnaSNCXDatos);
 route.get("/pendientes/:idDepartamento?", salidaNoConforme.findSNCPorCapturar);
 route.get("/detalleEmpleado/:idChecador", salidaNoConforme.findByEmpleado);
 

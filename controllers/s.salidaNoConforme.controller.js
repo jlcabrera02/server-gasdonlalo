@@ -5,6 +5,8 @@ import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
 import fTiempo from "../assets/formatTiempo";
 import respErro from "../respuestas/error.respuestas";
+import model from "../models/index";
+const { SNC } = model;
 const { peticionImposible } = respErro;
 const { tiempoDB } = fTiempo;
 const { verificar } = auth;
@@ -15,6 +17,33 @@ const validarText = (text) => {
 };
 
 const controller = {};
+
+controller.buscarUnaSNCXDatos = async (req, res) => {
+  try {
+    const snc = await SNC.findOne({
+      where: {
+        idempleado: req.query.idEmpleado,
+        idincumplimiento: req.query.idIncumplimiento,
+        fecha: req.query.fecha,
+      },
+    });
+
+    if (!snc)
+      throw {
+        success: false,
+        msg: "No se encontro una similitud con los datos proporcionados",
+        code: 404,
+      };
+
+    res.status(200).json({ success: true, response: snc });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "Error al obtener los datos", err });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 controller.findTotalSalidasXDiaXEmpleado = async (req, res) => {
   try {
