@@ -30,6 +30,10 @@ const SNC = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    fecha: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
     concesiones: {
       type: DataTypes.TEXT,
       allowNull: true,
