@@ -11,11 +11,6 @@ const { peticionImposible } = respErro;
 const { tiempoDB } = fTiempo;
 const { verificar } = auth;
 
-const validarText = (text) => {
-  const validarNoVacio = /^\s*$/g;
-  return validarNoVacio.test(text);
-};
-
 const controller = {};
 
 controller.buscarUnaSNCXDatos = async (req, res) => {
@@ -358,19 +353,15 @@ controller.insert = async (req, res) => {
       idIncumplimiento,
     } = req.body;
 
-    if (
-      validarText(accionesCorregir) ||
-      validarText(descripcionFalla) ||
-      validarText(concesiones)
-    ) {
-      throw peticionImposible("No puedes mandar vacio el elemento");
+    if (!descripcionFalla) {
+      throw peticionImposible("La descripción de la falla esta vacio");
     }
 
     const cuerpo = {
       fecha,
       descripcion_falla: descripcionFalla,
-      acciones_corregir: accionesCorregir,
-      concesiones,
+      acciones_corregir: accionesCorregir || null,
+      concesiones: concesiones || null,
       idempleado: Number(idEmpleadoIncumple),
       idempleado_autoriza: Number(user.token.data.datos.idempleado),
       idincumplimiento: Number(idIncumplimiento),
@@ -422,12 +413,8 @@ controller.update = async (req, res) => {
       // idDepartamento,
     } = req.body;
 
-    if (
-      validarText(accionesCorregir) ||
-      validarText(descripcionFalla) ||
-      validarText(concesiones)
-    ) {
-      throw peticionImposible("No puedes mandar vacio el elemento");
+    if (!descripcionFalla) {
+      throw peticionImposible("La descripción de la falla esta vacio");
     }
 
     const viejo = await salidaNoCM.findOne(idSalidaNoConforme);
@@ -471,8 +458,8 @@ controller.update = async (req, res) => {
       {
         fecha,
         descripcion_falla: descripcionFalla,
-        acciones_corregir: accionesCorregir,
-        concesiones,
+        acciones_corregir: accionesCorregir || null,
+        concesiones: concesiones || null,
         idempleado: Number(idEmpleadoIncumple),
         idempleado_autoriza: Number(user.token.data.datos.idempleado),
         idincumplimiento: Number(idIncumplimiento),
