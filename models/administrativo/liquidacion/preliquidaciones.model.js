@@ -30,11 +30,11 @@ const Preliquidaciones = sequelize.define(
       allowNull: false,
     },
     fechaturno: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     fechaliquidacion: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     idestacion_servicio: {
