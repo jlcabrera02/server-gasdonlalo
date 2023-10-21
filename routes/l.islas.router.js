@@ -4,6 +4,7 @@ import lecturas from "../controllers/l.lecturas.controller";
 import horarios from "../controllers/l.horarios.controller";
 import liquido from "../controllers/l.liquido.controller";
 import precio from "../controllers/l.preciogas.controller";
+import preliquidaciones from "../controllers/administrativo/preliquidaciones.controller";
 
 const route = router();
 
@@ -37,9 +38,10 @@ route.put("/preciosCombustible/edit/:idPrecio", precio.actualizarPrecios); //eli
 route.delete("/preciosCombustible/eliminar", precio.eliminarPrecios); //eliminarPrecios
 
 //captura de liquidacion
-route.get("/pendientes", liquido.liquidacionesPendientes); //
-route.get("/historial", liquido.consultarLiquidoHistorial); //
 route.post("/capturar", liquido.insertarLiquidos); //
+route.get("/pendientes", liquido.liquidacionesPendientes); //
+route.get("/buscar-preliquidacion", preliquidaciones.buscarPreliquidacion); //
+route.get("/historial", liquido.consultarLiquidoHistorial); //
 route.post("/reservar/:folio", liquido.reservarFolio); //
 route.delete("/noreservar/:folio", liquido.quitarReservarFolio); //
 route.put("/cancelar", liquido.cancelarLiquido); //
