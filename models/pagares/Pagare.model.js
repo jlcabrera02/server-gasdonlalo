@@ -1,10 +1,10 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../../config/configdb";
+import sequelize from "../../config/configdb";
 
-const Efectivo = sequelize.define(
-  "efectivo",
+const Pagare = sequelize.define(
+  "pagares",
   {
-    idefectivo: {
+    idpagare: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -13,23 +13,18 @@ const Efectivo = sequelize.define(
       type: DataTypes.DECIMAL(19, 2),
       allowNull: false,
     },
-    idliquidacion: {
+    idempleado: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    folio: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    idcodigo_uso: {
-      type: DataTypes.STRING(2),
+    fecha: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
   },
   {
     freezeTableName: true,
-    timestamps: false,
   }
 );
 
-export default Efectivo;
+export default Pagare;

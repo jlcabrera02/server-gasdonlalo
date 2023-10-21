@@ -46,21 +46,33 @@ controller.AccessLlaveAcceso = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { key, mangueras } = req.body;
+    const { key, mangueras, idLiquidacion } = req.body;
     const response = await LlaveAcceso.findOne({
       where: { key },
       include: empleados,
     });
+
     if (!response) throw { code: 403, msg: "No autorizado", success: false };
 
-    const auditoriaC = mangueras.map((el) => ({
-      peticion: "Autorización Reinicio Lectura",
-      idempleado: response.dataValues.empleado.idempleado,
-      accion: 2,
-      idaffectado: el,
-    }));
+    if (mangueras) {
+      const auditoriaC = mangueras.map((el) => ({
+        peticion: "Autorización Reinicio Lectura",
+        idempleado: response.dataValues.empleado.idempleado,
+        accion: 2,
+        idaffectado: el,
+      }));
+      await Auditoria.bulkCreate(auditoriaC);
+    }
 
-    await Auditoria.bulkCreate(auditoriaC);
+    if (idLiquidacion) {
+      await Auditoria.create({
+        peticion: "Autorización para capturar liquidación",
+        idempleado: response.dataValues.empleado.idempleado,
+        accion: 2,
+        idaffectado: idLiquidacion,
+      });
+    }
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

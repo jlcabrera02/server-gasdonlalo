@@ -22,6 +22,13 @@ import Liquidaciones from "./administrativo/liquidacion/liquidaciones.model";
 import Precios from "./administrativo/liquidacion/precios.model";
 import LlaveAcceso from "./administrativo/llavesAcceso.model";
 import Auditoria from "./administrativo/auditoria.model";
+import CodigosUso from "./administrativo/liquidacion/codigosUso.model";
+import EfectivoTienda from "./administrativo/liquidacion/efectivoTienda.model";
+import ControlVol from "./administrativo/liquidacion/control_volumetrico";
+import Preliquidaciones from "./administrativo/liquidacion/preliquidaciones.model";
+
+//pagares
+import Pagares from "../models/pagares/Pagare.model";
 
 nominas.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(nominas, { foreignKey: "idempleado" });
@@ -103,6 +110,66 @@ ES.hasMany(Islas, {
 empleados.hasOne(LlaveAcceso, { foreignKey: "idempleado" });
 LlaveAcceso.belongsTo(empleados, { foreignKey: "idempleado" });
 
+CodigosUso.hasMany(EfectivoTienda, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+EfectivoTienda.belongsTo(CodigosUso, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+empleados.hasMany(EfectivoTienda, {
+  foreignKey: "idempleado",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+EfectivoTienda.belongsTo(empleados, {
+  foreignKey: "idempleado",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+ES.hasMany(EfectivoTienda, {
+  foreignKey: "idestacion_servicio",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+EfectivoTienda.belongsTo(ES, {
+  foreignKey: "idestacion_servicio",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+CodigosUso.hasMany(Efectivo, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+Efectivo.belongsTo(CodigosUso, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+CodigosUso.hasMany(Vales, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+Vales.belongsTo(CodigosUso, {
+  foreignKey: "idcodigo_uso",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+ControlVol.belongsTo(ES, { foreignKey: "idestacion_servicio" });
+ES.hasMany(ControlVol, { foreignKey: "idestacion_servicio" });
+
+empleados.hasMany(Pagares, { foreignKey: "idempleado" });
+Pagares.belongsTo(empleados, { foreignKey: "idempleado" });
+
 export default {
   nominas,
   tiposNominas,
@@ -125,4 +192,9 @@ export default {
   Liquidaciones,
   LlaveAcceso,
   Auditoria,
+  Pagares,
+  CodigosUso,
+  EfectivoTienda,
+  ControlVol,
+  Preliquidaciones,
 };

@@ -1,35 +1,32 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/configdb";
 
-const Efectivo = sequelize.define(
-  "efectivo",
+const ControlVol = sequelize.define(
+  "control_volumetrico",
   {
-    idefectivo: {
+    idcontrol_volumetrico: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    monto: {
+    litros: {
       type: DataTypes.DECIMAL(19, 2),
-      allowNull: false,
-    },
-    idliquidacion: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    folio: {
-      type: DataTypes.STRING,
       allowNull: true,
     },
-    idcodigo_uso: {
-      type: DataTypes.STRING(2),
+    fecha: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
+    },
+    idestacion_servicio: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
   },
   {
     freezeTableName: true,
-    timestamps: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   }
 );
 
-export default Efectivo;
+export default ControlVol;

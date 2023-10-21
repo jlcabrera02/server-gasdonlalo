@@ -3,6 +3,7 @@ import auth from "../models/auth.model";
 import modelos from "../models/";
 import sequelize from "../config/configdb";
 import { insertarMf } from "./d.montoFaltante.controller";
+import sncaM from "../models/s.acumular.model";
 import { Op } from "sequelize";
 const {
   Liquidaciones,
@@ -15,8 +16,7 @@ const {
   InfoLecturas,
   LecturasFinales,
   Auditoria,
-  Mangueras,
-  Gas,
+  Precios,
 } = modelos;
 const { verificar } = auth;
 
@@ -41,12 +41,14 @@ controller.insertarLiquidos = async (req, res) => {
       idliquidacion: folio,
       folio: el.folio || null,
       label: el.label,
+      idcodigo_uso: el.codigoUso,
     }));
 
     const cuerpoEfectivo = efectivo.map((el) => ({
       monto: el.monto,
       idliquidacion: folio,
       folio: el.folio,
+      idcodigo_uso: el.codigoUso,
     }));
 
     const response = await sequelize.transaction(async (t) => {
@@ -102,6 +104,16 @@ controller.insertarLiquidos = async (req, res) => {
         });
       }
 
+      console.log(liquidacion);
+      if (diferencia > 0) {
+        await sncaM.insert([
+          6,
+          liquidacion.dataValues.horario.dataValues.idempleado,
+          liquidacion.dataValues.horario.dataValues.fechaturno,
+          `Registro un Monto Faltante de $${diferencia}`,
+        ]);
+      }
+
       await Auditoria.create(
         {
           peticion: area,
@@ -111,11 +123,13 @@ controller.insertarLiquidos = async (req, res) => {
         },
         { transaction: t }
       );
+
       return { vales, efectivo, infoLect, lectF, liquidaciones };
     });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -147,7 +161,7 @@ controller.cancelarLiquido = async (req, res) => {
 
     //Estas liquidaciones comprueban si hay liquidaciones siguientes a esta liquidacion, si hay entonces no puedo cancelar la liquidacion por las lecturas finales.
     const liquidacionesSiguientes = await Liquidaciones.findAll({
-      where: { capturado: true },
+      where: { capturado: true, cancelado: { [Op.is]: null } },
       include: [
         {
           model: InfoLecturas,
@@ -218,7 +232,6 @@ controller.cancelarLiquido = async (req, res) => {
   } catch (err) {
     console.log(err);
     if (!err.code) {
-      console.log(err);
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
       res.status(err.code).json(err);
@@ -302,6 +315,39 @@ controller.quitarReservarFolio = async (req, res) => {
   }
 };
 
+controller.imprimir = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { folio } = req.params;
+
+    const response = await Liquidaciones.findByPk(folio, {
+      attributes: ["num_impresiones"],
+    });
+
+    await Liquidaciones.update(
+      { num_impresiones: response.dataValues.num_impresiones + 1 },
+      { where: { idliquidacion: folio }, silent: true }
+    );
+
+    await Auditoria.create({
+      peticion: "Impresión Liquidación",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 1,
+      idaffectado: folio,
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.liquidacionesPendientes = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
@@ -371,6 +417,14 @@ controller.consultarLiquido = async (req, res) => {
       ],
     });
 
+    const { fechaturno, turno } = response.dataValues.horario.dataValues;
+
+    const cambioPrecios = await Precios.findOne({
+      where: { fecha: `${fechaturno} ${turno.dataValues.hora_empiezo}` },
+    });
+
+    console.log(cambioPrecios);
+
     const totalLiquidos = await Liquidaciones.findAll({
       where: { cancelado: null },
       include: [
@@ -386,9 +440,12 @@ controller.consultarLiquido = async (req, res) => {
       order: [["createdAt", "ASC"]], //Esto afecta el folio de la liquidacion **
     });
 
-    res
-      .status(200)
-      .json({ success: true, response, totalLiquidos: totalLiquidos });
+    res.status(200).json({
+      success: true,
+      response,
+      totalLiquidos: totalLiquidos,
+      cambioPrecios: cambioPrecios ? true : false,
+    });
   } catch (err) {
     console.log(err);
     if (!err.code) {
@@ -403,9 +460,9 @@ controller.consultarLiquidoHistorial = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { fechaI, fechaF, cancelado } = req.query;
+    const { fechaI, fechaF, filtro } = req.query;
     const querysL = {};
-    const querys = { capturado: true };
+    const querys = {};
 
     if (fechaI && fechaF) {
       querysL.fechaturno = {
@@ -413,9 +470,28 @@ controller.consultarLiquidoHistorial = async (req, res) => {
       };
     }
 
-    if (cancelado) {
-      console.log(cancelado);
-      querys.cancelado = cancelado === "true" ? false : null;
+    if (filtro) {
+      switch (filtro) {
+        case "capturado":
+          querys.cancelado = { [Op.is]: null };
+          querys.lecturas = { [Op.not]: null };
+          querys.capturado = true;
+          break;
+        case "capturando":
+          querys.lecturas = { [Op.is]: null };
+          querys.capturado = true;
+          break;
+        case "por capturar":
+          querys.lecturas = null;
+          querys.capturado = false;
+          break;
+        case "cancelado":
+          querys.cancelado = { [Op.not]: null };
+          break;
+
+        default:
+          break;
+      }
     }
 
     LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
@@ -432,6 +508,7 @@ controller.consultarLiquidoHistorial = async (req, res) => {
         { model: Efectivo },
         { model: Vales },
         { model: InfoLecturas, include: LecturasFinales },
+        { model: empleados, as: "empleado_captura" },
       ],
       order: [
         [Horarios, "fechaturno", "DESC"],

@@ -89,7 +89,7 @@ export const LitrosVendidosXIdempleado = async (req, res) => {
       "Importes en efectivo": calcularTotal(el.efectivos, "monto"),
       "Importes en vales": calcularTotal(el.vales, "monto"),
       "Importe Total": calcularTotal(JSON.parse(el.lecturas), "importe"),
-      Estatus: el.cancelado ? "Cancelado" : "Vigente",
+      Estatus: el.cancelado ? "Cancelado" : "Capturado",
     }));
 
     const datos = [];
