@@ -33,6 +33,10 @@ const Preliquidaciones = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    fechaliquidacion: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     idestacion_servicio: {
       type: DataTypes.INTEGER,
       allowNull: false,

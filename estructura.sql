@@ -817,6 +817,7 @@ CREATE TABLE IF NOT EXISTS `preliquidaciones` (
   `idempleado` INT NOT NULL,
   `idturno` INT NOT NULL,
   `fechaturno` DATE NOT NULL,
+  `fechaliquidacion` DATE NOT NULL,
   `idestacion_servicio` INT NOT NULL,
   `createdAt` DATE NOT NULL,
   `updatedAt` DATE NOT NULL,
