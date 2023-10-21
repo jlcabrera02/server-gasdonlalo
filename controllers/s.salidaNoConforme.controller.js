@@ -5,16 +5,40 @@ import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
 import fTiempo from "../assets/formatTiempo";
 import respErro from "../respuestas/error.respuestas";
+import model from "../models/index";
+const { SNC } = model;
 const { peticionImposible } = respErro;
 const { tiempoDB } = fTiempo;
 const { verificar } = auth;
 
-const validarText = (text) => {
-  const validarNoVacio = /^\s*$/g;
-  return validarNoVacio.test(text);
-};
-
 const controller = {};
+
+controller.buscarUnaSNCXDatos = async (req, res) => {
+  try {
+    const snc = await SNC.findOne({
+      where: {
+        idempleado: req.query.idEmpleado,
+        idincumplimiento: req.query.idIncumplimiento,
+        fecha: req.query.fecha,
+      },
+    });
+
+    if (!snc)
+      throw {
+        success: false,
+        msg: "No se encontro una similitud con los datos proporcionados",
+        code: 404,
+      };
+
+    res.status(200).json({ success: true, response: snc });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "Error al obtener los datos", err });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 controller.findTotalSalidasXDiaXEmpleado = async (req, res) => {
   try {
@@ -329,19 +353,15 @@ controller.insert = async (req, res) => {
       idIncumplimiento,
     } = req.body;
 
-    if (
-      validarText(accionesCorregir) ||
-      validarText(descripcionFalla) ||
-      validarText(concesiones)
-    ) {
-      throw peticionImposible("No puedes mandar vacio el elemento");
+    if (!descripcionFalla) {
+      throw peticionImposible("La descripción de la falla esta vacio");
     }
 
     const cuerpo = {
       fecha,
       descripcion_falla: descripcionFalla,
-      acciones_corregir: accionesCorregir,
-      concesiones,
+      acciones_corregir: accionesCorregir || null,
+      concesiones: concesiones || null,
       idempleado: Number(idEmpleadoIncumple),
       idempleado_autoriza: Number(user.token.data.datos.idempleado),
       idincumplimiento: Number(idIncumplimiento),
@@ -393,12 +413,8 @@ controller.update = async (req, res) => {
       // idDepartamento,
     } = req.body;
 
-    if (
-      validarText(accionesCorregir) ||
-      validarText(descripcionFalla) ||
-      validarText(concesiones)
-    ) {
-      throw peticionImposible("No puedes mandar vacio el elemento");
+    if (!descripcionFalla) {
+      throw peticionImposible("La descripción de la falla esta vacio");
     }
 
     const viejo = await salidaNoCM.findOne(idSalidaNoConforme);
@@ -442,8 +458,8 @@ controller.update = async (req, res) => {
       {
         fecha,
         descripcion_falla: descripcionFalla,
-        acciones_corregir: accionesCorregir,
-        concesiones,
+        acciones_corregir: accionesCorregir || null,
+        concesiones: concesiones || null,
         idempleado: Number(idEmpleadoIncumple),
         idempleado_autoriza: Number(user.token.data.datos.idempleado),
         idincumplimiento: Number(idIncumplimiento),

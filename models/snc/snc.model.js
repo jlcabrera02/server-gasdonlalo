@@ -14,6 +14,10 @@ const SNC = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    fecha: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
     idempleado_autoriza: {
       type: DataTypes.INTEGER,
       allowNull: true,

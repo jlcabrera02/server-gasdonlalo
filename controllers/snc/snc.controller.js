@@ -47,3 +47,57 @@ export async function buscarSNCXEmpleado(req, res) {
     });
   }
 }
+
+export async function obtenerRegistros(req, res) {
+  try {
+    const { fechaI, fechaF, month, year, idEmpleado, idIncumplimiento } =
+      req.query;
+
+    const querys = {};
+    const queryIncumplimientos = {};
+
+    if (idIncumplimiento) {
+      queryIncumplimientos.idIncumplimiento = Number(idIncumplimiento);
+    }
+
+    if (idEmpleado) {
+      queryIncumplimientos.idempleado = Number(idEmpleado);
+    }
+
+    if (fechaI && fechaF) {
+      querys.fecha = { [Op.between]: [fechaI, fechaF] };
+    } else {
+      querys[Op.and] = [
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+    }
+
+    const response = await SNC.findAll({
+      where: querys,
+      include: [
+        {
+          model: empleados,
+          as: "empleado_autoriza",
+        },
+        {
+          model: empleados,
+        },
+        {
+          model: Incumplimientos,
+          where: queryIncumplimientos,
+        },
+      ],
+      order: [["idsalida_noconforme", "DESC"]],
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      err,
+      msg: "Error al obtener las salidas no conformes por empleado",
+    });
+  }
+}
