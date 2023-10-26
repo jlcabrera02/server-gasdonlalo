@@ -50,7 +50,7 @@ export async function buscarSNCXEmpleado(req, res) {
 
 export async function obtenerRegistros(req, res) {
   try {
-    const { fechaI, fechaF, month, year, idEmpleado, idIncumplimiento } =
+    const { fechaI, fechaF, month, year, idEmpleado, idIncumplimiento, folio } =
       req.query;
 
     const querys = {};
@@ -61,12 +61,18 @@ export async function obtenerRegistros(req, res) {
     }
 
     if (idEmpleado) {
-      queryIncumplimientos.idempleado = Number(idEmpleado);
+      querys.idempleado = Number(idEmpleado);
+    }
+
+    if (folio) {
+      querys.idsalida_noconforme = Number(folio);
     }
 
     if (fechaI && fechaF) {
       querys.fecha = { [Op.between]: [fechaI, fechaF] };
-    } else {
+    }
+
+    if (year && month) {
       querys[Op.and] = [
         sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
         sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
