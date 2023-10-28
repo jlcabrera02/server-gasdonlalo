@@ -50,14 +50,34 @@ export async function buscarSNCXEmpleado(req, res) {
 
 export async function obtenerRegistros(req, res) {
   try {
-    const { fechaI, fechaF, month, year, idEmpleado, idIncumplimiento, folio } =
-      req.query;
+    const {
+      fechaI,
+      fechaF,
+      month,
+      year,
+      idEmpleado,
+      idIncumplimiento,
+      folio,
+      noValidados,
+    } = req.query;
 
     const querys = {};
     const queryIncumplimientos = {};
 
     if (idIncumplimiento) {
       queryIncumplimientos.idIncumplimiento = Number(idIncumplimiento);
+    }
+
+    if (noValidados) {
+      querys[Op.and] = [{ acciones_corregir: null }, { concesiones: null }];
+    }
+
+    if (year && month) {
+      querys[Op.and] = [
+        ...(querys[Op.and] || []),
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
     }
 
     if (idEmpleado) {
@@ -70,13 +90,6 @@ export async function obtenerRegistros(req, res) {
 
     if (fechaI && fechaF) {
       querys.fecha = { [Op.between]: [fechaI, fechaF] };
-    }
-
-    if (year && month) {
-      querys[Op.and] = [
-        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
-        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
-      ];
     }
 
     const response = await SNC.findAll({
@@ -97,13 +110,17 @@ export async function obtenerRegistros(req, res) {
       order: [["idsalida_noconforme", "DESC"]],
     });
 
+    if (response.length === 0) {
+      throw { success: false, code: 404, msg: "No se encontraron archivos" };
+    }
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
     res.status(400).json({
       success: false,
       err,
-      msg: "Error al obtener las salidas no conformes por empleado",
+      msg: err.msg || "Error al obtener los registros de SNC",
     });
   }
 }
