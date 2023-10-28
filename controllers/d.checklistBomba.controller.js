@@ -311,8 +311,8 @@ controller.nuevoChecklist = async (req, res) => {
 
     const guardarRegistro = await ChecklistRegistros.create({
       fecha,
-      idIsla,
-      idTurno,
+      idisla: idIsla,
+      idturno: idTurno,
       idempleado_entrante: dataEmpleadoE.dataValues.idempleado,
       idempleado_saliente: dataEmpleadoS.dataValues.idempleado,
       idestacion_servicio: idEstacionServicio,
