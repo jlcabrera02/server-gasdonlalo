@@ -1,8 +1,10 @@
 import checklistBombaM from "../models/d.checklistBomba.model";
+import model from "../models/index";
 import empM from "../models/rh.empleado.model";
 import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
+const { empleados, Islas, ES, ChecklistRegistros, LlaveAcceso } = model;
 const { verificar } = auth;
 
 const controller = {};
@@ -269,6 +271,59 @@ controller.delete = async (req, res) => {
     await guardarBitacora([area, user.token.data.datos.idempleado, 4, id]);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+//Registros de CheckList
+controller.nuevoChecklist = async (req, res) => {
+  try {
+    const {
+      fecha,
+      idIsla,
+      idTurno,
+      keyEmpleadoEntrante,
+      keyEmpleadoSaliente,
+      idEstacionServicio,
+      evaluaciones,
+    } = req.body;
+
+    const { aceitesCompletos, funcionalidad, islaLimpia } = evaluaciones;
+
+    const dataEmpleadoE = await LlaveAcceso.findOne({
+      where: { key: keyEmpleadoEntrante },
+    });
+    const dataEmpleadoS = await LlaveAcceso.findOne({
+      where: { key: keyEmpleadoSaliente },
+    });
+
+    if (!dataEmpleadoE || !dataEmpleadoS) {
+      throw {
+        success: false,
+        code: 400,
+        msg: "Error una de las llaves no está asignada correctamente",
+      };
+    }
+
+    const guardarRegistro = await ChecklistRegistros.create({
+      fecha,
+      idIsla,
+      idTurno,
+      idempleado_entrante: dataEmpleadoE.dataValues.idempleado,
+      idempleado_saliente: dataEmpleadoS.dataValues.idempleado,
+      idestacion_servicio: idEstacionServicio,
+      aceites_completos: aceitesCompletos,
+      isla_limpia: islaLimpia,
+      funcionalidad: funcionalidad,
+    });
+
+    res.status(200).json({ success: true, response: guardarRegistro });
+  } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

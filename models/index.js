@@ -3,6 +3,9 @@ import empleados from "./recursosHumanos/empleados.model";
 import departamentos from "./recursosHumanos/departamentos.model";
 import detalleEmpleado from "./recursosHumanos/detalleEmpleado.model";
 
+//Despacho
+import ChecklistRegistros from "./despacho/ChecklistRegistros.model";
+
 //SNC
 import SNC from "./snc/snc.model";
 import Incumplimientos from "./snc/incumplimientos";
@@ -170,6 +173,21 @@ ES.hasMany(ControlVol, { foreignKey: "idestacion_servicio" });
 empleados.hasMany(Pagares, { foreignKey: "idempleado" });
 Pagares.belongsTo(empleados, { foreignKey: "idempleado" });
 
+ChecklistRegistros.hasMany(empleados, { foreignKey: "idempleado_entrante" });
+empleados.belongsTo(ChecklistRegistros, { foreignKey: "idempleado_entrante" });
+
+ChecklistRegistros.hasMany(empleados, { foreignKey: "idempleado_saliente" });
+empleados.belongsTo(ChecklistRegistros, { foreignKey: "idempleado_saliente" });
+
+ChecklistRegistros.hasMany(ES, { foreignKey: "idestacion_servicio" });
+ES.belongsTo(ChecklistRegistros, { foreignKey: "idestacion_servicio" });
+
+ChecklistRegistros.hasMany(Turnos, { foreignKey: "idturno" });
+Turnos.belongsTo(ChecklistRegistros, { foreignKey: "idturno" });
+
+ChecklistRegistros.hasMany(Islas, { foreignKey: "idisla" });
+Islas.belongsTo(ChecklistRegistros, { foreignKey: "idisla" });
+
 export default {
   nominas,
   tiposNominas,
@@ -197,4 +215,5 @@ export default {
   EfectivoTienda,
   ControlVol,
   Preliquidaciones,
+  ChecklistRegistros,
 };
