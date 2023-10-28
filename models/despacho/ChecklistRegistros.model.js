@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../../config/configdb";
 
 const ChecklistRegistros = sequelize.define(
-  "ChecklistRegistros",
+  "checklistregistros",
   {
     idchecklist: {
       type: DataTypes.INTEGER,
