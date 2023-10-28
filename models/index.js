@@ -173,20 +173,17 @@ ES.hasMany(ControlVol, { foreignKey: "idestacion_servicio" });
 empleados.hasMany(Pagares, { foreignKey: "idempleado" });
 Pagares.belongsTo(empleados, { foreignKey: "idempleado" });
 
-ChecklistRegistros.hasMany(empleados, { foreignKey: "idempleado_entrante" });
-empleados.belongsTo(ChecklistRegistros, { foreignKey: "idempleado_entrante" });
-
-ChecklistRegistros.hasMany(empleados, { foreignKey: "idempleado_saliente" });
-empleados.belongsTo(ChecklistRegistros, { foreignKey: "idempleado_saliente" });
-
-ChecklistRegistros.hasMany(ES, { foreignKey: "idestacion_servicio" });
-ES.belongsTo(ChecklistRegistros, { foreignKey: "idestacion_servicio" });
-
-ChecklistRegistros.hasMany(Turnos, { foreignKey: "idturno" });
-Turnos.belongsTo(ChecklistRegistros, { foreignKey: "idturno" });
-
-ChecklistRegistros.hasMany(Islas, { foreignKey: "idisla" });
-Islas.belongsTo(ChecklistRegistros, { foreignKey: "idisla" });
+ChecklistRegistros.belongsTo(empleados, {
+  foreignKey: "idempleado_entrante",
+  as: "empleado_entrante",
+});
+ChecklistRegistros.belongsTo(empleados, {
+  foreignKey: "idempleado_saliente",
+  as: "empleado_saliente",
+});
+ChecklistRegistros.belongsTo(ES, { foreignKey: "idestacion_servicio" });
+ChecklistRegistros.belongsTo(Turnos, { foreignKey: "idturno" });
+ChecklistRegistros.belongsTo(Islas, { foreignKey: "idisla" });
 
 export default {
   nominas,
