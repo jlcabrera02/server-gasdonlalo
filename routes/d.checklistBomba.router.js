@@ -9,6 +9,7 @@ route.get(
 );
 route.get("/:year/:month", checklistBomba.find);
 route.post("/", checklistBomba.insert);
+route.get("/registro-checklist", checklistBomba.notificaciones);
 route.post("/registro-checklist", checklistBomba.nuevoChecklist); //Registro de parte de los bomberos en la tablets
 route.put("/:id", checklistBomba.update);
 route.delete("/:id", checklistBomba.delete);

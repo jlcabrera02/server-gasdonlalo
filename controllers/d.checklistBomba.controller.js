@@ -4,7 +4,9 @@ import empM from "../models/rh.empleado.model";
 import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
-const { empleados, Islas, ES, ChecklistRegistros, LlaveAcceso } = model;
+import sequelize from "../config/configdb";
+import { Op } from "sequelize";
+const { empleados, Turnos, Islas, ES, ChecklistRegistros, LlaveAcceso } = model;
 const { verificar } = auth;
 
 const controller = {};
@@ -322,6 +324,73 @@ controller.nuevoChecklist = async (req, res) => {
     });
 
     res.status(200).json({ success: true, response: guardarRegistro });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+//Notificaciones de los checklist
+controller.notificaciones = async (req, res) => {
+  try {
+    const {
+      month,
+      year,
+      fechaI,
+      fechaF,
+      idTurno,
+      idEstacionServicio,
+      idIsla,
+      idEmpleado,
+    } = req.query;
+
+    const querys = {};
+
+    if (fechaI && fechaF) {
+      querys.fecha = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (idIsla) {
+      querys.idisla = Number(idIsla);
+    }
+
+    if (idTurno) {
+      querys.idturno = Number(idTurno);
+    }
+
+    if (idEstacionServicio) {
+      querys.idestacion_servicio = Number(idEstacionServicio);
+    }
+
+    if (idEmpleado) {
+      querys[Op.or] = [
+        { idempleado_entrante: Number(idEmpleado) },
+        { idempleado_saliente: Number(idEmpleado) },
+      ];
+    }
+
+    if (year && month) {
+      querys[Op.and] = [
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+    }
+
+    const response = await ChecklistRegistros.findAll({
+      where: querys,
+      include: [
+        { model: ES },
+        { model: empleados, as: "empleado_entrante" },
+        { model: empleados, as: "empleado_saliente" },
+        { model: Turnos },
+        { model: Islas },
+      ],
+      order: [["idchecklist", "DESC"]],
+    });
+    res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
     if (!err.code) {
