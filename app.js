@@ -14,6 +14,7 @@ dotenv.config(); //Inicializo lectura de variables de entorno
 const app = express();
 //Estableciendo puerto del servidor globalmente
 app.set("port", process.env.PORT || 4000);
+app.set("port-socket", process.env.PORT_SOCKET || 4001);
 //Estableciendo llave de token jwt
 app.set("secret_key_jwt", process.env.SECRET_KEY_JWT);
 //Establesco las vistas que mostrara el servidor
