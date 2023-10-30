@@ -14,6 +14,7 @@ const sequelize = new Sequelize(
       typeCast: true,
     },
     timezone: "-06:00",
+    logging: false,
   }
 );
 
