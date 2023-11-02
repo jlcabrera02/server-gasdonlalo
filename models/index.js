@@ -29,6 +29,7 @@ import CodigosUso from "./administrativo/liquidacion/codigosUso.model";
 import EfectivoTienda from "./administrativo/liquidacion/efectivoTienda.model";
 import ControlVol from "./administrativo/liquidacion/control_volumetrico";
 import Preliquidaciones from "./administrativo/liquidacion/preliquidaciones.model";
+import PanicBtn from "./administrativo/panicBtn.model";
 
 //pagares
 import Pagares from "../models/pagares/Pagare.model";
@@ -185,6 +186,9 @@ ChecklistRegistros.belongsTo(ES, { foreignKey: "idestacion_servicio" });
 ChecklistRegistros.belongsTo(Turnos, { foreignKey: "idturno" });
 ChecklistRegistros.belongsTo(Islas, { foreignKey: "idisla" });
 
+PanicBtn.belongsTo(empleados, { foreignKey: "idempleado" });
+PanicBtn.belongsTo(Islas, { foreignKey: "idisla" });
+
 export default {
   nominas,
   tiposNominas,
@@ -213,4 +217,5 @@ export default {
   ControlVol,
   Preliquidaciones,
   ChecklistRegistros,
+  PanicBtn,
 };
