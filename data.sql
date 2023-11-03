@@ -261,7 +261,8 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 (57, "Configurar horarios", "Configuraciones", 11, "Das la opción de que el usuario registre horarios a los despachadores"),
 (58, "Capturar liquidos", "Captura", 11, "Das la opción de que el usuario capture las liquidaciones"),
 (59, "Copia de seguridad", "Permisos", 8, "Das la opción de que el usuario pueda generar una copia de seguridad que se alojara en el servidor"),
-(60, "Visualizar Reportes", "Reportes", 11, "Das la opción de que el usuario pueda ver los reportes del modulo de liquidación");
+(60, "Visualizar Reportes", "Reportes", 11, "Das la opción de que el usuario pueda ver los reportes del modulo de liquidación"),
+(61, "Manipular registros", "Permisos", 8, "Das la opción de que el usuario pueda manipular e insertar registros en fechas anteriores a la que transcurre");
 
 INSERT INTO acceso (user, idpermiso) VALUES 
 ("sralcocer", 1);
