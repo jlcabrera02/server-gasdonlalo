@@ -47,7 +47,12 @@ export default {
       )
     ),
 
-  tiempoDB: (f) => new Date(f).toISOString().split("T")[0],
+  tiempoDB: (f, local) =>
+    local
+      ? new Date(new Date(f).getTime() - new Date().getTimezoneOffset() * 60000)
+          .toISOString()
+          .split("T")[0]
+      : new Date(f).toISOString().split("T")[0],
 
   diff: (f, h) => new Date(`${f} ${h}`),
 
