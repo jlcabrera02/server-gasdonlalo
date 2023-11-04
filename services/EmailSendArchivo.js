@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import fs from "fs";
 import temp from "../assets/formatTiempo";
+import format from "../assets/formatTiempo";
 import estSerM from "../models/ad.estacionService.model";
 import { config } from "dotenv";
 import models from "../models";
@@ -45,9 +46,11 @@ export const pdfArchivo = async (req, res) => {
       efectivo,
       idEmpleado,
       idTurno,
-      fechaLiquidacion,
+      // fechaLiquidacion,
       idEstacionServicio,
     } = req.body;
+
+    const fechaLiquidacion = format.tiempoDB(new Date(), true);
 
     const ruta = process.env.RUTAFICHERO_PRELIQUIDACION;
     const rutaArchivo = ruta + "/" + req.body.filename;
