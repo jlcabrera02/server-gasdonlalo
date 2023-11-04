@@ -45,6 +45,11 @@ const ChecklistRegistros = sequelize.define(
       type: DataTypes.BOOLEAN,
       allowNull: true,
     },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   },
   {
     freezeTableName: true,
