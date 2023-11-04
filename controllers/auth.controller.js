@@ -4,7 +4,7 @@ import models from "../models";
 import formatTiempo from "../assets/formatTiempo";
 import { Op } from "sequelize";
 import sequelize from "../config/configdb";
-const { LlaveAcceso, empleados, Auditoria } = models;
+const { LlaveAcceso, empleados, Auditoria, LlaveAccesoChecklist } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -83,12 +83,61 @@ controller.AccessLlaveAcceso = async (req, res) => {
   }
 };
 
+controller.AccessLlaveAccesoChecklist = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { key } = req.params;
+    const response = await LlaveAccesoChecklist.findOne({
+      where: { key },
+      include: empleados,
+    });
+
+    if (!response) throw { code: 403, msg: "No autorizado", success: false };
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.RemoveLlaveAcceso = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 55);
     if (!user.success) throw user;
     const { key } = req.params;
     const response = await LlaveAcceso.destroy({
+      where: { key },
+    });
+
+    await Auditoria.create({
+      peticion: "Llave de acceso",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 4,
+      idaffectado: key,
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.RemoveLlaveAccesoChecklist = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 55);
+    if (!user.success) throw user;
+    const { key } = req.params;
+    const response = await LlaveAccesoChecklist.destroy({
       where: { key },
     });
 
@@ -125,6 +174,21 @@ controller.ListLlaveAcceso = async (req, res) => {
   }
 };
 
+controller.ListLlaveAccesoChecklist = async (req, res) => {
+  try {
+    const response = await LlaveAccesoChecklist.findAll({
+      include: empleados,
+    });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.CreateLlaveAcceso = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 55);
@@ -133,6 +197,28 @@ controller.CreateLlaveAcceso = async (req, res) => {
     const response = await LlaveAcceso.create({ idempleado, key });
     await Auditoria.create({
       peticion: "Llave de acceso",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 2,
+      idaffectado: response.key,
+    });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.CreateLlaveAccesoChecklist = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 55);
+    if (!user.success) throw user;
+    const { key, idempleado } = req.body;
+    const response = await LlaveAccesoChecklist.create({ idempleado, key });
+    await Auditoria.create({
+      peticion: "Llave de acceso checklist",
       idempleado: user.token.data.datos.idempleado,
       accion: 2,
       idaffectado: response.key,

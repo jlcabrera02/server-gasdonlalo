@@ -3,6 +3,11 @@ import auth from "../controllers/auth.controller";
 
 const route = router();
 
+route.get("/listAccessKeyChecklist", auth.ListLlaveAccesoChecklist);
+route.get("/accessKeyChecklist/:key", auth.AccessLlaveAccesoChecklist);
+route.post("/createAccessKeyChecklist", auth.CreateLlaveAccesoChecklist);
+route.delete("/deleteAccessKeyChecklist/:key", auth.RemoveLlaveAccesoChecklist);
+
 route.get("/", auth.validarTiempoSesion); //Me valida el tiempo en sesion
 route.get("/usuarios/:idChecador", auth.findByIdEmpleado);
 route.get("/usuarios", auth.findAll);
