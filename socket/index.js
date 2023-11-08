@@ -10,6 +10,7 @@ export const eventTypes = {
   PANIC_BTN_ON: "panicBtnOn",
   PANIC_BTN_OFF: "panicBtnOff",
   GET_PANIC_INFO: "getPanicInfo",
+  AVISO: "aviso",
   DISCONNECT: "disconnect",
 };
 export const users = {};

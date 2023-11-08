@@ -108,3 +108,29 @@ export const getPanicInfo = async (data, userIdTransmitting) => {
     );
   }
 };
+
+//Socket que mando al cliente para actualizar la peticion de checklist de bomba.
+export const mandarActualizacion = async () => {
+  try {
+    for (const userId in clients) {
+      const client = clients[userId];
+      if (client.readyState === 1) {
+        const dataSend = {
+          escena: "actualizarPeticion",
+          type: eventTypes.AVISO,
+        };
+        delete dataSend.usuarios;
+        client.send(JSON.stringify(dataSend));
+      }
+    }
+  } catch (err) {
+    clients[userIdTransmitting].send(
+      JSON.stringify({
+        escena: "actualizarPeticion",
+        success: false,
+        response: err,
+        type: eventTypes.GET_PANIC_INFO,
+      })
+    );
+  }
+};

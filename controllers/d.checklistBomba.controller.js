@@ -7,6 +7,7 @@ import sncaM from "../models/s.acumular.model";
 import sequelize from "../config/configdb";
 import { Op } from "sequelize";
 import format from "../assets/formatTiempo";
+import { mandarActualizacion } from "../socket/panicbtn.socket";
 const {
   empleados,
   Turnos,
@@ -351,8 +352,11 @@ controller.nuevoChecklist = async (req, res) => {
       funcionalidad: null,
     });
 
+    if (!aceitesCompletos || !islaLimpia) await mandarActualizacion(); //Si una evaluacion incumple manda un aviso
+
     res.status(200).json({ success: true, response: guardarRegistro });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -373,6 +377,8 @@ controller.notificaciones = async (req, res) => {
       idEstacionServicio,
       idIsla,
       idEmpleado,
+      activo,
+      detalles,
     } = req.query;
 
     const querys = {};
@@ -407,6 +413,18 @@ controller.notificaciones = async (req, res) => {
       ];
     }
 
+    if (detalles === "true") {
+      querys[Op.or] = [
+        ...(querys[Op.or] || []),
+        { aceites_completos: false },
+        { isla_limpia: false },
+      ];
+    }
+
+    if (activo === "true") {
+      querys.activo = true;
+    }
+
     const response = await ChecklistRegistros.findAll({
       where: querys,
       include: [
@@ -419,6 +437,30 @@ controller.notificaciones = async (req, res) => {
       order: [["idchecklist", "DESC"]],
     });
     res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+//Peticion para actualizar un checklist incompleto como visto.
+controller.notificarChecklistVisto = async (req, res) => {
+  try {
+    const { idchecklist } = req.body;
+    console.log(req.body);
+
+    const checklist = await ChecklistRegistros.update(
+      { activo: false },
+      { where: { idchecklist } }
+    );
+
+    await mandarActualizacion();
+
+    res.status(200).json({ success: true, response: checklist });
   } catch (err) {
     console.log(err);
     if (!err.code) {
