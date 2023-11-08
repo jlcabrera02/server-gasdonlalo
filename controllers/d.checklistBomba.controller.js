@@ -6,7 +6,15 @@ import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
 import sequelize from "../config/configdb";
 import { Op } from "sequelize";
-const { empleados, Turnos, Islas, ES, ChecklistRegistros, LlaveAcceso } = model;
+import format from "../assets/formatTiempo";
+const {
+  empleados,
+  Turnos,
+  Islas,
+  ES,
+  ChecklistRegistros,
+  LlaveAccesoChecklist,
+} = model;
 const { verificar } = auth;
 
 const controller = {};
@@ -285,7 +293,7 @@ controller.delete = async (req, res) => {
 controller.nuevoChecklist = async (req, res) => {
   try {
     const {
-      fecha,
+      // fecha,
       idIsla,
       idTurno,
       keyEmpleadoEntrante,
@@ -294,12 +302,14 @@ controller.nuevoChecklist = async (req, res) => {
       evaluaciones,
     } = req.body;
 
-    const { aceitesCompletos, funcionalidad, islaLimpia } = evaluaciones;
+    const fecha = format.tiempoDB(new Date(), true);
 
-    const dataEmpleadoE = await LlaveAcceso.findOne({
+    const { aceitesCompletos, /* funcionalidad */ islaLimpia } = evaluaciones;
+
+    const dataEmpleadoE = await LlaveAccesoChecklist.findOne({
       where: { key: keyEmpleadoEntrante },
     });
-    const dataEmpleadoS = await LlaveAcceso.findOne({
+    const dataEmpleadoS = await LlaveAccesoChecklist.findOne({
       where: { key: keyEmpleadoSaliente },
     });
 
@@ -311,6 +321,24 @@ controller.nuevoChecklist = async (req, res) => {
       };
     }
 
+    if (!aceitesCompletos) {
+      await sncaM.insert([
+        12,
+        dataEmpleadoS.dataValues.idempleado,
+        fecha,
+        `Inconformidad aceites en checklist de bomba`,
+      ]);
+    }
+
+    if (!islaLimpia) {
+      await sncaM.insert([
+        13,
+        dataEmpleadoS.dataValues.idempleado,
+        fecha,
+        `No cumplio con isla limpia en checklist de bomba`,
+      ]);
+    }
+
     const guardarRegistro = await ChecklistRegistros.create({
       fecha,
       idisla: idIsla,
@@ -320,7 +348,7 @@ controller.nuevoChecklist = async (req, res) => {
       idestacion_servicio: idEstacionServicio,
       aceites_completos: aceitesCompletos,
       isla_limpia: islaLimpia,
-      funcionalidad: funcionalidad,
+      funcionalidad: null,
     });
 
     res.status(200).json({ success: true, response: guardarRegistro });

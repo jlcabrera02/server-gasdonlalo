@@ -24,6 +24,7 @@ import Efectivo from "./administrativo/liquidacion/efectivo.model";
 import Liquidaciones from "./administrativo/liquidacion/liquidaciones.model";
 import Precios from "./administrativo/liquidacion/precios.model";
 import LlaveAcceso from "./administrativo/llavesAcceso.model";
+import LlaveAccesoChecklist from "./administrativo/llavesAccesoChecklist.model.js";
 import Auditoria from "./administrativo/auditoria.model";
 import CodigosUso from "./administrativo/liquidacion/codigosUso.model";
 import EfectivoTienda from "./administrativo/liquidacion/efectivoTienda.model";
@@ -113,6 +114,9 @@ ES.hasMany(Islas, {
 
 empleados.hasOne(LlaveAcceso, { foreignKey: "idempleado" });
 LlaveAcceso.belongsTo(empleados, { foreignKey: "idempleado" });
+
+empleados.hasOne(LlaveAccesoChecklist, { foreignKey: "idempleado" });
+LlaveAccesoChecklist.belongsTo(empleados, { foreignKey: "idempleado" });
 
 CodigosUso.hasMany(EfectivoTienda, {
   foreignKey: "idcodigo_uso",
@@ -210,6 +214,7 @@ export default {
   Vales,
   Liquidaciones,
   LlaveAcceso,
+  LlaveAccesoChecklist,
   Auditoria,
   Pagares,
   CodigosUso,
