@@ -1,3 +1,5 @@
+import agruparArr from "./agruparArr";
+
 export default {
   tiempoLocal: (date) =>
     new Date(new Date(date).getTime() + new Date().getTimezoneOffset() * 60000),
@@ -30,12 +32,14 @@ export default {
         1000 * 60 * 60 * 24
     ),
 
-  tiempoLocalShort: (date) =>
+  tiempoLocalShort: (date, local) =>
     new Intl.DateTimeFormat("es-MX", {
       dateStyle: "short",
     }).format(
       new Date(
-        new Date(date).getTime() + new Date().getTimezoneOffset() * 60000
+        local
+          ? new Date(date).getTime() - new Date().getTimezoneOffset() * 60000
+          : new Date(date).getTime() + new Date().getTimezoneOffset() * 60000
       )
     ),
   formatMes: (date) =>
@@ -47,7 +51,12 @@ export default {
       )
     ),
 
-  tiempoDB: (f) => new Date(f).toISOString().split("T")[0],
+  tiempoDB: (f, local) =>
+    local
+      ? new Date(new Date(f).getTime() - new Date().getTimezoneOffset() * 60000)
+          .toISOString()
+          .split("T")[0]
+      : new Date(f).toISOString().split("T")[0],
 
   diff: (f, h) => new Date(`${f} ${h}`),
 
@@ -73,4 +82,62 @@ export default {
       style: "currency",
       currency: "MXN",
     }).format(monto),
+
+  zFill: (cantidad) => {
+    const a = pad(Number(cantidad), 7);
+    const b = a.split("").slice(0, 7).join("");
+    return b;
+  },
+  orderMangueras: (arraIn, props) => {
+    const property = props ? props.property || null : null;
+    const arraOut = [];
+    if (arraIn.length === 0) return { array: arraOut, object: () => {} };
+
+    const mangueras = arraIn.map((el) => (property ? el[property] : el));
+
+    const convertMayus = mangueras.map((manguera) => manguera.toUpperCase());
+    const posiciones = convertMayus.map((manguera) => ({
+      posicion: Number(manguera.replace(/\w/, "")),
+      manguera: manguera.charAt(),
+    }));
+
+    const totalPosiciones = agruparArr(posiciones, (el) => el.posicion)
+      .keys()
+      .map((el) => Number(el))
+      .sort();
+
+    const findM = (data, property, Gas) =>
+      data.find((el) =>
+        property
+          ? el[property] === `${Gas.manguera}${Gas.posicion}`
+          : el === `${Gas.manguera}${Gas.posicion}`
+      );
+
+    totalPosiciones.forEach((p) => {
+      const manguera = posiciones.filter((el) => el.posicion === p);
+      const D = manguera.find((el) => el.manguera === "D");
+      const M = manguera.find((el) => el.manguera === "M");
+      const P = manguera.find((el) => el.manguera === "P");
+      if (D) arraOut.push(findM(arraIn, property, D));
+      if (M) arraOut.push(findM(arraIn, property, M));
+      if (P) arraOut.push(findM(arraIn, property, P));
+    });
+
+    const convertToObject = () =>
+      arraOut.map((el) => ({
+        [el[property] || el]: arraIn.find((manguera) =>
+          property
+            ? manguera[property] === el[property]
+            : manguera[property] === el
+        ),
+      }));
+
+    return { array: arraOut, object: convertToObject };
+  },
 };
+
+function pad(n, width, z) {
+  z = z || "0";
+  n = n + "";
+  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}

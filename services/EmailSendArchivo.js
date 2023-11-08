@@ -1,9 +1,10 @@
 import nodemailer from "nodemailer";
 import fs from "fs";
 import temp from "../assets/formatTiempo";
-import estSerM from "../models/ad.estacionService.model";
+import format from "../assets/formatTiempo";
 import { config } from "dotenv";
-import models from "../models";
+import createPDF from "./PDFPreliquidacion";
+import models from "../models/index";
 const { diff, tiempoDB, tiempoHorario } = temp;
 config();
 
@@ -39,20 +40,31 @@ const send = async ({ filename, content, text, subject, to }) => {
 export const pdfArchivo = async (req, res) => {
   try {
     //Para guardar el documento PDF preliquidacion en el servidor junto con los datos a la BD
-    const {
-      lecturas,
-      vales,
-      efectivo,
-      idEmpleado,
-      idTurno,
-      fechaLiquidacion,
-      idEstacionServicio,
-    } = req.body;
+    const { data, otherData } = req.body;
 
+    const { turno, empleado, estacionServicio, vales, efectivo } = otherData;
+
+    const fechaLiquidacion = format.tiempoDB(new Date(), true);
     const ruta = process.env.RUTAFICHERO_PRELIQUIDACION;
-    const rutaArchivo = ruta + "/" + req.body.filename;
 
-    const turno = await estSerM.findTurnoById(idTurno);
+    const rutaArchivo =
+      ruta +
+      `/preliquidacion_${
+        empleado.nombre + empleado.apellido_paterno + empleado.apellido_materno
+      }_${fechaLiquidacion.replaceAll("-", "")}_${turno.turno.replace(
+        " ",
+        ""
+      )}_${estacionServicio.nombre.replace(" ", "")}.pdf`;
+
+    const archivo = await createPDF({
+      data,
+      otherData,
+    });
+
+    const pdf = fs.createWriteStream(rutaArchivo);
+
+    archivo.pipe(pdf);
+
     const { hora_empiezo, hora_termino } = turno;
 
     let diaMayor =
@@ -65,33 +77,17 @@ export const pdfArchivo = async (req, res) => {
     const fecha = tiempoHorario(`${fechaLiquidacion} ${hora_termino}`);
     const fechaTurno = tiempoDB(new Date(fecha.getTime() - horaDiff));
 
-    console.log(horaDiff, fecha);
-
-    fs.writeFileSync(
-      rutaArchivo,
-      req.body.content.replace("data:application/pdf;base64,", ""),
-      "base64",
-      async (err, res) => {
-        if (err) {
-          throw {
-            code: 400,
-            msg: "Error al guardar documento intenta nuevamente",
-            success: false,
-          };
-        }
-      }
-    );
-
     const response = await models.Preliquidaciones.create({
-      lecturas,
+      lecturas: data.mangueras,
       vales,
       efectivo,
-      idempleado: idEmpleado,
-      idturno: idTurno,
+      idempleado: empleado.idempleado,
+      idturno: turno.idturno,
       fechaturno: fechaTurno,
       fechaliquidacion: fechaLiquidacion,
-      idestacion_servicio: idEstacionServicio,
+      idestacion_servicio: estacionServicio.idestacion_servicio,
     });
+
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (err.errno === -2) {
@@ -101,7 +97,6 @@ export const pdfArchivo = async (req, res) => {
         msg: "No se encontró el directorio para almacenar el documento, porfavor, comunicate con los auxiliares de calidad e informales el problema",
       });
     } else {
-      console.log(err);
       res.status(400).json({ err });
     }
   }
