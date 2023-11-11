@@ -85,8 +85,6 @@ controller.AccessLlaveAcceso = async (req, res) => {
 
 controller.AccessLlaveAccesoChecklist = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization);
-    if (!user.success) throw user;
     const { key } = req.params;
     const response = await LlaveAccesoChecklist.findOne({
       where: { key },
