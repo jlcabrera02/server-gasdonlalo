@@ -58,7 +58,7 @@ export async function obtenerRegistros(req, res) {
       idEmpleado,
       idIncumplimiento,
       folio,
-      noValidados,
+      etapa, //1 es por capturar, 2 es por corregir, 3 es finalizada
     } = req.query;
 
     const querys = {};
@@ -68,8 +68,15 @@ export async function obtenerRegistros(req, res) {
       queryIncumplimientos.idIncumplimiento = Number(idIncumplimiento);
     }
 
-    if (noValidados) {
+    if (etapa === "2") {
       querys[Op.and] = [{ acciones_corregir: null }, { concesiones: null }];
+    }
+
+    if (etapa === "3") {
+      querys[Op.or] = [
+        { acciones_corregir: { [Op.not]: null } },
+        { concesiones: { [Op.not]: null } },
+      ];
     }
 
     if (year && month) {
