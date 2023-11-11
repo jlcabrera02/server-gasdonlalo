@@ -97,15 +97,16 @@ export const getPanicInfo = async (data, userIdTransmitting) => {
       })
     );
   } catch (err) {
-    clients[userIdTransmitting].send(
-      JSON.stringify({
-        ...data,
-        escena: "obteniendoDatosEstadoIslas",
-        success: false,
-        response: err,
-        type: eventTypes.GET_PANIC_INFO,
-      })
-    );
+    if (clients[userIdTransmitting])
+      clients[userIdTransmitting.readyState === 1].send(
+        JSON.stringify({
+          ...data,
+          escena: "obteniendoDatosEstadoIslas",
+          success: false,
+          response: err,
+          type: eventTypes.GET_PANIC_INFO,
+        })
+      );
   }
 };
 
