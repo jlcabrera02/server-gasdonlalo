@@ -25,6 +25,15 @@ controller.configurarPrecio = (req, res) => {
   });
 };
 
+controller.precioOT = (req, res) => {
+  const response = obtenerConfiguraciones().precioHoraOT;
+
+  return res.status(200).json({
+    success: true,
+    response: { precioHoraOT: response },
+  });
+};
+
 controller.obtenerUtencilios = async (req, res) => {
   try {
     const response = await Utencilios.findAll();

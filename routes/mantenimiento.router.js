@@ -6,6 +6,7 @@ const route = router();
 
 //ordenes de trabajo
 route.post("/ot-from-panic-btn", ot.crearOTFromPanicBtn);
+route.get("/ordentrabajo/precioOT", ot.precioOT);
 route.post("/ordentrabajo/crear-solicitud", ot.crearOTSolicitud);
 route.put("/ordentrabajo/realizar/:idOT", ot.realizarOT);
 route.put("/ordentrabajo/finalizar/:idOT", ot.terminarOT);
