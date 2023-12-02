@@ -17,6 +17,7 @@ import bombaRouter from "./ad.bomba.router";
 import administrativo from "./administrativo";
 //mantenimiento
 import ordenTrabajoCalidad from "./m.ordenTrabajoCalidad.router";
+import mantenimiento from "./mantenimiento.router";
 // Recursos humanos
 import controlDocumentosRouter from "./rh.controlDocumentos.router";
 import departamentoRouter from "./rh.departamento.router";
@@ -92,5 +93,6 @@ route.use("/liquidacion", islas);
 route.use("/administrativo", administrativo);
 route.use("/documentos", dir);
 route.use("/pagare", pagare);
+route.use("/mantenimiento", mantenimiento);
 
 export default route;

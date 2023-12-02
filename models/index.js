@@ -35,6 +35,11 @@ import PanicBtn from "./administrativo/panicBtn.model";
 //pagares
 import Pagares from "../models/pagares/Pagare.model";
 
+//Mantenimiento
+import OT from "./mantenimiento/OrdenesTrabajo.js";
+import AT from "./mantenimiento/AreasTrabajo.js";
+import TM from "./mantenimiento/TrabajosMantenimiento.js";
+
 nominas.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(nominas, { foreignKey: "idempleado" });
 
@@ -193,6 +198,11 @@ ChecklistRegistros.belongsTo(Islas, { foreignKey: "idisla" });
 PanicBtn.belongsTo(empleados, { foreignKey: "idempleado" });
 PanicBtn.belongsTo(Islas, { foreignKey: "idisla" });
 
+OT.belongsTo(AT, { foreignKey: "idarea" });
+OT.belongsTo(ES, { foreignKey: "idestacion_servicio" });
+AT.belongsTo(TM, { foreignKey: "idmantenimiento" });
+TM.hasMany(AT, { foreignKey: "idmantenimiento" });
+
 export default {
   nominas,
   tiposNominas,
@@ -223,4 +233,7 @@ export default {
   Preliquidaciones,
   ChecklistRegistros,
   PanicBtn,
+  OT,
+  AT,
+  TM,
 };
