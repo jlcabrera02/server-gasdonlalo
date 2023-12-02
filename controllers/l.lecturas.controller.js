@@ -1,7 +1,7 @@
 import auth from "../models/auth.model";
 import models from "../models";
 import sequelize from "../config/configdb";
-import { Op, Sequelize } from "sequelize";
+import { Op } from "sequelize";
 const {
   InfoLecturas,
   LecturasFinales,
@@ -293,6 +293,7 @@ export const buscarLecturasXIdEmpleado = async ({
   orderLiquidaciones,
   filtro,
   estacionS,
+  codigoUso,
   fechaI,
   fechaF,
 }) => {
@@ -308,6 +309,7 @@ export const buscarLecturasXIdEmpleado = async ({
   Gas.hasMany(Mangueras, { foreignKey: "idgas" });
   Mangueras.belongsTo(Gas, { foreignKey: "idgas" });
   const querysHorario = {};
+  const querysCU = {};
 
   if (fechaI && fechaF) {
     querysHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
@@ -347,6 +349,12 @@ export const buscarLecturasXIdEmpleado = async ({
   // if (cancelado === "false") querys.cancelado = { [Op.is]: null };
   if (estacionS) querysHorario.idestacion_servicio = estacionS;
 
+  if (codigoUso) {
+    const multiple = Array.isArray(codigoUso);
+    const cu = multiple ? [...codigoUso] : [codigoUso];
+    querysCU.idcodigo_uso = { [Op.in]: cu };
+  }
+
   let response = await Liquidaciones.findAll({
     where: { ...querys },
     include: [
@@ -356,8 +364,8 @@ export const buscarLecturasXIdEmpleado = async ({
         include: [{ model: empleados }, { model: Turnos }, { model: ES }],
         where: querysHorario,
       },
-      { model: Vales, include: { model: CodigosUso } },
-      { model: Efectivo, include: { model: CodigosUso } },
+      { model: Vales, include: { model: CodigosUso, where: querysCU } },
+      { model: Efectivo, include: { model: CodigosUso, where: querysCU } },
     ],
     order: [["idliquidacion", orderLiquidaciones === "DESC" ? "DESC" : "ASC"]],
   });
@@ -379,6 +387,7 @@ export const buscarLecturasXIdEmpleado = async ({
       "idgas"
     );
   }
+
   if (posicion) {
     const multiple = Array.isArray(posicion);
     response = filtrarDatos(
