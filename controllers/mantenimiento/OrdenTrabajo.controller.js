@@ -8,6 +8,7 @@ import {
 import snca from "../../models/s.acumular.model";
 import format from "../../assets/formatTiempo";
 import Decimal from "decimal.js-light";
+import Utencilios from "../../models/mantenimiento/Utencilios";
 const { verificar } = auth;
 const { OT, PanicBtn } = modelos;
 
@@ -22,6 +23,84 @@ controller.configurarPrecio = (req, res) => {
     success: true,
     response: { precioHoraOT: obtenerConfiguraciones().precioHoraOT },
   });
+};
+
+controller.obtenerUtencilios = async (req, res) => {
+  try {
+    const response = await Utencilios.findAll();
+
+    return res.status(200).json({
+      success: true,
+      response,
+    });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.editarUtencilios = async (req, res) => {
+  try {
+    const { idutencilio } = req.params;
+    const { utencilio, costo } = req.body;
+
+    const response = await Utencilios.update(
+      { utencilio, costo },
+      { where: { idutencilio } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      response,
+    });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.crearUtencilios = async (req, res) => {
+  try {
+    const { utencilio, costo } = req.body;
+
+    const response = await Utencilios.create({ utencilio, costo });
+
+    return res.status(200).json({
+      success: true,
+      response,
+    });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.eliminarUtencilios = async (req, res) => {
+  try {
+    const { idutencilio } = req.params;
+    const response = await Utencilios.destroy({ where: { idutencilio } });
+
+    return res.status(200).json({
+      success: true,
+      response,
+    });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
 };
 
 controller.crearOTFromPanicBtn = async (req, res) => {

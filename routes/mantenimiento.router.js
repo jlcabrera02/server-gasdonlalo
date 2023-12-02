@@ -13,6 +13,13 @@ route.put("/ordentrabajo/liberar/:idOT", ot.liberarOT);
 route.get("/ordentrabajo/obtener", ot.obtenerOT);
 route.put("/ordentrabajo/configurarPrecioOT", ot.configurarPrecio);
 
+//Herramientas de trabajo
+route.get("/herramientas/obtener", ot.obtenerUtencilios);
+route.post("/herramientas/crear", ot.crearUtencilios);
+route.put("/herramientas/editar/:idutencilio", ot.editarUtencilios);
+route.delete("/herramientas/eliminar/:idutencilio", ot.eliminarUtencilios);
+
+//Areas de trabajo
 route.post("/areastrabajo/crear", at.crearAreaT);
 route.get("/areastrabajo/obtener", at.obtenerAreaT);
 route.put("/areastrabajo/editar/:idarea", at.editarArea);
