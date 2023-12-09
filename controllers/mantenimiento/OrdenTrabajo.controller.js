@@ -285,7 +285,7 @@ controller.terminarOT = async (req, res) => {
       .toFixed(2);
 
     const costoHerramientas = herramientas
-      .map((el) => el.coste)
+      .map((el) => el.costo)
       .reduce((a, b) => new Decimal(a).add(new Decimal(b).toFixed(2)), 0);
 
     const totalGeneral = new Decimal(totalCostoHora)
