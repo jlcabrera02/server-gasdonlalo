@@ -200,6 +200,7 @@ PanicBtn.belongsTo(Islas, { foreignKey: "idisla" });
 
 OT.belongsTo(AT, { foreignKey: "idarea" });
 OT.belongsTo(ES, { foreignKey: "idestacion_servicio" });
+OT.belongsTo(empleados, { foreignKey: "idpersonal", as: "personal" });
 AT.belongsTo(TM, { foreignKey: "idmantenimiento" });
 TM.hasMany(AT, { foreignKey: "idmantenimiento" });
 

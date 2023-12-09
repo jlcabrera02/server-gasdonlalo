@@ -10,7 +10,7 @@ import format from "../../assets/formatTiempo";
 import Decimal from "decimal.js-light";
 import Utencilios from "../../models/mantenimiento/Utencilios";
 const { verificar } = auth;
-const { OT, PanicBtn } = modelos;
+const { OT, PanicBtn, empleados } = modelos;
 
 const controller = {};
 
@@ -205,11 +205,15 @@ controller.obtenerOT = async (req, res) => {
       delete query.estatus;
     }
 
-    const response = await OT.findAll({ where: query });
+    const response = await OT.findAll({
+      where: query,
+      include: [{ model: empleados, as: "personal" }],
+    });
     const costoHora = obtenerConfiguraciones().precioHoraOT;
 
     res.status(200).json({ success: true, costoHora, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
