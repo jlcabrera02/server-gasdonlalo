@@ -8,7 +8,7 @@ const route = router();
 route.post("/ot-from-panic-btn", ot.crearOTFromPanicBtn);
 route.get("/ordentrabajo/precioOT", ot.precioOT);
 route.post("/ordentrabajo/crear-solicitud", ot.crearOTSolicitud);
-route.post("/ordentrabajo/crearot", ot.crearOTSolicitud);
+route.post("/ordentrabajo/crear-ot", ot.crearOT);
 route.put("/ordentrabajo/realizar/:idOT", ot.realizarOT);
 route.put("/ordentrabajo/finalizar/:idOT", ot.terminarOT);
 route.put("/ordentrabajo/liberar/:idOT", ot.liberarOT);

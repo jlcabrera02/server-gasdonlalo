@@ -90,7 +90,6 @@ controller.crearUtencilios = async (req, res) => {
       response,
     });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -177,7 +176,6 @@ controller.crearOTSolicitud = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -198,6 +196,8 @@ controller.crearOT = async (req, res) => {
       descripcionTrabajo,
       observaciones,
       herramientas,
+      idPersonal,
+      tipoPersonal,
       idArea,
       idEstacionServicio,
     } = req.body;
@@ -224,22 +224,31 @@ controller.crearOT = async (req, res) => {
     const detallesCosto = {
       horasAcumuladas: trasformHours,
       pagoHora: totalCostoHora,
-      costoTotalHerramientaEinsumos: costoHerramientas,
+      precioHora: obtenerConfiguraciones().precioHoraOT,
+      costoHerramientaEinsumos: costoHerramientas,
       costoGeneral: totalGeneral,
     };
 
     const response = await OT.create({
       idsolicitante: user.token.data.datos.idempleado,
       tipo_mantenimiento: tipoMantenimiento,
-      fecha_inicio: fecha,
+      fecha_inicio: fechaInicio,
+      fecha_termino: fechaTermino,
       idarea: idArea,
+      estatus: 4,
       idestacion_servicio: idEstacionServicio,
       descripcion_falla: descripcionFalla,
+      descripcion_trabajo: descripcionTrabajo,
+      observaciones: observaciones,
+      idpersonal: idPersonal,
+      tipo_personal: tipoPersonal,
+      idliberante: user.token.data.datos.idempleado,
+      herramientas: herramientas,
+      detalles_costo: detallesCosto,
     });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -280,7 +289,6 @@ controller.obtenerOT = async (req, res) => {
 
     res.status(200).json({ success: true, costoHora, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -362,7 +370,8 @@ controller.terminarOT = async (req, res) => {
     const detallesCosto = {
       horasAcumuladas: trasformHours,
       pagoHora: totalCostoHora,
-      costoTotalHerramientaEinsumos: costoHerramientas,
+      precioHora: obtenerConfiguraciones().precioHoraOT,
+      costoHerramientaEinsumos: costoHerramientas,
       costoGeneral: totalGeneral,
     };
 
@@ -382,7 +391,6 @@ controller.terminarOT = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
