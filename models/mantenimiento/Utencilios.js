@@ -18,7 +18,7 @@ const Utencilios = sequelize.define(
       allowNull: false,
     },
     medida: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("Litro", "Kilogramo", "Metro", "Unidad", "Hora"),
       allowNull: false,
       defaultValue: "unidad",
     },
