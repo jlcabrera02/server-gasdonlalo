@@ -13,6 +13,15 @@ const Utencilios = sequelize.define(
       type: DataTypes.STRING(25),
       allowNull: false,
     },
+    tipo_utencilio: {
+      type: DataTypes.ENUM("Herramienta", "Insumo"),
+      allowNull: false,
+    },
+    medida: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "unidad",
+    },
     costo: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,

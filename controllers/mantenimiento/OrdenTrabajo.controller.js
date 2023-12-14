@@ -54,10 +54,10 @@ controller.obtenerUtencilios = async (req, res) => {
 controller.editarUtencilios = async (req, res) => {
   try {
     const { idutencilio } = req.params;
-    const { utencilio, costo } = req.body;
+    const { utencilio, costo, medida, tipoHerramienta } = req.body;
 
     const response = await Utencilios.update(
-      { utencilio, costo },
+      { utencilio, costo, medida, tipo_utencilio: tipoHerramienta },
       { where: { idutencilio } }
     );
 
@@ -76,9 +76,14 @@ controller.editarUtencilios = async (req, res) => {
 
 controller.crearUtencilios = async (req, res) => {
   try {
-    const { utencilio, costo } = req.body;
+    const { utencilio, costo, medida, tipoHerramienta } = req.body;
 
-    const response = await Utencilios.create({ utencilio, costo });
+    const response = await Utencilios.create({
+      utencilio,
+      costo,
+      tipo_utencilio: tipoHerramienta,
+      medida: medida,
+    });
 
     return res.status(200).json({
       success: true,
@@ -160,6 +165,68 @@ controller.crearOTSolicitud = async (req, res) => {
       idArea,
       idEstacionServicio,
     } = req.body;
+
+    const response = await OT.create({
+      idsolicitante: user.token.data.datos.idempleado,
+      tipo_mantenimiento: tipoMantenimiento,
+      fecha_inicio: fecha,
+      idarea: idArea,
+      idestacion_servicio: idEstacionServicio,
+      descripcion_falla: descripcionFalla,
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.crearOT = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const {
+      fechaInicio,
+      fechaTermino,
+      tipoMantenimiento,
+      descripcionFalla,
+      descripcionTrabajo,
+      observaciones,
+      herramientas,
+      idArea,
+      idEstacionServicio,
+    } = req.body;
+
+    const totalTiempo =
+      new Date(fechaTermino).getTime() - new Date(fechaInicio).getTime();
+
+    const trasformHours = new Decimal(totalTiempo)
+      .div(new Decimal(60000 * 60))
+      .toFixed(2);
+
+    const totalCostoHora = new Decimal(obtenerConfiguraciones().precioHoraOT)
+      .mul(new Decimal(trasformHours))
+      .toFixed(2);
+
+    const costoHerramientas = herramientas
+      .map((el) => el.costo)
+      .reduce((a, b) => new Decimal(a).add(new Decimal(b).toFixed(2)), 0);
+
+    const totalGeneral = new Decimal(totalCostoHora)
+      .add(new Decimal(costoHerramientas))
+      .toFixed(2);
+
+    const detallesCosto = {
+      horasAcumuladas: trasformHours,
+      pagoHora: totalCostoHora,
+      costoTotalHerramientaEinsumos: costoHerramientas,
+      costoGeneral: totalGeneral,
+    };
 
     const response = await OT.create({
       idsolicitante: user.token.data.datos.idempleado,
