@@ -15,7 +15,7 @@ const OrdenTrabajo = sequelize.define(
     },
     fecha_inicio: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     fecha_termino: {
       type: DataTypes.DATE,

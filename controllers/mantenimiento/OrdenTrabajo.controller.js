@@ -157,18 +157,12 @@ controller.crearOTSolicitud = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const {
-      fecha,
-      tipoMantenimiento,
-      descripcionFalla,
-      idArea,
-      idEstacionServicio,
-    } = req.body;
+    const { tipoMantenimiento, descripcionFalla, idArea, idEstacionServicio } =
+      req.body;
 
     const response = await OT.create({
       idsolicitante: user.token.data.datos.idempleado,
       tipo_mantenimiento: tipoMantenimiento,
-      fecha_inicio: fecha,
       idarea: idArea,
       idestacion_servicio: idEstacionServicio,
       descripcion_falla: descripcionFalla,
@@ -447,6 +441,27 @@ controller.liberarOT = async (req, res) => {
 
       res.status(200).json({ success: true, response });
     }
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.cancelarOT = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { idOT } = req.params;
+
+    const ot = await OT.update(
+      { estatus: 1, fechaInicio: null, fechaTermino: null, idPersonal: null },
+      { where: { idorden_trabajo: idOT } }
+    );
+
+    res.status(200).json({ success: true, response: ot });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
