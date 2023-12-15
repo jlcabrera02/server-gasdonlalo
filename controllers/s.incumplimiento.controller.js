@@ -1,6 +1,8 @@
 import incumplimientoM from "../models/s.incumplimiento.model";
 import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
+import models from "../models";
+const { Incumplimientos, departamentos } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -9,7 +11,7 @@ controller.find = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    let response = await incumplimientoM.find();
+    let response = await Incumplimientos.findAll({ include: departamentos });
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
