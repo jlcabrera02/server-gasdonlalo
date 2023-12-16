@@ -277,7 +277,11 @@ controller.obtenerOT = async (req, res) => {
 
     const response = await OT.findAll({
       where: query,
-      include: [{ model: empleados, as: "personal" }],
+      include: [
+        { model: empleados, as: "personal" },
+        { model: empleados, as: "liberante" },
+        { model: empleados, as: "solicitante" },
+      ],
     });
     const costoHora = obtenerConfiguraciones().precioHoraOT;
 
