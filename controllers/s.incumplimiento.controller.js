@@ -162,12 +162,14 @@ controller.update = async (req, res) => {
     let user = verificar(req.headers.authorization, 11);
     if (!user.success) throw user;
     const { id } = req.params;
-    const { incumplimiento } = req.body;
+    const { incumplimiento, idDepartamento } = req.body;
     const cuerpo = {
       incumplimiento: incumplimiento.toUpperCase(),
+      iddepartamento: idDepartamento,
     };
-    const data = [cuerpo, id];
-    let response = await incumplimientoM.update(data);
+    let response = await Incumplimientos.update(cuerpo, {
+      where: { idincumplimiento: id },
+    });
     await guardarBitacora([
       "Incumplimiento",
       user.token.data.datos.idempleado,
@@ -176,6 +178,7 @@ controller.update = async (req, res) => {
     ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
