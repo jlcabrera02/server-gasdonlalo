@@ -334,6 +334,8 @@ controller.terminarOT = async (req, res) => {
 
     const ot = await OT.findOne({ where: { idorden_trabajo: idOT } });
 
+    const isFechaTermino = ot.dataValues.fecha_termino;
+
     if (!ot)
       throw {
         success: false,
@@ -345,7 +347,9 @@ controller.terminarOT = async (req, res) => {
       idPersonal = null;
     }
 
-    const fechaTermino = format.tiempoDBComplete(Date.now());
+    const fechaTermino = isFechaTermino
+      ? format.tiempoDBComplete(isFechaTermino)
+      : format.tiempoDBComplete(Date.now());
 
     const totalTiempo =
       new Date(fechaTermino).getTime() -
