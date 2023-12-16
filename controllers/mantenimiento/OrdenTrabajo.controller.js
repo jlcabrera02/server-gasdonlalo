@@ -10,7 +10,7 @@ import format from "../../assets/formatTiempo";
 import Decimal from "decimal.js-light";
 import Utencilios from "../../models/mantenimiento/Utencilios";
 const { verificar } = auth;
-const { OT, PanicBtn, empleados } = modelos;
+const { OT, PanicBtn, empleados, AT } = modelos;
 
 const controller = {};
 
@@ -281,12 +281,14 @@ controller.obtenerOT = async (req, res) => {
         { model: empleados, as: "personal" },
         { model: empleados, as: "liberante" },
         { model: empleados, as: "solicitante" },
+        { model: AT },
       ],
     });
     const costoHora = obtenerConfiguraciones().precioHoraOT;
 
     res.status(200).json({ success: true, costoHora, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
