@@ -71,6 +71,11 @@ const OrdenTrabajo = sequelize.define(
       allowNull: false,
       defaultValue: "Interno",
     },
+    personal_externo: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      defaultValue: "Personal Externo",
+    },
   },
   {
     freezeTableName: true,

@@ -193,6 +193,7 @@ controller.crearOT = async (req, res) => {
       idPersonal,
       tipoPersonal,
       idArea,
+      personalExterno,
       idEstacionServicio,
     } = req.body;
 
@@ -239,10 +240,12 @@ controller.crearOT = async (req, res) => {
       idliberante: user.token.data.datos.idempleado,
       herramientas: herramientas,
       detalles_costo: detallesCosto,
+      personal_externo: personalExterno,
     });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
