@@ -61,11 +61,14 @@ controller.insert = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 11);
     if (!user.success) throw user;
-    const { incumplimiento } = req.body;
+    const { incumplimiento, idDepartamento } = req.body;
     const cuerpo = {
       incumplimiento: incumplimiento.toUpperCase(),
+      iddepartamento: idDepartamento,
     };
-    let response = await incumplimientoM.insert(cuerpo);
+
+    const response = await Incumplimientos.create(cuerpo);
+
     await guardarBitacora([
       "Incumplimiento",
       user.token.data.datos.idempleado,
