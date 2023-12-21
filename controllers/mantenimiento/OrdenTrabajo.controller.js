@@ -9,6 +9,7 @@ import snca from "../../models/s.acumular.model";
 import format from "../../assets/formatTiempo";
 import Decimal from "decimal.js-light";
 import Utencilios from "../../models/mantenimiento/Utencilios";
+import { Op } from "sequelize";
 const { verificar } = auth;
 const { OT, PanicBtn, empleados, AT } = modelos;
 
@@ -258,8 +259,7 @@ controller.obtenerOT = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-
-    const { estatus } = req.query;
+    const { estatus, fechaInicio, fechaTermino, month, year, ES } = req.query;
     const query = { estatus: 4 };
 
     if (estatus === "terminadas") {
@@ -278,14 +278,45 @@ controller.obtenerOT = async (req, res) => {
       delete query.estatus;
     }
 
+    if (fechaInicio && fechaTermino) {
+      query.createdAt = { [Op.between]: [fechaInicio, fechaTermino] };
+    }
+
+    if (month && year) {
+      query[Op.and] = [
+        sequelize.where(
+          sequelize.fn("MONTH", sequelize.col("createdAt")),
+          month
+        ),
+        sequelize.where(sequelize.fn("year", sequelize.col("createdAt")), year),
+      ];
+    }
+
+    if (ES) {
+      query["idestacion_servicio"] = ES;
+    }
+
     const response = await OT.findAll({
+      attributes: req.query.isReport
+        ? [
+            "idorden_trabajo",
+            "estatus",
+            "detalles_costo",
+            "herramientas",
+            "tipo_mantenimiento",
+            "tipo_personal",
+            "createdAt",
+          ]
+        : false,
       where: query,
-      include: [
-        { model: empleados, as: "personal" },
-        { model: empleados, as: "liberante" },
-        { model: empleados, as: "solicitante" },
-        { model: AT },
-      ],
+      include: req.query.isReport
+        ? [{ model: AT }]
+        : [
+            { model: empleados, as: "personal" },
+            { model: empleados, as: "liberante" },
+            { model: empleados, as: "solicitante" },
+            { model: AT },
+          ],
     });
     const costoHora = obtenerConfiguraciones().precioHoraOT;
 
