@@ -68,6 +68,7 @@ route.get("/historial", liquido.consultarLiquidoHistorial); //
 route.post("/reservar/:folio", liquido.reservarFolio); //
 route.delete("/noreservar/:folio", liquido.quitarReservarFolio); //
 route.put("/imprimir/:folio", liquido.imprimir); //
+route.put("/update-show-mf-ms/:folio", liquido.showMfMs); //
 route.put("/cancelar", liquido.cancelarLiquido); //
 
 route.get("/capturados/:idliquidacion", liquido.consultarLiquido); //
