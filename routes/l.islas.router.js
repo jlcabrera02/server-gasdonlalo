@@ -60,10 +60,21 @@ route.post("/codigo-uso/nuevo", codigoUso.nuevoCodigoUso); //
 route.put("/codigo-uso/editar/:idCodigoUso", codigoUso.editarCodigoUso); //
 route.delete("/codigo-uso/eliminar/:idCodigoUso", codigoUso.eliminarCodigoUso); //
 
+//Preliquidaciones
+route.get("/preliquidaciones", preliquidaciones.buscarPreliquidaciones); //
+route.put(
+  "/preliquidaciones/editar/:idPreliquidacion",
+  preliquidaciones.actualizarPreliquidacion
+); //
+route.delete(
+  "/preliquidaciones/eliminar/:idPreliquidacion",
+  preliquidaciones.eliminarPreliquidacion
+); //
+route.get("/buscar-preliquidacion", preliquidaciones.buscarPreliquidacion); //
+
 //captura de liquidacion
 route.post("/capturar", liquido.insertarLiquidos); //
 route.get("/pendientes", liquido.liquidacionesPendientes); //
-route.get("/buscar-preliquidacion", preliquidaciones.buscarPreliquidacion); //
 route.get("/historial", liquido.consultarLiquidoHistorial); //
 route.post("/reservar/:folio", liquido.reservarFolio); //
 route.delete("/noreservar/:folio", liquido.quitarReservarFolio); //

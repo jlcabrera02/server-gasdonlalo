@@ -193,6 +193,9 @@ ChecklistRegistros.belongsTo(Islas, { foreignKey: "idisla" });
 PanicBtn.belongsTo(empleados, { foreignKey: "idempleado" });
 PanicBtn.belongsTo(Islas, { foreignKey: "idisla" });
 
+Preliquidaciones.belongsTo(empleados, { foreignKey: "idempleado" });
+Preliquidaciones.belongsTo(Turnos, { foreignKey: "idturno" });
+
 export default {
   nominas,
   tiposNominas,
