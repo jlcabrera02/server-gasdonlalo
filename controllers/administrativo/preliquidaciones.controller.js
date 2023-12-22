@@ -52,12 +52,12 @@ controller.buscarPreliquidaciones = async (req, res) => {
 
 controller.actualizarPreliquidacion = async (req, res) => {
   try {
-    const { fecha, idEmpleado, idTurno, idEstacion } = req.body;
+    const { fechaTurno, idEmpleado, idTurno, idEstacion } = req.body;
     const { idPreliquidacion } = req.params;
 
     const response = await Preliquidaciones.update(
       {
-        fecha,
+        fechaTurno,
         idempleado: idEmpleado,
         idturno: idTurno,
         idestacion_servicio: idEstacion,
