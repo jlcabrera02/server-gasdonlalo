@@ -57,7 +57,7 @@ controller.actualizarPreliquidacion = async (req, res) => {
 
     const response = await Preliquidaciones.update(
       {
-        fechaTurno,
+        fechaturno: fechaTurno,
         idempleado: idEmpleado,
         idturno: idTurno,
         idestacion_servicio: idEstacion,
