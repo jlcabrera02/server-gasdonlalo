@@ -231,7 +231,7 @@ controller.crearOT = async (req, res) => {
       fecha_inicio: fechaInicio,
       fecha_termino: fechaTermino,
       idarea: idArea,
-      estatus: 4,
+      estatus: 3,
       idestacion_servicio: idEstacionServicio,
       descripcion_falla: descripcionFalla,
       descripcion_trabajo: descripcionTrabajo,
