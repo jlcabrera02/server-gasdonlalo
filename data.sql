@@ -262,7 +262,9 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 (58, "Capturar liquidos", "Captura", 11, "Das la opción de que el usuario capture las liquidaciones"),
 (59, "Copia de seguridad", "Permisos", 8, "Das la opción de que el usuario pueda generar una copia de seguridad que se alojara en el servidor"),
 (60, "Visualizar Reportes", "Reportes", 11, "Das la opción de que el usuario pueda ver los reportes del modulo de liquidación"),
-(61, "Manipular registros", "Permisos", 8, "Das la opción de que el usuario pueda manipular e insertar registros en fechas anteriores a la que transcurre");
+(61, "Manipular registros", "Permisos", 8, "Das la opción de que el usuario pueda manipular e insertar registros en fechas anteriores a la que transcurre"),
+(64, "Corregir Preliquidación", "Captura", 11, "Das la opción de que el usuario editar una preliquidación"),
+(65, "Dar de baja MF o MS", "Reportes", 11, "Das la opción de que el usuario pueda manipular el mostrar o no un monto faltante o sobrante");
 
 INSERT INTO acceso (user, idpermiso) VALUES 
 ("sralcocer", 1);

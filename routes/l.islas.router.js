@@ -32,6 +32,7 @@ route.put("/controlv/editar/:idControl", controlV.editarControlV); //
 route.delete("/controlv/eliminar/:idControl", controlV.eliminarControlV); //
 
 //Lectura de bombas
+route.get("/lectura/historial/:idEstacion", lecturas.historial); //
 route.get("/lectura/inicial/:idEstacion", lecturas.lecturasIniciales); //
 route.get("/lectura/buscar/:idEstacion", lecturas.buscarLecturas); //
 route.get("/infolecturas/:idEstacion", lecturas.buscarInfoLec); //
