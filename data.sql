@@ -266,7 +266,9 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 (62, "Manipular Pagares", "Permisos", 8, "Das la opción de que el usuario pueda manipular e insertar registros en el modulo de pagares"),
 (63, "Manipular Codigos uso", "Permisos", 8, "Das la opción de que el usuario pueda manipular e insertar registros en el modulo de tienda"),
 (64, "Órdenes de trabajo", "Permisos", 4, "Dar soluciones a solicitudes y órdenes de trabajo"),
-(65, "Administrar", "Permisos", 4, "Das la opción de que el usuario pueda administrar el módulo de mantenimiento");
+(65, "Administrar", "Permisos", 4, "Das la opción de que el usuario pueda administrar el módulo de mantenimiento"),
+(66, "Corregir Preliquidación", "Captura", 11, "Das la opción de que el usuario editar una preliquidación"),
+(67, "Dar de baja MF o MS", "Reportes", 11, "Das la opción de que el usuario pueda manipular el mostrar o no un monto faltante o sobrante");
 
 
 INSERT INTO acceso (user, idpermiso) VALUES 
