@@ -268,6 +268,7 @@ controller.obtenerOT = async (req, res) => {
       ES,
       idPersonal,
       idArea,
+      TM,
     } = req.query;
     const query = { estatus: 4 };
     const queryAreaT = {};
@@ -315,6 +316,10 @@ controller.obtenerOT = async (req, res) => {
 
     if (idArea) {
       query["idarea"] = idArea;
+    }
+
+    if (TM) {
+      query["tipo_mantenimiento"] = TM;
     }
 
     const response = await OT.findAll({
