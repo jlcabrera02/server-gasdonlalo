@@ -259,8 +259,18 @@ controller.obtenerOT = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { estatus, fechaInicio, fechaTermino, month, year, ES } = req.query;
+    const {
+      estatus,
+      fechaInicio,
+      fechaTermino,
+      month,
+      year,
+      ES,
+      idPersonal,
+      idArea,
+    } = req.query;
     const query = { estatus: 4 };
+    const queryAreaT = {};
 
     if (estatus === "terminadas") {
       query.estatus = 3;
@@ -279,21 +289,32 @@ controller.obtenerOT = async (req, res) => {
     }
 
     if (fechaInicio && fechaTermino) {
-      query.createdAt = { [Op.between]: [fechaInicio, fechaTermino] };
+      query.fecha_inicio = { [Op.between]: [fechaInicio, fechaTermino] };
     }
 
     if (month && year) {
       query[Op.and] = [
         sequelize.where(
-          sequelize.fn("MONTH", sequelize.col("createdAt")),
+          sequelize.fn("MONTH", sequelize.col("fecha_inicio")),
           month
         ),
-        sequelize.where(sequelize.fn("year", sequelize.col("createdAt")), year),
+        sequelize.where(
+          sequelize.fn("year", sequelize.col("fecha_inicio")),
+          year
+        ),
       ];
     }
 
     if (ES) {
       query["idestacion_servicio"] = ES;
+    }
+
+    if (idPersonal) {
+      query["idpersonal"] = idPersonal;
+    }
+
+    if (idArea) {
+      query["idarea"] = idArea;
     }
 
     const response = await OT.findAll({
@@ -305,12 +326,29 @@ controller.obtenerOT = async (req, res) => {
             "herramientas",
             "tipo_mantenimiento",
             "tipo_personal",
-            "createdAt",
+            "fecha_inicio",
           ]
         : false,
       where: query,
       include: req.query.isReport
-        ? [{ model: AT }]
+        ? [
+            { model: AT, where: queryAreaT },
+            {
+              model: empleados,
+              as: "personal",
+              attributes: ["nombre", "apellido_paterno", "apellido_materno"],
+            },
+            {
+              model: empleados,
+              as: "liberante",
+              attributes: ["nombre", "apellido_paterno", "apellido_materno"],
+            },
+            {
+              model: empleados,
+              as: "solicitante",
+              attributes: ["nombre", "apellido_paterno", "apellido_materno"],
+            },
+          ]
         : [
             { model: empleados, as: "personal" },
             { model: empleados, as: "liberante" },
