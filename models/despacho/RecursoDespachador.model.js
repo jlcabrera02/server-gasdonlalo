@@ -46,10 +46,22 @@ export const RecursosDespachadorEv = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
+    quincena: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const dayOfMonth = new Date(this.fecha).getDate();
+        return dayOfMonth <= 15 ? 1 : 2;
+      },
+    },
   },
   {
     freezeTableName: true,
   }
 );
+
+// Registro.prototype.quincena = function () {
+//   const dayOfMonth = this.getDataValue("fecha").getDate();
+//   return dayOfMonth <= 15 ? "Primera quincena" : "Segunda quincena";
+// };
 
 export default RecursosDespachador;
