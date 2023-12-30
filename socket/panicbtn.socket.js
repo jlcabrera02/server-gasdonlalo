@@ -97,7 +97,7 @@ export const getPanicInfo = async (data, userIdTransmitting) => {
       })
     );
   } catch (err) {
-    if (clients[userIdTransmitting])
+    if (clients[userIdTransmitting]) {
       clients[userIdTransmitting.readyState === 1].send(
         JSON.stringify({
           ...data,
@@ -107,6 +107,7 @@ export const getPanicInfo = async (data, userIdTransmitting) => {
           type: eventTypes.GET_PANIC_INFO,
         })
       );
+    }
   }
 };
 

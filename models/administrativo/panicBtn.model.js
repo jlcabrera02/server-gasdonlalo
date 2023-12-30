@@ -26,6 +26,11 @@ const panicBtn = sequelize.define(
       allowNull: false,
       defaultValue: true,
     },
+    ot: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     freezeTableName: true,

@@ -26,6 +26,12 @@ const empleados = sequelize.define(
       type: DataTypes.STRING(30),
       allowNull: false,
     },
+    nombre_completo: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return `${this.nombre} ${this.apellido_paterno} ${this.apellido_materno}`;
+      },
+    },
     iddepartamento: {
       type: DataTypes.INTEGER,
       allowNull: false,
