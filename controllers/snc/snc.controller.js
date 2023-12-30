@@ -1,8 +1,7 @@
 import { Op } from "sequelize";
 import models from "../../models";
 import sequelize from "../../config/configdb";
-import Incumplimientos from "../../models/snc/incumplimientos";
-const { empleados, SNC } = models;
+const { empleados, SNC, Incumplimientos } = models;
 
 export async function buscarSNCXEmpleado(req, res) {
   try {
@@ -138,6 +137,89 @@ export async function obtenerRegistros(req, res) {
     console.log(resp);
 
     res.status(200).json({ success: true, response: resp });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      err,
+      msg: err.msg || "Error al obtener los registros de SNC",
+    });
+  }
+}
+
+export async function obtenerReportesEmpleados(req, res) {
+  try {
+    const {
+      fechaI,
+      fechaF,
+      month,
+      year,
+      idEmpleado,
+      idIncumplimiento,
+      idDepartamento,
+      etapa, //1 es por capturar, 2 es por corregir, 3 es finalizada
+    } = req.query;
+
+    const querysSnc = {};
+    const querysEmpleado = {};
+    const queryIncumplimientos = {};
+
+    if (idIncumplimiento) {
+      queryIncumplimientos.idIncumplimiento = Number(idIncumplimiento);
+    }
+
+    if (etapa === "2") {
+      querysSnc[Op.and] = [{ acciones_corregir: null }, { concesiones: null }];
+    }
+
+    if (etapa === "3") {
+      querysSnc[Op.or] = [
+        { acciones_corregir: { [Op.not]: null } },
+        { concesiones: { [Op.not]: null } },
+      ];
+    }
+
+    if (year && month) {
+      querysSnc[Op.and] = [
+        ...(querysSnc[Op.and] || []),
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+    }
+
+    if (idEmpleado) {
+      querysEmpleado.idempleado = Number(idEmpleado);
+    }
+
+    if (idDepartamento) {
+      querysEmpleado.idDepartamento = Number(idDepartamento);
+    }
+
+    if (fechaI && fechaF) {
+      querysSnc.fecha = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    const response = await empleados.findAll({
+      attributes: [
+        "nombre",
+        "apellido_paterno",
+        "apellido_materno",
+        "iddepartamento",
+        "idempleado",
+        "nombre_completo",
+      ],
+      where: querysEmpleado,
+      include: [
+        {
+          model: SNC,
+          where: querysSnc,
+          attributes: ["idsalida_noconforme", "fecha"],
+          include: Incumplimientos,
+        },
+      ],
+    });
+
+    res.status(200).json({ success: true, response: response });
   } catch (err) {
     console.log(err);
     res.status(400).json({
