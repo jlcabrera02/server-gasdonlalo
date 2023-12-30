@@ -1,6 +1,8 @@
 import incumplimientoM from "../models/s.incumplimiento.model";
 import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
+import models from "../models";
+const { Incumplimientos, departamentos } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -9,7 +11,7 @@ controller.find = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    let response = await incumplimientoM.find();
+    let response = await Incumplimientos.findAll({ include: departamentos });
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -59,11 +61,14 @@ controller.insert = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 11);
     if (!user.success) throw user;
-    const { incumplimiento } = req.body;
+    const { incumplimiento, idDepartamento } = req.body;
     const cuerpo = {
       incumplimiento: incumplimiento.toUpperCase(),
+      iddepartamento: idDepartamento,
     };
-    let response = await incumplimientoM.insert(cuerpo);
+
+    const response = await Incumplimientos.create(cuerpo);
+
     await guardarBitacora([
       "Incumplimiento",
       user.token.data.datos.idempleado,
@@ -157,12 +162,14 @@ controller.update = async (req, res) => {
     let user = verificar(req.headers.authorization, 11);
     if (!user.success) throw user;
     const { id } = req.params;
-    const { incumplimiento } = req.body;
+    const { incumplimiento, idDepartamento } = req.body;
     const cuerpo = {
       incumplimiento: incumplimiento.toUpperCase(),
+      iddepartamento: idDepartamento,
     };
-    const data = [cuerpo, id];
-    let response = await incumplimientoM.update(data);
+    let response = await Incumplimientos.update(cuerpo, {
+      where: { idincumplimiento: id },
+    });
     await guardarBitacora([
       "Incumplimiento",
       user.token.data.datos.idempleado,
@@ -171,6 +178,7 @@ controller.update = async (req, res) => {
     ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

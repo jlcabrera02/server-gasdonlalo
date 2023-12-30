@@ -5,6 +5,9 @@ import detalleEmpleado from "./recursosHumanos/detalleEmpleado.model";
 
 //Despacho
 import ChecklistRegistros from "./despacho/ChecklistRegistros.model";
+import RecursosDespachador, {
+  RecursosDespachadorEv,
+} from "./despacho/RecursoDespachador.model.js";
 
 //SNC
 import SNC from "./snc/snc.model";
@@ -35,6 +38,11 @@ import PanicBtn from "./administrativo/panicBtn.model";
 //pagares
 import Pagares from "../models/pagares/Pagare.model";
 
+//Mantenimiento
+import OT from "./mantenimiento/OrdenesTrabajo.js";
+import AT from "./mantenimiento/AreasTrabajo.js";
+import TM from "./mantenimiento/TrabajosMantenimiento.js";
+
 nominas.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(nominas, { foreignKey: "idempleado" });
 
@@ -49,8 +57,8 @@ detalleEmpleado.belongsTo(empleados, { foreignKey: "idempleado" });
 detalleEmpleado.belongsTo(tiposNominas, { foreignKey: "idtipo_nomina" });
 tiposNominas.hasMany(detalleEmpleado, { foreignKey: "idtipo_nomina" });
 
-// Incumplimientos.belongsTo(departamentos, { foreignKey: "iddepartamento" });
-// departamentos.hasMany(Incumplimientos, { foreignKey: "iddepartamento" });
+departamentos.hasMany(Incumplimientos, { foreignKey: "iddepartamento" });
+Incumplimientos.belongsTo(departamentos, { foreignKey: "iddepartamento" });
 
 SNC.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(SNC, { foreignKey: "idempleado" });
@@ -195,6 +203,38 @@ PanicBtn.belongsTo(Islas, { foreignKey: "idisla" });
 
 Preliquidaciones.belongsTo(empleados, { foreignKey: "idempleado" });
 Preliquidaciones.belongsTo(Turnos, { foreignKey: "idturno" });
+OT.belongsTo(AT, { foreignKey: "idarea" });
+OT.belongsTo(ES, { foreignKey: "idestacion_servicio" });
+OT.belongsTo(empleados, { foreignKey: "idpersonal", as: "personal" });
+OT.belongsTo(empleados, { foreignKey: "idsolicitante", as: "solicitante" });
+OT.belongsTo(empleados, { foreignKey: "idliberante", as: "liberante" });
+AT.belongsTo(TM, { foreignKey: "idmantenimiento" });
+TM.hasMany(AT, { foreignKey: "idmantenimiento" });
+
+RecursosDespachador.belongsToMany(empleados, {
+  through: RecursosDespachadorEv,
+  // uniqueKey: "idrecurso",
+  foreignKey: "idrecurso",
+  otherKey: "idempleado",
+  as: "empleados",
+});
+empleados.belongsToMany(RecursosDespachador, {
+  through: RecursosDespachadorEv,
+  // uniqueKey: "idempleado",
+  foreignKey: "idempleado",
+  otherKey: "idrecurso",
+  // as: "evaluaciones",
+});
+
+RecursosDespachador.hasMany(RecursosDespachadorEv, { foreignKey: "idrecurso" });
+RecursosDespachadorEv.belongsTo(RecursosDespachador, {
+  foreignKey: "idrecurso",
+});
+empleados.hasMany(RecursosDespachadorEv, {
+  foreignKey: "idempleado",
+  as: "evaluaciones",
+});
+RecursosDespachadorEv.belongsTo(empleados, { foreignKey: "idempleado" });
 
 export default {
   nominas,
@@ -226,4 +266,9 @@ export default {
   Preliquidaciones,
   ChecklistRegistros,
   PanicBtn,
+  OT,
+  AT,
+  TM,
+  RecursosDespachadorEv,
+  RecursosDespachador,
 };

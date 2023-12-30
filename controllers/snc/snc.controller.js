@@ -121,7 +121,23 @@ export async function obtenerRegistros(req, res) {
       throw { success: false, code: 404, msg: "No se encontraron archivos" };
     }
 
-    res.status(200).json({ success: true, response });
+    const resp = JSON.parse(JSON.stringify(response)).map((el) => {
+      if (!el.empleado) {
+        return {
+          ...el,
+          empleado: {
+            nombre: "GASOLINERIA",
+            apellido_paterno: "DON",
+            apellido_materno: "LALO",
+          },
+        };
+      }
+      return el;
+    });
+
+    console.log(resp);
+
+    res.status(200).json({ success: true, response: resp });
   } catch (err) {
     console.log(err);
     res.status(400).json({

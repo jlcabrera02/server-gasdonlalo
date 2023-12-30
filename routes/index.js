@@ -6,6 +6,7 @@ import acumular from "./s.acumular.router";
 import snc from "./snc/index";
 //despacho
 import listaRecursosDespachadorRouter from "./d.listaRecursosDespachador.router";
+import recursosDespachadorRouter from "./d.recursosDespachador.router";
 import evaluacionUniformeRouter from "./d.evaluacionUniforme.router";
 import pasosDespacharRouter from "./d.pasosDespachar.router";
 import checklistBombaRouter from "./d.checklistBomba.router";
@@ -17,6 +18,7 @@ import bombaRouter from "./ad.bomba.router";
 import administrativo from "./administrativo";
 //mantenimiento
 import ordenTrabajoCalidad from "./m.ordenTrabajoCalidad.router";
+import mantenimiento from "./mantenimiento.router";
 // Recursos humanos
 import controlDocumentosRouter from "./rh.controlDocumentos.router";
 import departamentoRouter from "./rh.departamento.router";
@@ -55,6 +57,7 @@ route.use("/incumplimiento", incumplimientoRouter);
 route.use("/sncacumuladas", acumular);
 route.use("/snc", snc);
 //despacho
+route.use("/recursos-despachador", recursosDespachadorRouter);
 route.use("/lista-recurso-despachador", listaRecursosDespachadorRouter);
 route.use("/monto-faltante-despachador", montoFaltanteRouter);
 route.use("/evaluacion-uniforme", evaluacionUniformeRouter);
@@ -92,5 +95,6 @@ route.use("/liquidacion", islas);
 route.use("/administrativo", administrativo);
 route.use("/documentos", dir);
 route.use("/pagare", pagare);
+route.use("/mantenimiento", mantenimiento);
 
 export default route;

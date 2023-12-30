@@ -58,6 +58,14 @@ export default {
           .split("T")[0]
       : new Date(f).toISOString().split("T")[0],
 
+  tiempoDBComplete: (f) => {
+    const parsetDate = new Date(f);
+
+    return `${parsetDate.getFullYear()}-${
+      parsetDate.getMonth() + 1
+    }-${parsetDate.getDate()} ${parsetDate.getHours()}:${parsetDate.getMinutes()}:${parsetDate.getSeconds()}`;
+  },
+
   diff: (f, h) => new Date(`${f} ${h}`),
 
   tiempoHorario: (date) =>
