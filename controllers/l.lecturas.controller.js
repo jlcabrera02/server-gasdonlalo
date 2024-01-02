@@ -1,7 +1,10 @@
 import auth from "../models/auth.model";
 import models from "../models";
 import sequelize from "../config/configdb";
-import { Op, Sequelize } from "sequelize";
+import { Op } from "sequelize";
+import formatTiempo from "../assets/formatTiempo";
+import { format } from "mysql2";
+import agruparArr from "../assets/agruparArr";
 const {
   InfoLecturas,
   LecturasFinales,
@@ -284,6 +287,83 @@ controller.updateLecturaInicial = async (req, res) => {
   }
 };
 
+controller.historial = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    const { auth } = req.query;
+    if (!user.success && !auth) throw user;
+    const { fechaI, fechaF } = req.query;
+    const fechaInit = new Date(fechaI);
+    const diasFechas =
+      (new Date(fechaF).getTime() - fechaInit.getTime()) /
+      (1000 * 60 * 60 * 24);
+    const fechas = [formatTiempo.tiempoDB(fechaI)];
+
+    const filtroLiquidacion = { capturado: true };
+    const filtroHorario = { fechaturno: { [Op.between]: [fechaI, fechaF] } };
+
+    for (let i = 0; i < diasFechas; i++) {
+      const fecha = new Date(fechaInit.setDate(fechaInit.getDate() + 1));
+      fechas.push(formatTiempo.tiempoDB(fecha));
+    }
+
+    const islas = JSON.parse(JSON.stringify(await Islas.findAll()));
+
+    const response = JSON.parse(
+      JSON.stringify(
+        await Liquidaciones.findAll({
+          where: filtroLiquidacion,
+          include: [
+            {
+              model: Horarios,
+              attributes: ["fechaturno", "idempleado"],
+              where: filtroHorario,
+              include: [{ model: Turnos, attributes: ["turno"] }],
+            },
+          ],
+        })
+      )
+    );
+
+    const lecturas = response
+      .map((liq) =>
+        JSON.parse(liq.lecturas).map((lect) => ({
+          ...lect,
+          nIsla: islas.find((isla) => isla.idisla === lect.idisla).nisla || "0",
+          turno: liq.horario.turno.turno,
+          fechaturno: liq.horario.fechaturno,
+        }))
+      )
+      .flat();
+
+    const agruparIslas = agruparArr(lecturas, (e) => e.nIsla);
+
+    const data = agruparIslas.keys().map((nisla) => {
+      const lecturas = agruparIslas.single()[nisla];
+      const agruparTurnos = agruparArr(lecturas, (e) => e.turno);
+
+      //
+      // agruparTurnos.keys().map((t) => {
+
+      // });
+      const acomodarFechas = fechas.map((fecha) =>
+        lecturas.filter((el) => el.fechaturno === fecha)
+      );
+
+      return acomodarFechas;
+    });
+
+    res.status(200).json({ success: true, lecturas, data });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 export const buscarLecturasXIdEmpleado = async ({
   idTurno,
   idIsla,
@@ -293,6 +373,7 @@ export const buscarLecturasXIdEmpleado = async ({
   orderLiquidaciones,
   filtro,
   estacionS,
+  codigoUso,
   fechaI,
   fechaF,
 }) => {
@@ -308,6 +389,7 @@ export const buscarLecturasXIdEmpleado = async ({
   Gas.hasMany(Mangueras, { foreignKey: "idgas" });
   Mangueras.belongsTo(Gas, { foreignKey: "idgas" });
   const querysHorario = {};
+  const querysCU = {};
 
   if (fechaI && fechaF) {
     querysHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
@@ -347,6 +429,12 @@ export const buscarLecturasXIdEmpleado = async ({
   // if (cancelado === "false") querys.cancelado = { [Op.is]: null };
   if (estacionS) querysHorario.idestacion_servicio = estacionS;
 
+  if (codigoUso) {
+    const multiple = Array.isArray(codigoUso);
+    const cu = multiple ? [...codigoUso] : [codigoUso];
+    querysCU.idcodigo_uso = { [Op.in]: cu };
+  }
+
   let response = await Liquidaciones.findAll({
     where: { ...querys },
     include: [
@@ -356,8 +444,8 @@ export const buscarLecturasXIdEmpleado = async ({
         include: [{ model: empleados }, { model: Turnos }, { model: ES }],
         where: querysHorario,
       },
-      { model: Vales, include: { model: CodigosUso } },
-      { model: Efectivo, include: { model: CodigosUso } },
+      { model: Vales, include: { model: CodigosUso, where: querysCU } },
+      { model: Efectivo, include: { model: CodigosUso, where: querysCU } },
     ],
     order: [["idliquidacion", orderLiquidaciones === "DESC" ? "DESC" : "ASC"]],
   });
@@ -379,6 +467,7 @@ export const buscarLecturasXIdEmpleado = async ({
       "idgas"
     );
   }
+
   if (posicion) {
     const multiple = Array.isArray(posicion);
     response = filtrarDatos(

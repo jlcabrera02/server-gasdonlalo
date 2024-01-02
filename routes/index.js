@@ -6,6 +6,7 @@ import acumular from "./s.acumular.router";
 import snc from "./snc/index";
 //despacho
 import listaRecursosDespachadorRouter from "./d.listaRecursosDespachador.router";
+import recursosDespachadorRouter from "./d.recursosDespachador.router";
 import evaluacionUniformeRouter from "./d.evaluacionUniforme.router";
 import pasosDespacharRouter from "./d.pasosDespachar.router";
 import checklistBombaRouter from "./d.checklistBomba.router";
@@ -56,6 +57,7 @@ route.use("/incumplimiento", incumplimientoRouter);
 route.use("/sncacumuladas", acumular);
 route.use("/snc", snc);
 //despacho
+route.use("/recursos-despachador", recursosDespachadorRouter);
 route.use("/lista-recurso-despachador", listaRecursosDespachadorRouter);
 route.use("/monto-faltante-despachador", montoFaltanteRouter);
 route.use("/evaluacion-uniforme", evaluacionUniformeRouter);

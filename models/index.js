@@ -5,6 +5,9 @@ import detalleEmpleado from "./recursosHumanos/detalleEmpleado.model";
 
 //Despacho
 import ChecklistRegistros from "./despacho/ChecklistRegistros.model";
+import RecursosDespachador, {
+  RecursosDespachadorEv,
+} from "./despacho/RecursoDespachador.model.js";
 
 //SNC
 import SNC from "./snc/snc.model";
@@ -198,6 +201,8 @@ ChecklistRegistros.belongsTo(Islas, { foreignKey: "idisla" });
 PanicBtn.belongsTo(empleados, { foreignKey: "idempleado" });
 PanicBtn.belongsTo(Islas, { foreignKey: "idisla" });
 
+Preliquidaciones.belongsTo(empleados, { foreignKey: "idempleado" });
+Preliquidaciones.belongsTo(Turnos, { foreignKey: "idturno" });
 OT.belongsTo(AT, { foreignKey: "idarea" });
 OT.belongsTo(ES, { foreignKey: "idestacion_servicio" });
 OT.belongsTo(empleados, { foreignKey: "idpersonal", as: "personal" });
@@ -205,6 +210,31 @@ OT.belongsTo(empleados, { foreignKey: "idsolicitante", as: "solicitante" });
 OT.belongsTo(empleados, { foreignKey: "idliberante", as: "liberante" });
 AT.belongsTo(TM, { foreignKey: "idmantenimiento" });
 TM.hasMany(AT, { foreignKey: "idmantenimiento" });
+
+RecursosDespachador.belongsToMany(empleados, {
+  through: RecursosDespachadorEv,
+  // uniqueKey: "idrecurso",
+  foreignKey: "idrecurso",
+  otherKey: "idempleado",
+  as: "empleados",
+});
+empleados.belongsToMany(RecursosDespachador, {
+  through: RecursosDespachadorEv,
+  // uniqueKey: "idempleado",
+  foreignKey: "idempleado",
+  otherKey: "idrecurso",
+  // as: "evaluaciones",
+});
+
+RecursosDespachador.hasMany(RecursosDespachadorEv, { foreignKey: "idrecurso" });
+RecursosDespachadorEv.belongsTo(RecursosDespachador, {
+  foreignKey: "idrecurso",
+});
+empleados.hasMany(RecursosDespachadorEv, {
+  foreignKey: "idempleado",
+  as: "evaluaciones",
+});
+RecursosDespachadorEv.belongsTo(empleados, { foreignKey: "idempleado" });
 
 export default {
   nominas,
@@ -239,4 +269,6 @@ export default {
   OT,
   AT,
   TM,
+  RecursosDespachadorEv,
+  RecursosDespachador,
 };

@@ -348,6 +348,36 @@ controller.imprimir = async (req, res) => {
   }
 };
 
+controller.showMfMs = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { folio } = req.params;
+    const { show_mf, show_ms } = req.body;
+
+    const response = await Liquidaciones.update(
+      { show_mf, show_ms },
+      { where: { idliquidacion: folio }, silent: true }
+    );
+
+    await Auditoria.create({
+      peticion: "Actualización mostrar MF o MS",
+      idempleado: user.token.data.datos.idempleado,
+      accion: 1,
+      idaffectado: folio,
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.liquidacionesPendientes = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);

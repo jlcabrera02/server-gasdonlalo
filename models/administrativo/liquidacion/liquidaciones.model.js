@@ -47,6 +47,16 @@ const Liquidaciones = sequelize.define(
       allowNull: false,
       defaultValue: 0,
     },
+    show_mf: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+    show_ms: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   },
   {
     freezeTableName: true,

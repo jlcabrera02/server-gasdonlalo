@@ -1,1 +1,8 @@
-{ "precioHoraOT": 22 }
+{
+  "configDespacho": {
+    "recursosDespachador": {
+      "puntajeMinimo": 15
+    }
+  },
+  "precioHoraOT": 22
+}
