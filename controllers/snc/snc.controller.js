@@ -134,8 +134,6 @@ export async function obtenerRegistros(req, res) {
       return el;
     });
 
-    console.log(resp);
-
     res.status(200).json({ success: true, response: resp });
   } catch (err) {
     console.log(err);
