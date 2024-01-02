@@ -43,7 +43,7 @@ const EvUniforme = sequelize.define(
 export const CumplimientosUniforme = sequelize.define(
   "cumplimiento_uniforme",
   {
-    idcumplimiento: {
+    idcumplimiento_uniforme: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -59,7 +59,11 @@ export const CumplimientosUniforme = sequelize.define(
   }
 );
 
-EvUniforme.hasMany(CumplimientosUniforme, { foreignKey: "idcumplimiento" });
-CumplimientosUniforme.hasMany(EvUniforme, { foreignKey: "idcumplimiento" });
+EvUniforme.hasMany(CumplimientosUniforme, {
+  foreignKey: "idcumplimiento_uniforme",
+});
+CumplimientosUniforme.hasMany(EvUniforme, {
+  foreignKey: "idcumplimiento_uniforme",
+});
 
 export default EvUniforme;

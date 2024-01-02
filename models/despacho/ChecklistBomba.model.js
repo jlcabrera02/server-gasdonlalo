@@ -37,10 +37,6 @@ const ChecklistBomba = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    idempleado_entrante: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     idempleado_saliente: {
       type: DataTypes.INTEGER,
       allowNull: false,

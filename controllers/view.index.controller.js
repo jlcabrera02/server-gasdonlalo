@@ -8,7 +8,18 @@ import rdM from "../models/d.listaRecursosDespachador.model";
 import oyLM from "../models/d.oylIsla.model";
 import sncM from "../models/s.salidaNoConforme.model";
 import formatTiempo from "../assets/formatTiempo";
+import MF from "../models/despacho/MontosFaltantes.model";
+import CK from "../models/despacho/ChecklistBomba.model";
+import EV from "../models/despacho/EvUniforme.model";
+import PD from "../models/despacho/PasosDespachar.model";
+import OyL from "../models/despacho/OyL.model";
+import models from "../models";
+import sequelize from "../config/configdb";
+import { Op } from "sequelize";
+import calcularTotal from "../assets/sumarAlgo";
+import Decimal from "decimal.js-light";
 const { tiempoDB, formatMes } = formatTiempo;
+const { RecursosDespachadorEv, SNC, empleados, departamentos } = models;
 // import view from "../public/view/index.ejs";
 
 controller.index = async (req, res) => {
@@ -381,5 +392,122 @@ async function findEvaluaciones(fechaI, fechaF, idEmpleado, empleado, hoy) {
 
   return ev;
 }
+
+controller.boletasDespachadores = async (req, res) => {
+  try {
+    const { idEmpleado, month, year, quincena } = req.query;
+    if (!idEmpleado || !month || !year)
+      throw { code: 404, msg: "Faltan parametros a la consulta" };
+
+    const filtros = { idempleado: idEmpleado };
+
+    if (year && month) {
+      filtros[Op.and] = [
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+      if (quincena) {
+        if (Number(quincena) > 1) {
+          filtros[Op.and] = [
+            ...filtros[Op.and],
+            sequelize.where(sequelize.fn("DAY", sequelize.col("fecha")), {
+              [Op.gte]: 15,
+            }),
+          ];
+        } else {
+          filtros[Op.and] = [
+            ...filtros[Op.and],
+            sequelize.where(sequelize.fn("DAY", sequelize.col("fecha")), {
+              [Op.lt]: 15,
+            }),
+          ];
+        }
+      }
+    }
+
+    const empleado = await empleados.findOne({
+      attributes: [
+        "nombre",
+        "apellido_paterno",
+        "apellido_materno",
+        "nombre_completo",
+        "idempleado",
+        "idchecador",
+        "estatus",
+      ],
+      where: { idempleado: idEmpleado },
+      include: departamentos,
+    });
+    const mf = await MF.findAll({ where: filtros }).then((res) => {
+      const convertObject = JSON.parse(JSON.stringify(res));
+      return calcularTotal(convertObject, "cantidad");
+    });
+
+    const ck = await CK.count({
+      where: {
+        ...filtros,
+        fechac: true,
+        isla_limpia: true,
+        aceites_completos: true,
+        turno: true,
+        bomba: true,
+        estacion_servicio: true,
+        empleado_saliente: true,
+      },
+    });
+
+    const eu = await EV.findAll({ where: filtros }).then((res) => {
+      const convertObject = JSON.parse(JSON.stringify(res)).map((el) => ({
+        cantidad: el.cumple ? 1 : 0,
+      }));
+      const puntos = calcularTotal(convertObject, "cantidad");
+      const total = convertObject.length;
+      return Number(new Decimal(puntos).div(total).toFixed(2)) * 10;
+    });
+
+    const pd = await PD.findAll({ where: filtros }).then((res) => {
+      const convertObject = JSON.parse(JSON.stringify(res)).map((el) => ({
+        cantidad: el.evaluacion ? 1 : 0,
+      }));
+      const puntos = calcularTotal(convertObject, "cantidad");
+      const total = convertObject.length;
+      return Number(new Decimal(puntos).div(total).toFixed(2)) * 10;
+    });
+
+    const rd = await RecursosDespachadorEv.findAll({ where: filtros }).then(
+      (res) => {
+        const convertObject = JSON.parse(JSON.stringify(res)).map((el) => ({
+          cantidad: el.evaluacion ? 1 : 0,
+        }));
+        const puntos = calcularTotal(convertObject, "cantidad");
+        const total = convertObject.length;
+        return Number(new Decimal(puntos).div(total).toFixed(2)) * 10;
+      }
+    );
+
+    const oyl = await OyL.findAll({ where: filtros }).then((res) => {
+      const convertObject = JSON.parse(JSON.stringify(res)).map((el) => ({
+        cantidad: el.cumple ? 1 : 0,
+      }));
+      const puntos = calcularTotal(convertObject, "cantidad");
+      const total = convertObject.length;
+      return Number(new Decimal(puntos).div(total).toFixed(2)) * 10;
+    });
+
+    const snc = await SNC.count({ where: filtros });
+
+    res.status(200).json({
+      success: true,
+      response: { empleado, mf, ck, eu, pd, rd, oyl, snc },
+    });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 export default controller;
