@@ -47,8 +47,7 @@ controller.findOne = async (req, res) => {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
     const { id } = req.params;
-    let response = await empleadoM.findOne(id);
-    console.log(response);
+    let response = await empleados.findOne({ where: { idempleado: id } });
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {

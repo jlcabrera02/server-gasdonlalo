@@ -393,7 +393,7 @@ async function findEvaluaciones(fechaI, fechaF, idEmpleado, empleado, hoy) {
   return ev;
 }
 
-controller.boletasDespachadores = async (req, res) => {
+controller.boletasDespachador = async (req, res) => {
   try {
     const { idEmpleado, month, year, quincena } = req.query;
     if (!idEmpleado || !month || !year)
@@ -499,6 +499,112 @@ controller.boletasDespachadores = async (req, res) => {
     res.status(200).json({
       success: true,
       response: { empleado, mf, ck, eu, pd, rd, oyl, snc },
+    });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.boletasDespachadores = async (req, res) => {
+  try {
+    const { month, year, quincena } = req.query;
+    if (!month || !year)
+      throw { code: 404, msg: "Faltan parametros a la consulta" };
+
+    const filtros = {};
+
+    if (year && month) {
+      filtros[Op.and] = [
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+      if (quincena) {
+        if (Number(quincena) > 1) {
+          filtros[Op.and] = [
+            ...filtros[Op.and],
+            sequelize.where(sequelize.fn("DAY", sequelize.col("fecha")), {
+              [Op.gte]: 15,
+            }),
+          ];
+        } else {
+          filtros[Op.and] = [
+            ...filtros[Op.and],
+            sequelize.where(sequelize.fn("DAY", sequelize.col("fecha")), {
+              [Op.lt]: 15,
+            }),
+          ];
+        }
+      }
+    }
+
+    const empleadosRes = await empleados.findAll({
+      attributes: [
+        "nombre",
+        "apellido_paterno",
+        "apellido_materno",
+        "nombre_completo",
+        "idempleado",
+        "idchecador",
+        "estatus",
+      ],
+      where: {
+        iddepartamento: 1,
+        estatus: { [Op.or]: ["Contrato", "Despido"] },
+      },
+      include: departamentos,
+    });
+    const mf = await MF.findAll({
+      attributes: ["idempleado", "fecha", "cantidad"],
+      where: filtros,
+    });
+
+    const ck = await CK.findAll({
+      attributes: ["idempleado", "fecha", "isla_limpia", "aceites_completos"],
+      where: {
+        ...filtros,
+        fechac: true,
+        isla_limpia: true,
+        aceites_completos: true,
+        turno: true,
+        bomba: true,
+        estacion_servicio: true,
+        empleado_saliente: true,
+      },
+    });
+
+    const eu = await EV.findAll({
+      attributes: ["idempleado", "fecha", "cumple"],
+      where: filtros,
+    });
+
+    const pd = await PD.findAll({
+      attributes: ["idempleado", "fecha", "evaluacion"],
+      where: filtros,
+    });
+
+    const rd = await RecursosDespachadorEv.findAll({
+      attributes: ["idempleado", "fecha", "evaluacion"],
+      where: filtros,
+    });
+
+    const oyl = await OyL.findAll({
+      attributes: ["idempleado", "fecha", "cumple"],
+      where: filtros,
+    });
+
+    const snc = await SNC.findAll({
+      attributes: ["idempleado", "fecha"],
+      where: filtros,
+    });
+
+    res.status(200).json({
+      success: true,
+      response: { empleados: empleadosRes, mf, ck, eu, pd, rd, oyl, snc },
     });
   } catch (err) {
     console.log(err);
