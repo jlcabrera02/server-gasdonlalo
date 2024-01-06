@@ -38,7 +38,7 @@ model.findIncumplimientosXcategorizacion = (idConcurso, iddepartamento) =>
     if (!iddepartamento) {
       //Como el idconcurso y el concurso son iguales por eso no separo el idconcurso con una nueva propiedad concurso
       sql = mysql.format(
-        `SELECT inc.incumplimiento, inc.idincumplimiento, cinc.idconcurso, cinc.cantidad  FROM (SELECT * FROM concurso c, incumplimiento inc WHERE c.concurso = ? AND iddepartamento = 1) inc LEFT JOIN (SELECT * FROM categorizar_incumplimiento WHERE idconcurso = ?) cinc ON inc.idincumplimiento = cinc.idincumplimiento`,
+        `SELECT inc.incumplimiento, inc.idincumplimiento, cinc.idconcurso, cinc.cantidad  FROM (SELECT inc.incumplimiento, inc.idincumplimiento FROM concurso c, incumplimiento inc WHERE c.concurso = ? AND c.iddepartamento = 1) inc LEFT JOIN (SELECT * FROM categorizar_incumplimiento WHERE idconcurso = ?) cinc ON inc.idincumplimiento = cinc.idincumplimiento`,
         [idConcurso, idConcurso]
       );
     } else {
@@ -50,6 +50,7 @@ model.findIncumplimientosXcategorizacion = (idConcurso, iddepartamento) =>
     }
 
     connection.query(sql, idConcurso, (err, res) => {
+      console.log({ err });
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
