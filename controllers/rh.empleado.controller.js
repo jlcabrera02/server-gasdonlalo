@@ -4,7 +4,7 @@ import auth from "../models/auth.model";
 const { verificar } = auth;
 import { mayus } from "./formatearText.controller";
 import models from "../models";
-const { empleados } = models;
+const { empleados, departamentos } = models;
 
 const controller = {};
 const area = "Empleados";
@@ -29,7 +29,10 @@ controller.find = async (req, res) => {
       filtros.estatus = estatus;
     }
 
-    const response = await empleados.findAll({ where: filtros });
+    const response = await empleados.findAll({
+      where: filtros,
+      include: departamentos,
+    });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
