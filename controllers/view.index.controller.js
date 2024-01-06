@@ -491,7 +491,9 @@ controller.boletasDespachador = async (req, res) => {
       }));
       const puntos = calcularTotal(convertObject, "cantidad");
       const total = convertObject.length;
-      return Number(new Decimal(puntos).div(total).toFixed(2)) * 10;
+      return new Decimal(new Decimal(puntos).div(total).toFixed(2))
+        .mul(10)
+        .toFixed(2);
     });
 
     const snc = await SNC.count({ where: filtros });
