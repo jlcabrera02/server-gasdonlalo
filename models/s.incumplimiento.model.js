@@ -43,7 +43,7 @@ model.findIncumplimientosXcategorizacion = (idConcurso, iddepartamento) =>
       );
     } else {
       sql = mysql.format(
-        `SELECT inc.incumplimiento, inc.idincumplimiento, cinc.idconcurso, cinc.cantidad  FROM (SELECT * FROM concurso c, incumplimiento inc WHERE c.concurso = 1 AND c.iddepartamento = ?) inc LEFT JOIN (SELECT * FROM categorizar_incumplimiento WHERE idconcurso = ?) cinc ON inc.idincumplimiento = cinc.idincumplimiento`,
+        `SELECT inc.incumplimiento, inc.idincumplimiento, cinc.idconcurso, cinc.cantidad  FROM(SELECT inc.incumplimiento, inc.idincumplimiento FROM concurso c, incumplimiento inc WHERE c.concurso = ? AND c.iddepartamento = ?) inc LEFT JOIN (SELECT * FROM categorizar_incumplimiento WHERE idconcurso = ?) cinc ON inc.idincumplimiento = cinc.idincumplimiento`,
         [iddepartamento, idConcurso]
         //Aqui el c.concurso va a hacer siempre 1 haciendo referencia al concurso madrugador.
       );
