@@ -71,6 +71,57 @@ controller.lecturasIniciales = async (req, res) => {
   }
 };
 
+controller.lecturasInicialesNew = async (req, res) => {
+  try {
+    // let user = verificar(req.headers.authorization);
+    // const { auth } = req.query;
+    // if (!user.success && !auth) throw user;
+    const { idEstacion } = req.params;
+
+    Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
+    Islas.hasMany(Mangueras, { foreignKey: "idisla" });
+
+    Mangueras.belongsTo(Gas, { foreignKey: "idgas" });
+    Gas.hasMany(Mangueras, { foreignKey: "idgas" });
+
+    const response = await Mangueras.findAll({
+      include: [
+        { model: Gas },
+        {
+          model: LecturasFinales,
+          limit: 1,
+          include: [{ model: InfoLecturas }],
+          order: [["idinfo_lectura", "DESC"]],
+        },
+        {
+          model: Islas,
+          where: { idestacion_servicio: idEstacion },
+        },
+      ],
+    });
+
+    const filtrarDatos = JSON.parse(JSON.stringify(response)).filter(
+      (el) => el.lecturas_finales.length > 0
+    );
+
+    const folios = agruparArr(
+      filtrarDatos,
+      (e) => e.lecturas_finales[0].info_lectura.idinfo_lectura
+    ).keys();
+
+    const folio = folios[folios.length - 1];
+
+    res.status(200).json({ success: true, response, folio });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.buscarLecturas = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);

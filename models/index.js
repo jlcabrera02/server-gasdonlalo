@@ -236,6 +236,22 @@ empleados.hasMany(RecursosDespachadorEv, {
 });
 RecursosDespachadorEv.belongsTo(empleados, { foreignKey: "idempleado" });
 
+InfoLecturas.belongsToMany(Mangueras, {
+  through: LecturasFinales,
+  foreignKey: "idinfo_lectura",
+});
+Mangueras.belongsToMany(InfoLecturas, {
+  through: LecturasFinales,
+  foreignKey: "idmanguera",
+});
+InfoLecturas.hasMany(LecturasFinales, {
+  foreignKey: "idinfo_lectura",
+  as: "LCT",
+});
+LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
+Mangueras.hasMany(LecturasFinales, { foreignKey: "idmanguera" });
+LecturasFinales.belongsTo(Mangueras, { foreignKey: "idmanguera" });
+
 export default {
   nominas,
   tiposNominas,
