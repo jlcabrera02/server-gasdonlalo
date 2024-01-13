@@ -5,8 +5,11 @@ import empM from "../models/rh.empleado.model";
 import auth from "../models/auth.model";
 import formatTiempo from "../assets/formatTiempo";
 import sncaM from "../models/s.acumular.model";
+import models from "../models";
+import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
+const { SncNotification, empleados } = models;
 
 const controller = {};
 const area = "Evaluación Uniforme";
@@ -181,12 +184,34 @@ controller.insert = async (req, res) => {
 
     const SNCvalidar = cuerpo.some((el) => el[4] === 0);
     if (SNCvalidar) {
-      await sncaM.insert([
-        11,
-        empleado,
-        fecha,
-        `No cumplio completamente con el uniforme`,
-      ]);
+      const sncNotificationFind =
+        obtenerConfiguraciones().configSNC.sncacumuladas.find(
+          (el) => el.notificacion === "Evaluación de uniforme"
+        );
+
+      const empleadoName = await empleados.findOne({
+        attributes: [
+          "nombre",
+          "apellido_paterno",
+          "apellido_materno",
+          "nombre_completo",
+        ],
+        where: { idempleado: empleado },
+      });
+
+      const descripcion = sncNotificationFind.descripcion
+        .replaceAll(
+          `\$\{empleado\}`,
+          JSON.parse(JSON.stringify(empleadoName)).nombre_completo.toLowerCase()
+        )
+        .replaceAll(`\$\{fecha\}`, formatTiempo.tiempoLocalShort(fecha));
+
+      await SncNotification.create({
+        idincumplimiento: sncNotificationFind.idincumplimiento,
+        descripcion: descripcion,
+        idempleado: empleado,
+        fecha: fecha,
+      });
     }
 
     //await evaluacionUniformeM.validarNoDuplicadoXQuincena(req.body); //validamos si existe un registro
@@ -237,12 +262,36 @@ controller.update = async (req, res) => {
 
     if (!correcto) {
       if (snca.length === 0) {
-        await sncaM.insert([
-          11,
-          empleado,
-          fecha,
-          `No cumplio completamente con el uniforme`,
-        ]);
+        const sncNotificationFind =
+          obtenerConfiguraciones().configSNC.sncacumuladas.find(
+            (el) => el.notificacion === "Evaluación de uniforme"
+          );
+
+        const empleadoName = await empleados.findOne({
+          attributes: [
+            "nombre",
+            "apellido_paterno",
+            "apellido_materno",
+            "nombre_completo",
+          ],
+          where: { idempleado: empleado },
+        });
+
+        const descripcion = sncNotificationFind.descripcion
+          .replaceAll(
+            `\$\{empleado\}`,
+            JSON.parse(
+              JSON.stringify(empleadoName)
+            ).nombre_completo.toLowerCase()
+          )
+          .replaceAll(`\$\{fecha\}`, formatTiempo.tiempoLocalShort(fecha));
+
+        await SncNotification.create({
+          idincumplimiento: sncNotificationFind.idincumplimiento,
+          descripcion: descripcion,
+          idempleado: empleado,
+          fecha: fecha,
+        });
       }
     } else {
       const SNCvalidar = cuerpo.map((el) => el[0]).includes(0);
@@ -260,6 +309,7 @@ controller.update = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

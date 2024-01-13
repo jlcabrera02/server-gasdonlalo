@@ -6,7 +6,7 @@ import sncaM from "../models/s.acumular.model";
 import fTiempo from "../assets/formatTiempo";
 import respErro from "../respuestas/error.respuestas";
 import model from "../models/index";
-const { SNC } = model;
+const { SNC, SncNotification, empleados, Incumplimientos } = model;
 const { peticionImposible } = respErro;
 const { tiempoDB } = fTiempo;
 const { verificar } = auth;
@@ -78,10 +78,14 @@ controller.findSNCPorCapturar = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 20);
     if (!user.success) throw user;
-    const { idDepartamento } = req.params;
-    const response = await sncaM.find(idDepartamento);
+    const response = await SncNotification.findAll({
+      where: { capturado: 0 },
+      include: [empleados, Incumplimientos],
+      order: [["idsncacumuladas", "DESC"]],
+    });
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

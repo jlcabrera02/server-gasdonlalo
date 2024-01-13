@@ -1,10 +1,15 @@
 import { Op } from "sequelize";
 import sequelize from "../../config/configdb";
 import models from "../../models/index";
-const { RecursosDespachadorEv, RecursosDespachador, Auditoria, empleados } =
-  models;
-
-const area = "Recurso Despachador";
+import { obtenerConfiguraciones } from "../../services/configuracionesPersonalizables";
+import formatTiempo from "../../assets/formatTiempo";
+const {
+  RecursosDespachadorEv,
+  RecursosDespachador,
+  Auditoria,
+  empleados,
+  SncNotification,
+} = models;
 
 const controller = {};
 
@@ -96,9 +101,40 @@ controller.createEv = async (req, res) => {
       fecha,
     }));
 
-    const response = await RecursosDespachadorEv.bulkCreate(ev);
+    const incumple = evaluaciones.some((ev) => !ev.evaluacion);
 
-    // await Auditoria.create({});
+    if (incumple) {
+      const sncNotificationFind =
+        obtenerConfiguraciones().configSNC.sncacumuladas.find(
+          (el) => el.notificacion === "Recursos de despachador"
+        );
+
+      const empleadoName = await empleados.findOne({
+        attributes: [
+          "nombre",
+          "apellido_paterno",
+          "apellido_materno",
+          "nombre_completo",
+        ],
+        where: { idempleado: idEmpleado },
+      });
+
+      const descripcion = sncNotificationFind.descripcion
+        .replaceAll(
+          `\$\{empleado\}`,
+          JSON.parse(JSON.stringify(empleadoName)).nombre_completo.toLowerCase()
+        )
+        .replaceAll(`\$\{fecha\}`, formatTiempo.tiempoLocalShort(fecha));
+
+      await SncNotification.create({
+        idincumplimiento: sncNotificationFind.idincumplimiento,
+        descripcion: descripcion,
+        idempleado: idEmpleado,
+        fecha: fecha,
+      });
+    }
+
+    const response = await RecursosDespachadorEv.bulkCreate(ev);
 
     return res.status(200).json({ succcess: true, response });
   } catch (err) {

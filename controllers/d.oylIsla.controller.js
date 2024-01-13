@@ -5,6 +5,9 @@ import auth from "../models/auth.model";
 import sncaM from "../models/s.acumular.model";
 import empM from "../models/rh.empleado.model";
 import formatTiempo from "../assets/formatTiempo";
+import models from "../models";
+import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
+const { SncNotification, empleados } = models;
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 
@@ -184,12 +187,34 @@ controller.insert = async (req, res) => {
     let buscarInconformidad = evaluaciones.some((el) => el.cumple === 0);
 
     if (buscarInconformidad || incidentes) {
-      await sncaM.insert([
-        13,
-        idEmpleado,
-        fecha,
-        `Incidentes o falta de puntos en orden y limpieza`,
-      ]);
+      const sncNotificationFind =
+        obtenerConfiguraciones().configSNC.sncacumuladas.find(
+          (el) => el.notificacion === "Orden y limpieza de isla"
+        );
+
+      const empleadoName = await empleados.findOne({
+        attributes: [
+          "nombre",
+          "apellido_paterno",
+          "apellido_materno",
+          "nombre_completo",
+        ],
+        where: { idempleado: idEmpleado },
+      });
+
+      const descripcion = sncNotificationFind.descripcion
+        .replaceAll(
+          `\$\{empleado\}`,
+          JSON.parse(JSON.stringify(empleadoName)).nombre_completo.toLowerCase()
+        )
+        .replaceAll(`\$\{fecha\}`, formatTiempo.tiempoLocalShort(fecha));
+
+      await SncNotification.create({
+        idincumplimiento: sncNotificationFind.idincumplimiento,
+        descripcion: descripcion,
+        idempleado: idEmpleado,
+        fecha: fecha,
+      });
     }
 
     const response = await oylM.insert(cuerpo);
@@ -203,6 +228,7 @@ controller.insert = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res
         .status(400)

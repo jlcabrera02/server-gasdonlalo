@@ -2,6 +2,10 @@ import { Op } from "sequelize";
 import models from "../../models";
 import sequelize from "../../config/configdb";
 import Incumplimientos from "../../models/snc/incumplimientos";
+import {
+  obtenerConfiguraciones,
+  escribirConfiguraciones,
+} from "../../services/configuracionesPersonalizables";
 const { empleados, SNC } = models;
 
 export async function buscarSNCXEmpleado(req, res) {
@@ -39,7 +43,6 @@ export async function buscarSNCXEmpleado(req, res) {
     const response = await SNC.findAll(options);
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     res.status(400).json({
       success: false,
       err,
@@ -135,15 +138,28 @@ export async function obtenerRegistros(req, res) {
       return el;
     });
 
-    console.log(resp);
-
     res.status(200).json({ success: true, response: resp });
   } catch (err) {
-    console.log(err);
     res.status(400).json({
       success: false,
       err,
       msg: err.msg || "Error al obtener los registros de SNC",
     });
   }
+}
+
+export async function configSnc(req, res) {
+  const config = obtenerConfiguraciones().configSNC;
+  res.status(200).json({ success: true, response: config });
+}
+
+export async function updateConfigSnc(req, res) {
+  const configuraciones = {
+    configSNC: {
+      sncacumuladas: req.body,
+    },
+  };
+  escribirConfiguraciones(configuraciones);
+
+  res.status(200).json({ success: true, response: "Se guardo correctamente" });
 }

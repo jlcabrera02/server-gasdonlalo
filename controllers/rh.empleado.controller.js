@@ -35,7 +35,6 @@ controller.findOne = async (req, res) => {
     if (!user.success) throw user;
     const { id } = req.params;
     let response = await empleadoM.findOne(id);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -118,7 +117,6 @@ controller.update = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

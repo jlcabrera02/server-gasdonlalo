@@ -8,6 +8,7 @@ import sequelize from "../config/configdb";
 import { Op } from "sequelize";
 import format from "../assets/formatTiempo";
 import { mandarActualizacion } from "../socket/panicbtn.socket";
+import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
 const {
   empleados,
   Turnos,
@@ -15,6 +16,7 @@ const {
   ES,
   ChecklistRegistros,
   LlaveAccesoChecklist,
+  SncNotification,
 } = model;
 const { verificar } = auth;
 
@@ -158,7 +160,35 @@ controller.insert = async (req, res) => {
       let data = Object.entries(cuerpo).slice(1, 9);
       let incumple = data.filter((el) => el[1] === false);
       let atexto = incumple.map((el) => el[0].replace("_", " ")).join(", ");
-      await sncaM.insert([3, idEmpleado, fecha, `No cumple con ${atexto}`]);
+      const sncNotificationFind =
+        obtenerConfiguraciones().configSNC.sncacumuladas.find(
+          (el) => el.notificacion === "Checklist de bomba"
+        );
+
+      const empleadoName = await empleados.findOne({
+        attributes: [
+          "nombre",
+          "apellido_paterno",
+          "apellido_materno",
+          "nombre_completo",
+        ],
+        where: { idempleado: cuerpo.idempleado },
+      });
+
+      const descripcion = sncNotificationFind.descripcion
+        .replaceAll(
+          `\$\{empleado\}`,
+          JSON.parse(JSON.stringify(empleadoName)).nombre_completo.toLowerCase()
+        )
+        .replaceAll(`\$\{evaluaciones\}`, atexto)
+        .replaceAll(`\$\{fecha\}`, format.tiempoLocalShort(cuerpo.fecha));
+
+      await SncNotification.create({
+        idincumplimiento: sncNotificationFind.idincumplimiento,
+        descripcion: descripcion,
+        idempleado: cuerpo.idempleado,
+        fecha: cuerpo.fecha,
+      });
     }
 
     let response = await checklistBombaM.insert(cuerpo);
@@ -232,7 +262,9 @@ controller.update = async (req, res) => {
         cuerpo.fechac
       ) {
         if (snca.length > 0) {
-          await sncaM.delete(snca[0].idsncacumuladas);
+          await SncNotification.destroy({
+            where: { idsncacumuladas: snca[0].idsncacumuladas },
+          });
         }
       }
     }
@@ -251,7 +283,38 @@ controller.update = async (req, res) => {
         let data = Object.entries(cuerpo).slice(1, 9);
         let incumple = data.filter((el) => el[1] === false);
         let atexto = incumple.map((el) => el[0].replace("_", " ")).join(", ");
-        await sncaM.insert([3, idEmpleado, fecha, `No cumple con ${atexto}`]);
+
+        const sncNotificationFind =
+          obtenerConfiguraciones().configSNC.sncacumuladas.find(
+            (el) => el.notificacion === "Checklist de bomba"
+          );
+
+        const empleadoName = await empleados.findOne({
+          attributes: [
+            "nombre",
+            "apellido_paterno",
+            "apellido_materno",
+            "nombre_completo",
+          ],
+          where: { idempleado: cuerpo.idempleado },
+        });
+
+        const descripcion = sncNotificationFind.descripcion
+          .replaceAll(
+            `\$\{empleado\}`,
+            JSON.parse(
+              JSON.stringify(empleadoName)
+            ).nombre_completo.toLowerCase()
+          )
+          .replaceAll(`\$\{evaluaciones\}`, atexto)
+          .replaceAll(`\$\{fecha\}`, format.tiempoLocalShort(cuerpo.fecha));
+
+        await SncNotification.create({
+          idincumplimiento: sncNotificationFind.idincumplimiento,
+          descripcion: descripcion,
+          idempleado: cuerpo.idempleado,
+          fecha: cuerpo.fecha,
+        });
       }
     }
 

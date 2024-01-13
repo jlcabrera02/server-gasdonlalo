@@ -5,9 +5,12 @@ import errRes from "../respuestas/error.respuestas";
 import sncaM from "../models/s.acumular.model";
 import auth from "../models/auth.model";
 import formatTiempo from "../assets/formatTiempo";
+import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
+import models from "../models";
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 const { sinRegistro } = errRes;
+const { SncNotification, empleados } = models;
 
 const controller = {};
 
@@ -145,12 +148,34 @@ controller.insert = async (req, res) => {
 
     const incorrecto = cuerpo.map((el) => el[3]).includes(0);
     if (incorrecto) {
-      await sncaM.insert([
-        10,
-        empleado,
-        fecha,
-        `No cumplio con algunos pasos en pasos para despachar`,
-      ]);
+      const sncNotificationFind =
+        obtenerConfiguraciones().configSNC.sncacumuladas.find(
+          (el) => el.notificacion === "Pasos para despachar"
+        );
+
+      const empleadoName = await empleados.findOne({
+        attributes: [
+          "nombre",
+          "apellido_paterno",
+          "apellido_materno",
+          "nombre_completo",
+        ],
+        where: { idempleado: empleado },
+      });
+
+      const descripcion = sncNotificationFind.descripcion
+        .replaceAll(
+          `\$\{empleado\}`,
+          JSON.parse(JSON.stringify(empleadoName)).nombre_completo.toLowerCase()
+        )
+        .replaceAll(`\$\{fecha\}`, formatTiempo.tiempoLocalShort(fecha));
+
+      await SncNotification.create({
+        idincumplimiento: sncNotificationFind.idincumplimiento,
+        descripcion: descripcion,
+        idempleado: empleado,
+        fecha: fecha,
+      });
     }
 
     //await pasosDM.verificar([cuerpo.fecha, cuerpo.idempleado]); //recoleccion efectivo
@@ -196,12 +221,34 @@ controller.update = async (req, res) => {
       .includes(false);
 
     if (!viejoIncorrecto && incorrecto) {
-      await sncaM.insert([
-        10,
-        idEmpleado,
-        fecha,
-        `No cumplio con algunos pasos en pasos para despachar`,
-      ]);
+      const sncNotificationFind =
+        obtenerConfiguraciones().configSNC.sncacumuladas.find(
+          (el) => el.notificacion === "Pasos para despachar"
+        );
+
+      const empleadoName = await empleados.findOne({
+        attributes: [
+          "nombre",
+          "apellido_paterno",
+          "apellido_materno",
+          "nombre_completo",
+        ],
+        where: { idempleado: idEmpleado },
+      });
+
+      const descripcion = sncNotificationFind.descripcion
+        .replaceAll(
+          `\$\{empleado\}`,
+          JSON.parse(JSON.stringify(empleadoName)).nombre_completo.toLowerCase()
+        )
+        .replaceAll(`\$\{fecha\}`, formatTiempo.tiempoLocalShort(fecha));
+
+      await SncNotification.create({
+        idincumplimiento: sncNotificationFind.idincumplimiento,
+        descripcion: descripcion,
+        idempleado: idEmpleado,
+        fecha: fecha,
+      });
     }
 
     if (snca.length > 0 && !incorrecto) {

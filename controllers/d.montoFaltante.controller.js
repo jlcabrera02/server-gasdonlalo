@@ -7,8 +7,11 @@ import operacionTiempo from "../assets/operacionTiempo";
 import formatTiempo from "../assets/formatTiempo";
 import sncaM from "../models/s.acumular.model";
 import auth from "../models/auth.model";
+import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
+import models from "../models";
 const { verificar } = auth;
 const { errorMath, sinRegistro } = resErr;
+const { SncNotification, empleados } = models;
 
 const controller = {};
 const area = "Montos Faltantes";
@@ -182,24 +185,10 @@ controller.insert = async (req, res) => {
       );
 
     const response = await insertarMf(req, res, cuerpo);
-    /* await sncaM.insert([
-      6,
-      empleado,
-      fecha,
-      `Inconformidad por la cantidad de $${cantidad} pesos`,
-    ]);
-
-    let response = await montoFaltanteM.insert(cuerpo);
-
-    await guardarBitacora([
-      area,
-      user.token.data.datos.idempleado,
-      2,
-      response.insertId,
-    ]); */
 
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -214,15 +203,6 @@ controller.update = async (req, res) => {
     if (!user.success) throw user;
     const { id } = req.params;
     const { cantidad, fecha, empleado } = req.body;
-    const snca = await sncaM.validar([empleado, 6, fecha]);
-    if (snca.length > 0) {
-      await sncaM.update([
-        {
-          descripcion: `Inconformidad por la cantidad de $${cantidad} pesos`,
-        },
-        snca[0].idsncacumuladas,
-      ]);
-    }
 
     const cuerpo = {
       cantidad: Number(cantidad),
@@ -237,7 +217,6 @@ controller.update = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -251,9 +230,6 @@ controller.delete = async (req, res) => {
     let user = verificar(req.headers.authorization, 4);
     if (!user.success) throw user;
     const { id } = req.params;
-    const viejo = await montoFaltanteM.findOne(id);
-    const snca = await sncaM.validar([viejo.idempleado, 6, viejo.fecha]);
-    if (snca.length > 0) await sncaM.delete(snca[0].idsncacumuladas);
     let response = await montoFaltanteM.delete(id);
     await guardarBitacora([area, user.token.data.datos.idempleado, 4, id]);
     res.status(200).json({ success: true, response });
@@ -269,12 +245,35 @@ controller.delete = async (req, res) => {
 export const insertarMf = async (req, res, cuerpo) => {
   let user = verificar(req.headers.authorization, 2);
 
-  const insertar = await sncaM.insert([
-    6,
-    cuerpo.idempleado,
-    cuerpo.fecha,
-    `Inconformidad por la cantidad de $${cuerpo.cantidad} pesos`,
-  ]);
+  const sncNotificationFind =
+    obtenerConfiguraciones().configSNC.sncacumuladas.find(
+      (el) => el.notificacion === "Monto Faltante"
+    );
+
+  const empleadoName = await empleados.findOne({
+    attributes: [
+      "nombre",
+      "apellido_paterno",
+      "apellido_materno",
+      "nombre_completo",
+    ],
+    where: { idempleado: cuerpo.idempleado },
+  });
+
+  const descripcion = sncNotificationFind.descripcion
+    .replaceAll(
+      `\$\{empleado\}`,
+      JSON.parse(JSON.stringify(empleadoName)).nombre_completo.toLowerCase()
+    )
+    .replaceAll(`\$\{cantidad\}`, formatTiempo.formatDinero(cuerpo.cantidad))
+    .replaceAll(`\$\{fecha\}`, formatTiempo.tiempoLocalShort(cuerpo.fecha));
+
+  const createNotification = await SncNotification.create({
+    idincumplimiento: sncNotificationFind.idincumplimiento,
+    descripcion: descripcion,
+    idempleado: cuerpo.idempleado,
+    fecha: cuerpo.fecha,
+  });
 
   let response = await montoFaltanteM.insert(cuerpo);
 
@@ -284,7 +283,8 @@ export const insertarMf = async (req, res, cuerpo) => {
     2,
     response.insertId,
   ]);
-  return insertar;
+
+  return createNotification;
 };
 
 export default controller;

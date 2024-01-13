@@ -34,6 +34,7 @@ import EfectivoTienda from "./administrativo/liquidacion/efectivoTienda.model";
 import ControlVol from "./administrativo/liquidacion/control_volumetrico";
 import Preliquidaciones from "./administrativo/liquidacion/preliquidaciones.model";
 import PanicBtn from "./administrativo/panicBtn.model";
+import SncNotification from "./snc/sncAcumuladas.model.js";
 
 //pagares
 import Pagares from "../models/pagares/Pagare.model";
@@ -252,6 +253,9 @@ LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
 Mangueras.hasMany(LecturasFinales, { foreignKey: "idmanguera" });
 LecturasFinales.belongsTo(Mangueras, { foreignKey: "idmanguera" });
 
+SncNotification.belongsTo(empleados, { foreignKey: "idempleado" });
+SncNotification.belongsTo(Incumplimientos, { foreignKey: "idincumplimiento" });
+
 export default {
   nominas,
   tiposNominas,
@@ -287,4 +291,5 @@ export default {
   TM,
   RecursosDespachadorEv,
   RecursosDespachador,
+  SncNotification,
 };
