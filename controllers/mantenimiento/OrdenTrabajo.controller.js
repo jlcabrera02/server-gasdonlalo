@@ -5,13 +5,12 @@ import {
   obtenerConfiguraciones,
   escribirConfiguraciones,
 } from "../../services/configuracionesPersonalizables";
-import snca from "../../models/s.acumular.model";
 import format from "../../assets/formatTiempo";
 import Decimal from "decimal.js-light";
 import Utencilios from "../../models/mantenimiento/Utencilios";
 import { Op } from "sequelize";
 const { verificar } = auth;
-const { OT, PanicBtn, empleados, AT } = modelos;
+const { OT, PanicBtn, empleados, AT, SncNotification } = modelos;
 
 const controller = {};
 
@@ -518,12 +517,36 @@ controller.liberarOT = async (req, res) => {
       );
 
       if (ot.dataValues.idpersonal) {
-        await snca.insert([
-          19,
-          ot.dataValues.idpersonal,
-          fecha,
-          `No paso cumplio correctamente con una OT`,
-        ]);
+        const sncNotificationFind =
+          obtenerConfiguraciones().configSNC.sncacumuladas.find(
+            (el) => el.notificacion === "Órden de trabajo no autorizada"
+          );
+
+        const empleadoName = await empleados.findOne({
+          attributes: [
+            "nombre",
+            "apellido_paterno",
+            "apellido_materno",
+            "nombre_completo",
+          ],
+          where: { idempleado: ot.dataValues.idpersonal },
+        });
+
+        const descripcion = sncNotificationFind.descripcion
+          .replaceAll(
+            `\$\{empleado\}`,
+            JSON.parse(
+              JSON.stringify(empleadoName)
+            ).nombre_completo.toLowerCase()
+          )
+          .replaceAll(`\$\{fecha\}`, format.tiempoLocalShort(fecha));
+
+        await SncNotification.create({
+          idincumplimiento: sncNotificationFind.idincumplimiento,
+          descripcion: descripcion,
+          idempleado: ot.dataValues.idpersonal,
+          fecha: fecha,
+        });
       }
 
       res.status(200).json({ success: true, response });
