@@ -56,7 +56,7 @@ export const pasosDes = sequelize.define(
   }
 );
 
-EvPasosDespachar.hasMany(pasosDes, {
+EvPasosDespachar.belongsTo(pasosDes, {
   foreignKey: "idpaso_despachar",
 });
 pasosDes.hasMany(EvPasosDespachar, {

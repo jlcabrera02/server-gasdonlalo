@@ -3,6 +3,8 @@ import evaluacionUniforme from "../controllers/d.evaluacionUniforme.controller";
 
 const route = router();
 
+route.get("/historial", evaluacionUniforme.obtenerEvaluacion);
+
 route.get("/get-pasos", evaluacionUniforme.findPasosEvUniforme);
 route.get("/buscar/:identificador", evaluacionUniforme.findOne);
 route.get(

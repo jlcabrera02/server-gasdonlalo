@@ -7,12 +7,73 @@ import empM from "../models/rh.empleado.model";
 import formatTiempo from "../assets/formatTiempo";
 import models from "../models";
 import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
+import { Op } from "sequelize";
+import sequelize from "../config/configdb";
+import OyL, { CumplimientosOyL } from "../models/despacho/OyL.model";
 const { SncNotification, empleados } = models;
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 
 const controller = {};
 const area = "Orden y limpieza";
+
+controller.obtenerEvaluacion = async (req, res) => {
+  try {
+    const { fechaI, fechaF, month, year, idEmpleado } = req.query;
+
+    const filtros = {};
+
+    if (fechaI && fechaF) {
+      filtros.fecha = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (idEmpleado) {
+      filtros.idempleado = idEmpleado;
+    }
+
+    if (year && month) {
+      filtros[Op.and] = [
+        ...(filtros[Op.and] || []),
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+    }
+
+    empleados.hasMany(OyL, { foreignKey: "idempleado" });
+
+    const response = await empleados.findAll({
+      attributes: [
+        "nombre",
+        "idempleado",
+        "idchecador",
+        "apellido_paterno",
+        "apellido_materno",
+        "nombre_completo",
+      ],
+      include: {
+        model: OyL,
+        attributes: ["idoyl", "cumple", "identificador", "fecha"],
+        where: filtros,
+        include: {
+          model: CumplimientosOyL,
+          attributes: ["idoyl_cumplimiento", "cumplimiento"],
+        },
+      },
+    });
+
+    const puntajeMinimo =
+      obtenerConfiguraciones().configDespacho.OyL.puntajeMinimo;
+
+    res.status(200).json({ success: true, response, puntajeMinimo });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 controller.findEvaluacionXmensual = async (req, res) => {
   try {

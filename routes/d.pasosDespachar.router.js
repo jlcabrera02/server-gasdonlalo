@@ -3,6 +3,8 @@ import pasosDespachar from "../controllers/d.pasosDespachar.controller";
 
 const route = router();
 
+route.get("/historial", pasosDespachar.obtenerEvaluacion);
+
 route.get(
   "/:year/:month/:idEmpleado/:quincena?",
   pasosDespachar.findEvaluacionesXEmpleado

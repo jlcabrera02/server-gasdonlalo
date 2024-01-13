@@ -9,6 +9,7 @@ import { Op } from "sequelize";
 import format from "../assets/formatTiempo";
 import { mandarActualizacion } from "../socket/panicbtn.socket";
 import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
+import ChecklistBomba from "../models/despacho/ChecklistBomba.model";
 const {
   empleados,
   Turnos,
@@ -22,6 +23,56 @@ const { verificar } = auth;
 
 const controller = {};
 const area = "Checklist Bomba";
+
+controller.obtenerEvaluacion = async (req, res) => {
+  try {
+    const { fechaI, fechaF, month, year, idEmpleado } = req.query;
+
+    const filtros = {};
+
+    if (fechaI && fechaF) {
+      filtros.fecha = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (idEmpleado) {
+      filtros.idempleado = idEmpleado;
+    }
+
+    if (year && month) {
+      filtros[Op.and] = [
+        ...(filtros[Op.and] || []),
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+    }
+
+    empleados.hasMany(ChecklistBomba, { foreignKey: "idempleado" });
+
+    const response = await empleados.findAll({
+      attributes: [
+        "nombre",
+        "idempleado",
+        "idchecador",
+        "apellido_paterno",
+        "apellido_materno",
+        "nombre_completo",
+      ],
+
+      include: { model: ChecklistBomba, where: filtros },
+    });
+
+    const puntajeMinimo =
+      obtenerConfiguraciones().configDespacho.Checklist.puntajeMinimo;
+
+    res.status(200).json({ success: true, response, puntajeMinimo });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 controller.find = async (req, res) => {
   try {

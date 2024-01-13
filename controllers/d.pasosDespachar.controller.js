@@ -7,6 +7,10 @@ import auth from "../models/auth.model";
 import formatTiempo from "../assets/formatTiempo";
 import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
 import models from "../models";
+import { Op } from "sequelize";
+import EvPasosDespachar, {
+  pasosDes,
+} from "../models/despacho/PasosDespachar.model";
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 const { sinRegistro } = errRes;
@@ -15,6 +19,68 @@ const { SncNotification, empleados } = models;
 const controller = {};
 
 const area = "Evaluación Pasos de despacho";
+
+controller.obtenerEvaluacion = async (req, res) => {
+  try {
+    const { fechaI, fechaF, month, year, idEmpleado } = req.query;
+
+    const filtros = {};
+
+    if (fechaI && fechaF) {
+      filtros.fecha = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (idEmpleado) {
+      filtros.idempleado = idEmpleado;
+    }
+
+    if (year && month) {
+      filtros[Op.and] = [
+        ...(filtros[Op.and] || []),
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+    }
+
+    empleados.hasMany(EvPasosDespachar, { foreignKey: "idempleado" });
+
+    const response = await empleados.findAll({
+      attributes: [
+        "nombre",
+        "idempleado",
+        "idchecador",
+        "apellido_paterno",
+        "apellido_materno",
+        "nombre_completo",
+      ],
+
+      include: {
+        attributes: [
+          "evaluacion",
+          "identificador",
+          "idpaso_despachar",
+          "fecha",
+        ],
+        model: EvPasosDespachar,
+        where: filtros,
+        include: {
+          model: pasosDes,
+        },
+      },
+    });
+
+    const puntajeMinimo =
+      obtenerConfiguraciones().configDespacho.PasosDespachar.puntajeMinimo;
+
+    res.status(200).json({ success: true, response, puntajeMinimo });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 controller.findEvaluacionesXEmpleado = async (req, res) => {
   try {

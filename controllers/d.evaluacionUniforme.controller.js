@@ -7,12 +7,79 @@ import formatTiempo from "../assets/formatTiempo";
 import sncaM from "../models/s.acumular.model";
 import models from "../models";
 import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
+import EvUniforme, {
+  CumplimientosUniforme,
+} from "../models/despacho/EvUniforme.model";
+import { Op } from "sequelize";
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 const { SncNotification, empleados } = models;
 
 const controller = {};
 const area = "Evaluación Uniforme";
+
+controller.obtenerEvaluacion = async (req, res) => {
+  try {
+    const { fechaI, fechaF, month, year, idEmpleado } = req.query;
+
+    const filtros = {};
+
+    if (fechaI && fechaF) {
+      filtros.fecha = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (idEmpleado) {
+      filtros.idempleado = idEmpleado;
+    }
+
+    if (year && month) {
+      filtros[Op.and] = [
+        ...(filtros[Op.and] || []),
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+    }
+
+    empleados.hasMany(EvUniforme, { foreignKey: "idempleado" });
+
+    const response = await empleados.findAll({
+      attributes: [
+        "nombre",
+        "idempleado",
+        "idchecador",
+        "apellido_paterno",
+        "apellido_materno",
+        "nombre_completo",
+      ],
+
+      include: {
+        attributes: [
+          "cumple",
+          "identificador",
+          "idevaluacion_uniforme",
+          "fecha",
+        ],
+        model: EvUniforme,
+        where: filtros,
+        include: {
+          model: CumplimientosUniforme,
+          // attributes: ["cumplimiento", "idevaluacion_unfiroem"],
+        },
+      },
+    });
+
+    const puntajeMinimo =
+      obtenerConfiguraciones().configDespacho.EvaluacionUniforme.puntajeMinimo;
+
+    res.status(200).json({ success: true, response, puntajeMinimo });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 controller.findPasosEvUniforme = async (req, res) => {
   try {

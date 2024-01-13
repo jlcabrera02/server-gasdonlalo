@@ -3,6 +3,7 @@ import oyl from "../controllers/d.oylIsla.controller";
 
 const route = router();
 
+route.get("/historial", oyl.obtenerEvaluacion);
 route.get("/identificador/:identificador", oyl.findByIdentificador);
 route.get("/:year/:month/:idEmpleado?", oyl.findEvaluacionXmensual);
 route.get("/cumplimientos", oyl.findCumplimientos);

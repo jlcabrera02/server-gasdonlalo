@@ -59,7 +59,7 @@ export const CumplimientosUniforme = sequelize.define(
   }
 );
 
-EvUniforme.hasMany(CumplimientosUniforme, {
+EvUniforme.belongsTo(CumplimientosUniforme, {
   foreignKey: "idcumplimiento_uniforme",
 });
 CumplimientosUniforme.hasMany(EvUniforme, {

@@ -79,7 +79,7 @@ export const CumplimientosOyL = sequelize.define(
   }
 );
 
-OyL.hasMany(CumplimientosOyL, { foreignKey: "idoyl_cumplimiento" });
+OyL.belongsTo(CumplimientosOyL, { foreignKey: "idoyl_cumplimiento" });
 CumplimientosOyL.hasMany(OyL, { foreignKey: "idoyl_cumplimiento" });
 
 export default OyL;
