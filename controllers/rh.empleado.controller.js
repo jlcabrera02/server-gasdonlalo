@@ -3,6 +3,8 @@ import { guardarBitacora } from "../models/auditorias";
 import auth from "../models/auth.model";
 const { verificar } = auth;
 import { mayus } from "./formatearText.controller";
+import models from "../models";
+const { empleados, departamentos } = models;
 
 const controller = {};
 const area = "Empleados";
@@ -11,16 +13,30 @@ controller.find = async (req, res) => {
   try {
     //Se comento respecto las rutas que no necesitan autenticancion
     let user = verificar(req.headers.authorization);
-    const { departamento, todo, auth } = req.query;
+    const { departamento, todo, auth, estatus } = req.query;
+    const filtros = { estatus: "Contrato" };
     if (!user.success && !auth) throw user;
-    let response;
-    if (todo) {
-      response = await empleadoM.findTodo(departamento);
-    } else {
-      response = await empleadoM.find(departamento);
+
+    if (departamento) {
+      filtros.iddepartamento = departamento;
     }
+
+    if (todo) {
+      delete filtros.estatus;
+    }
+
+    if (estatus) {
+      filtros.estatus = estatus;
+    }
+
+    const response = await empleados.findAll({
+      where: filtros,
+      include: departamentos,
+    });
+
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -34,7 +50,7 @@ controller.findOne = async (req, res) => {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
     const { id } = req.params;
-    let response = await empleadoM.findOne(id);
+    let response = await empleados.findOne({ where: { idempleado: id } });
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
