@@ -338,6 +338,12 @@ controller.updateLecturaInicial = async (req, res) => {
   }
 };
 
+const montosFaltantes = () => async (req, res) => {
+  try {
+    const { year, month, fechaI, fechaF } = req.query;
+  } catch (err) {}
+};
+
 controller.historial = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
@@ -428,12 +434,6 @@ export const buscarLecturasXIdEmpleado = async ({
   fechaI,
   fechaF,
 }) => {
-  LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
-  InfoLecturas.hasMany(LecturasFinales, { foreignKey: "idinfo_lectura" });
-
-  LecturasFinales.belongsTo(Mangueras, { foreignKey: "idmanguera" });
-  Mangueras.hasMany(LecturasFinales, { foreignKey: "idmanguera" });
-
   Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
   Islas.hasMany(Mangueras, { foreignKey: "idisla" });
 
@@ -495,8 +495,14 @@ export const buscarLecturasXIdEmpleado = async ({
         include: [{ model: empleados }, { model: Turnos }, { model: ES }],
         where: querysHorario,
       },
-      { model: Vales, include: { model: CodigosUso, where: querysCU } },
-      { model: Efectivo, include: { model: CodigosUso, where: querysCU } },
+      {
+        model: Vales,
+        include: codigoUso ? { model: CodigosUso, where: querysCU } : [],
+      },
+      {
+        model: Efectivo,
+        include: codigoUso ? { model: CodigosUso, where: querysCU } : [],
+      },
     ],
     order: [["idliquidacion", orderLiquidaciones === "DESC" ? "DESC" : "ASC"]],
   });
