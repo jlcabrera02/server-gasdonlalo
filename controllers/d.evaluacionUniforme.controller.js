@@ -29,7 +29,10 @@ controller.obtenerEvaluacion = async (req, res) => {
     }
 
     if (idEmpleado) {
-      filtros.idempleado = idEmpleado;
+      const arrayEmpleados =
+        typeof idEmpleado === "object" ? idEmpleado : [idEmpleado];
+      console.log(idEmpleado);
+      filtros.idempleado = arrayEmpleados;
     }
 
     if (year && month) {
