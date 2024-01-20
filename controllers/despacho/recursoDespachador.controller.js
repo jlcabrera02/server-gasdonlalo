@@ -49,7 +49,7 @@ controller.getEv = async (req, res) => {
         new Date().getMonth() - Number(monthBack)
       );
 
-      filtros.fecha = { [Op.gte]: fecha };
+      filtrosEv.fecha = { [Op.gte]: fecha };
     }
 
     const response = await empleados.findAll({
