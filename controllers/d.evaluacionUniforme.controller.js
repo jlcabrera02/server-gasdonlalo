@@ -20,7 +20,7 @@ const area = "Evaluación Uniforme";
 
 controller.obtenerEvaluacion = async (req, res) => {
   try {
-    const { fechaI, fechaF, month, year, idEmpleado } = req.query;
+    const { fechaI, fechaF, month, year, idEmpleado, monthBack } = req.query;
 
     const filtros = {};
 
@@ -33,6 +33,14 @@ controller.obtenerEvaluacion = async (req, res) => {
         typeof idEmpleado === "object" ? idEmpleado : [idEmpleado];
       console.log(idEmpleado);
       filtros.idempleado = arrayEmpleados;
+    }
+
+    if (monthBack) {
+      const fecha = new Date(new Date().setDate(1)).setMonth(
+        new Date().getMonth() - Number(monthBack)
+      );
+
+      filtros.fecha = { [Op.gte]: fecha };
     }
 
     if (year && month) {
@@ -66,7 +74,6 @@ controller.obtenerEvaluacion = async (req, res) => {
         where: filtros,
         include: {
           model: CumplimientosUniforme,
-          // attributes: ["cumplimiento", "idevaluacion_unfiroem"],
         },
       },
     });
@@ -76,6 +83,7 @@ controller.obtenerEvaluacion = async (req, res) => {
 
     res.status(200).json({ success: true, response, puntajeMinimo });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

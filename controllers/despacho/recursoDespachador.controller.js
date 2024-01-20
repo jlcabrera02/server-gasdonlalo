@@ -26,7 +26,7 @@ controller.getRecursos = async (req, res) => {
 
 controller.getEv = async (req, res) => {
   try {
-    const { month, year, quincena, idEmpleado } = req.query;
+    const { month, year, quincena, idEmpleado, monthBack } = req.query;
     const filtrosEv = {};
     const filtrosEmpleado = { iddepartamento: 1 };
 
@@ -38,7 +38,18 @@ controller.getEv = async (req, res) => {
     }
 
     if (idEmpleado) {
-      filtrosEmpleado.idempleado = idEmpleado;
+      const arrayEmpleados =
+        typeof idEmpleado === "object" ? idEmpleado : [idEmpleado];
+      console.log(idEmpleado);
+      filtrosEmpleado.idempleado = arrayEmpleados;
+    }
+
+    if (monthBack) {
+      const fecha = new Date(new Date().setDate(1)).setMonth(
+        new Date().getMonth() - Number(monthBack)
+      );
+
+      filtros.fecha = { [Op.gte]: fecha };
     }
 
     const response = await empleados.findAll({

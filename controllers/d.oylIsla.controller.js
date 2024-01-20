@@ -19,7 +19,7 @@ const area = "Orden y limpieza";
 
 controller.obtenerEvaluacion = async (req, res) => {
   try {
-    const { fechaI, fechaF, month, year, idEmpleado } = req.query;
+    const { fechaI, fechaF, month, year, idEmpleado, monthBack } = req.query;
 
     const filtros = {};
 
@@ -28,7 +28,18 @@ controller.obtenerEvaluacion = async (req, res) => {
     }
 
     if (idEmpleado) {
-      filtros.idempleado = idEmpleado;
+      const arrayEmpleados =
+        typeof idEmpleado === "object" ? idEmpleado : [idEmpleado];
+      console.log(idEmpleado);
+      filtros.idempleado = arrayEmpleados;
+    }
+
+    if (monthBack) {
+      const fecha = new Date(new Date().setDate(1)).setMonth(
+        new Date().getMonth() - Number(monthBack)
+      );
+
+      filtros.fecha = { [Op.gte]: fecha };
     }
 
     if (year && month) {
