@@ -477,6 +477,12 @@ controller.nuevoChecklist = async (req, res) => {
       funcionalidad: null,
     });
 
+    const rellenarChecklistBomba = await ChecklistBomba.create({
+      fecha: fecha,
+      idempleado: dataEmpleadoE.dataValues.idempleado,
+      idempleado_saliente: dataEmpleadoS.dataValues.idempleado,
+    });
+
     if (!aceitesCompletos || !islaLimpia) await mandarActualizacion(); //Si una evaluacion incumple manda un aviso
 
     res.status(200).json({ success: true, response: guardarRegistro });
