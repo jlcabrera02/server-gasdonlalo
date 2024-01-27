@@ -12,6 +12,7 @@ import pasosDespacharRouter from "./d.pasosDespachar.router";
 import checklistBombaRouter from "./d.checklistBomba.router";
 import montoFaltanteRouter from "./d.montoFaltante.router";
 import oylRouter from "./d.oylIsla.router";
+import configDespacho from "./d.configDespacho";
 //administrativo
 import estacionServiceRouter from "./ad.estacionService.router";
 import bombaRouter from "./ad.bomba.router";
@@ -56,7 +57,9 @@ route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/incumplimiento", incumplimientoRouter);
 route.use("/sncacumuladas", acumular);
 route.use("/snc", snc);
-//despacho
+//
+
+route.use("/despacho", configDespacho);
 route.use("/recursos-despachador", recursosDespachadorRouter);
 route.use("/lista-recurso-despachador", listaRecursosDespachadorRouter);
 route.use("/monto-faltante-despachador", montoFaltanteRouter);

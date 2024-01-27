@@ -30,6 +30,9 @@ controller.getEv = async (req, res) => {
     const filtrosEv = {};
     const filtrosEmpleado = { iddepartamento: 1 };
 
+    const puntajeMinimo =
+      obtenerConfiguraciones().configDespacho.RecursosDespachador.puntajeMinimo;
+
     if (month && year) {
       filtrosEv[Op.and] = [
         sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
@@ -95,7 +98,7 @@ controller.getEv = async (req, res) => {
       });
     }
 
-    return res.status(200).json({ success: true, response });
+    return res.status(200).json({ success: true, response, puntajeMinimo });
   } catch (err) {
     console.log(err);
     res.status(400).json({ success: false, err });
