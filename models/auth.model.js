@@ -165,7 +165,7 @@ model.verificar = (header, idPer = null) => {
   if (!header) {
     return {
       success: false,
-      code: 403,
+      code: 401,
       msg: "No se ha recibido llave de autorización",
     };
   }

@@ -118,8 +118,8 @@ controller.eliminarUtencilios = async (req, res) => {
 
 controller.crearOTFromPanicBtn = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization);
-    if (!user.success) throw user;
+    // let user = verificar(req.headers.authorization);
+    // if (!user.success) throw user;
     const { idPanicBtn, fechaInicio, descripcionFalla, idEstacionServicio } =
       req.body;
 

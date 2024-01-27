@@ -1,15 +1,15 @@
 import { Op } from "sequelize";
 import modelos from "../../models/";
-import auth from "../../models/auth.model";
-const { verificar } = auth;
+// import auth from "../../models/auth.model";
+// const { verificar } = auth;
 const { PanicBtn, empleados, Islas, ES } = modelos;
 
 const controller = {};
 
 controller.buscarDetalles = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization);
-    if (!user.success) throw user;
+    // let user = verificar(req.headers.authorization);
+    // if (!user.success) throw user;
     const { order, limit, offset, idIsla, idEstacionS, fechaI, fechaF } =
       req.query;
     const querys = { activo: false };
@@ -38,8 +38,8 @@ controller.buscarDetalles = async (req, res) => {
 
 controller.addDescripcion = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization);
-    if (!user.success) throw user;
+    // let user = verificar(req.headers.authorization);
+    // if (!user.success) throw user;
     const { idPanic } = req.params;
     const { descripcion } = req.body;
 
