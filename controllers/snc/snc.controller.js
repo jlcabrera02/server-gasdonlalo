@@ -237,6 +237,8 @@ export async function obtenerReportesEmpleados(req, res) {
       querysSnc.fecha = { [Op.between]: [fechaI, fechaF] };
     }
 
+    const puntajeMinimo = obtenerConfiguraciones().configSNC.puntajeMinimo;
+
     const response = await empleados.findAll({
       attributes: [
         "nombre",
@@ -257,7 +259,7 @@ export async function obtenerReportesEmpleados(req, res) {
       ],
     });
 
-    res.status(200).json({ success: true, response: response });
+    res.status(200).json({ success: true, response: response, puntajeMinimo });
   } catch (err) {
     console.log(err);
     res.status(400).json({
