@@ -5,6 +5,8 @@ import {
   obtenerConfiguraciones,
   escribirConfiguraciones,
 } from "../../services/configuracionesPersonalizables";
+import { attributesPersonal } from "../../models/recursosHumanos/empleados.model";
+
 const { empleados, SNC, Incumplimientos } = models;
 
 export async function buscarSNCXEmpleado(req, res) {
@@ -60,6 +62,8 @@ export async function obtenerRegistros(req, res) {
       idEmpleado,
       idIncumplimiento,
       folio,
+      isReport,
+      monthBack,
       etapa, //1 es por capturar, 2 es por corregir, 3 es finalizada
     } = req.query;
 
@@ -81,6 +85,8 @@ export async function obtenerRegistros(req, res) {
       ];
     }
 
+    const puntajeMinimo = obtenerConfiguraciones().configSNC.puntajeMinimo;
+
     if (year && month) {
       querys[Op.and] = [
         ...(querys[Op.and] || []),
@@ -101,15 +107,31 @@ export async function obtenerRegistros(req, res) {
       querys.fecha = { [Op.between]: [fechaI, fechaF] };
     }
 
+    if (monthBack) {
+      const fecha = new Date(new Date().setDate(1)).setMonth(
+        new Date().getMonth() - Number(monthBack)
+      );
+
+      querys.fecha = { [Op.gte]: fecha };
+    }
+
     const response = await SNC.findAll({
+      attributes: {
+        exclude:
+          isReport === "true"
+            ? ["descripcion_falla", "concesiones", "acciones_corregir"]
+            : [],
+      },
       where: querys,
       include: [
         {
           model: empleados,
+          attributes: attributesPersonal,
           as: "empleado_autoriza",
         },
         {
           model: empleados,
+          attributes: attributesPersonal,
         },
         {
           model: Incumplimientos,
@@ -137,7 +159,7 @@ export async function obtenerRegistros(req, res) {
       return el;
     });
 
-    res.status(200).json({ success: true, response: resp });
+    res.status(200).json({ success: true, response: resp, puntajeMinimo });
   } catch (err) {
     res.status(400).json({
       success: false,

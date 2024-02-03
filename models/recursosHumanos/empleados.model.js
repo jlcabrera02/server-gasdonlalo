@@ -78,4 +78,13 @@ const empleados = sequelize.define(
   }
 );
 
+export const attributesPersonal = [
+  "nombre",
+  "apellido_paterno",
+  "apellido_materno",
+  "nombre_completo",
+  "idempleado",
+  "idchecador",
+];
+
 export default empleados;

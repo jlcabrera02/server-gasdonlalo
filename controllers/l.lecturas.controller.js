@@ -3,7 +3,7 @@ import models from "../models";
 import sequelize from "../config/configdb";
 import { Op } from "sequelize";
 import formatTiempo from "../assets/formatTiempo";
-import { format } from "mysql2";
+import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
 import agruparArr from "../assets/agruparArr";
 const {
   InfoLecturas,
@@ -277,14 +277,6 @@ controller.reportes = async (req, res) => {
     } = req.query;
 
     const includes = [];
-    const attributesPersonal = [
-      "nombre",
-      "apellido_paterno",
-      "apellido_materno",
-      "nombre_completo",
-      "idempleado",
-      "idchecador",
-    ];
 
     const attributes = Array.isArray(req.query.at)
       ? req.query.at
