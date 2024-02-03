@@ -141,10 +141,6 @@ export async function obtenerRegistros(req, res) {
       order: [["idsalida_noconforme", "DESC"]],
     });
 
-    if (response.length === 0) {
-      throw { success: false, code: 404, msg: "No se encontraron archivos" };
-    }
-
     const resp = JSON.parse(JSON.stringify(response)).map((el) => {
       if (!el.empleado) {
         return {
