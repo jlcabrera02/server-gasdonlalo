@@ -2,6 +2,7 @@ import nominas, { tiposNominas } from "./recursosHumanos/nominas.model";
 import empleados from "./recursosHumanos/empleados.model";
 import departamentos from "./recursosHumanos/departamentos.model";
 import detalleEmpleado from "./recursosHumanos/detalleEmpleado.model";
+import Cmadrugador from "./recursosHumanos/Cmadrugador.model.js";
 
 //Despacho
 import ChecklistRegistros from "./despacho/ChecklistRegistros.model";
@@ -256,6 +257,8 @@ LecturasFinales.belongsTo(Mangueras, { foreignKey: "idmanguera" });
 SncNotification.belongsTo(empleados, { foreignKey: "idempleado" });
 SncNotification.belongsTo(Incumplimientos, { foreignKey: "idincumplimiento" });
 
+Cmadrugador.belongsTo(empleados, { foreignKey: "idempleado" });
+
 export default {
   nominas,
   tiposNominas,
@@ -292,4 +295,5 @@ export default {
   RecursosDespachadorEv,
   RecursosDespachador,
   SncNotification,
+  Cmadrugador,
 };
