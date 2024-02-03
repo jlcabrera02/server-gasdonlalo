@@ -81,7 +81,7 @@ const Liquidaciones = sequelize.define(
       type: DataTypes.VIRTUAL,
       get() {
         if (!this.capturado) {
-          return "asd";
+          return 0;
         }
         const litros = JSON.parse(this.lecturas);
         return calcularTotal(litros, "importe");
@@ -91,12 +91,17 @@ const Liquidaciones = sequelize.define(
       type: DataTypes.VIRTUAL,
       get() {
         if (!this.capturado) {
-          return 0;
+          return { efectivo: 0, vales: 0, total: 0 };
         }
-        const efectivo = calcularTotal(this.efectivo, "monto");
-        const vales = calcularTotal(this.vales, "monto");
-        const total = efectivo + vales;
-        return { efectivo, vales, total };
+
+        const efectivo = JSON.parse(JSON.stringify(this.efectivos));
+        const vales = JSON.parse(JSON.stringify(this.vales));
+
+        const Cefectivo = calcularTotal(efectivo, "monto");
+        const Cvales = calcularTotal(vales, "monto");
+        const total = Cefectivo + Cvales;
+        return { efectivo: Cefectivo, vales: Cvales, total };
+        // return { efectivo: 0, vales: 0, total: 0 };
       },
     },
   },
