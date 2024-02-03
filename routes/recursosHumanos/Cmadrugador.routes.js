@@ -11,6 +11,8 @@ const route = router();
 route.get("/configuracion-tabla", obtenerConfiguracion);
 
 route.post("/configurar-tabla", configuracion);
+route.post("/guardar-registros", guardarRegistros);
+
 route.put("/configurar-tabla/:idconcurso", editarConfiguracion);
 
 export default route;

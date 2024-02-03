@@ -87,8 +87,10 @@ export async function guardarRegistros(req, res) {
       fecha,
     }));
 
+    console.log(data);
+
     const response = await Cmadrugador.bulkCreate(data, {
-      updateOnDuplicate: ["idconcurso"],
+      updateOnDuplicate: ["precio", "fecha"],
     });
 
     res.status(200).json({ success: true, response });
