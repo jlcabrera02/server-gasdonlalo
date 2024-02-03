@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/configdb";
+import calcularTotal from "../../../assets/sumarAlgo";
 
 const Liquidaciones = sequelize.define(
   "liquidaciones",
@@ -56,6 +57,47 @@ const Liquidaciones = sequelize.define(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+    },
+    ventasLitros: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        if (!this.capturado) {
+          return { magna: 0, premium: 0, diesel: 0, total: 0 };
+        }
+
+        const litros = JSON.parse(this.lecturas);
+        const filtrarG = (idgas) => litros.filter((l) => l.idgas === idgas);
+        const m = filtrarG("M"),
+          p = filtrarG("P"),
+          d = filtrarG("D");
+        const magna = calcularTotal(m, "litrosVendidos");
+        const premium = calcularTotal(p, "litrosVendidos");
+        const diesel = calcularTotal(d, "litrosVendidos");
+        const total = calcularTotal(litros, "litrosVendidos");
+        return { magna, premium, diesel, total };
+      },
+    },
+    totalCalculado: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        if (!this.capturado) {
+          return "asd";
+        }
+        const litros = JSON.parse(this.lecturas);
+        return calcularTotal(litros, "importe");
+      },
+    },
+    ventasPesos: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        if (!this.capturado) {
+          return 0;
+        }
+        const efectivo = calcularTotal(this.efectivo, "monto");
+        const vales = calcularTotal(this.vales, "monto");
+        const total = efectivo + vales;
+        return { efectivo, vales, total };
+      },
     },
   },
   {

@@ -38,6 +38,7 @@ route.get("/lectura/inicialn/:idEstacion", lecturas.lecturasInicialesNew); //
 route.get("/lectura/buscar/:idEstacion", lecturas.buscarLecturas); //
 route.get("/infolecturas/:idEstacion", lecturas.buscarInfoLec); //
 route.get("/jsonexcel", lecturas.jsonExcel); //
+route.get("/reportes", lecturas.reportes); //
 route.get("/infolecturasxLimit/:idEstacion", lecturas.buscarInfoLecLimit); //
 route.post("/lecturasXIdempleado", lecturas.buscarLecturasXIdEmpleado);
 route.put("/lectura/inicial", lecturas.updateLecturaInicial); //

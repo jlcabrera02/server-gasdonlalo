@@ -260,6 +260,157 @@ controller.jsonExcel = async (req, res) => {
   }
 };
 
+controller.reportes = async (req, res) => {
+  try {
+    const {
+      idTurno,
+      idIsla,
+      combustible,
+      posicion,
+      idEmpleado,
+      orderLiquidaciones,
+      filtro,
+      estacionS,
+      codigoUso,
+      fechaI,
+      fechaF,
+    } = req.query;
+
+    const includes = [];
+    const attributesPersonal = [
+      "nombre",
+      "apellido_paterno",
+      "apellido_materno",
+      "nombre_completo",
+      "idempleado",
+      "idchecador",
+    ];
+
+    const attributes = Array.isArray(req.query.at)
+      ? req.query.at
+      : [req.query.at];
+
+    const ref = Array.isArray(req.query.in) ? req.query.in : [req.query.in];
+
+    const existAt = (attribute) => attributes.find((el) => el === attribute);
+    const existIn = (include) => ref.find((el) => el === include);
+
+    if (existIn("capturista")) {
+      includes.push({
+        model: empleados,
+        as: "empleado_captura",
+        attributes: attributesPersonal,
+      });
+    }
+    if (existIn("horario")) {
+      includes.push({
+        model: Horarios,
+        include: [
+          { model: empleados, attributes: attributesPersonal },
+          { model: Turnos },
+          { model: ES },
+        ],
+        where: querysHorario,
+      });
+    }
+
+    if (existIn("vales")) {
+      includes.push({
+        model: Vales,
+        include:
+          codigoUso !== undefined ? { model: CodigosUso, where: querysCU } : [],
+      });
+    }
+
+    if (existIn("efectivos")) {
+      includes.push({
+        model: Efectivo,
+        include:
+          codigoUso !== undefined ? { model: CodigosUso, where: querysCU } : [],
+      });
+    }
+
+    if (existIn("efectivo")) {
+      includes.push({
+        model: Efectivo,
+        include:
+          codigoUso !== undefined ? { model: CodigosUso, where: querysCU } : [],
+      });
+    }
+
+    /*
+    At:
+    ventasLitros, ventasPesos, idliquidacion, lecturas, idislas,paginación, cancelado, fechaCancelado, capturado, idempleado_captura, idhorario, num_impresiones, show_mf, show_ms, createdAt, updateAt 
+    
+    */
+
+    const querysHorario = {};
+    const querysCU = {};
+
+    if (fechaI && fechaF) {
+      querysHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    const querys = {};
+    if (filtro) {
+      switch (filtro) {
+        case "capturado":
+          querys.cancelado = { [Op.is]: null };
+          querys.lecturas = { [Op.not]: null };
+          querys.capturado = true;
+          break;
+        case "capturando":
+          querys.lecturas = { [Op.is]: null };
+          querys.capturado = true;
+          break;
+        case "por capturar":
+          querys.lecturas = null;
+          querys.capturado = false;
+          break;
+        case "cancelado":
+          querys.cancelado = { [Op.not]: null };
+          break;
+        case "reporte":
+          querys.capturado = true;
+          querys.lecturas = { [Op.not]: null };
+          break;
+
+        default:
+          break;
+      }
+    }
+    if (idEmpleado) querysHorario.idempleado = idEmpleado;
+    if (idTurno) querysHorario.idturno = idTurno;
+    // if (cancelado) querys.cancelado = cancelado;
+    // if (cancelado === "false") querys.cancelado = { [Op.is]: null };
+    if (estacionS) querysHorario.idestacion_servicio = estacionS;
+
+    if (codigoUso) {
+      const multiple = Array.isArray(codigoUso);
+      const cu = multiple ? [...codigoUso] : [codigoUso];
+      querysCU.idcodigo_uso = { [Op.in]: cu };
+    }
+
+    const response = await Liquidaciones.findAll({
+      attributes,
+      where: { ...querys },
+      include: includes,
+      order: [
+        ["idliquidacion", orderLiquidaciones === "DESC" ? "DESC" : "ASC"],
+      ],
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.updateLecturaInicial = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
