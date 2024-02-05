@@ -58,52 +58,6 @@ const Liquidaciones = sequelize.define(
       allowNull: false,
       defaultValue: true,
     },
-    ventasLitros: {
-      type: DataTypes.VIRTUAL,
-      get() {
-        if (!this.capturado) {
-          return { magna: 0, premium: 0, diesel: 0, total: 0 };
-        }
-
-        const litros = JSON.parse(this.lecturas);
-        const filtrarG = (idgas) => litros.filter((l) => l.idgas === idgas);
-        const m = filtrarG("M"),
-          p = filtrarG("P"),
-          d = filtrarG("D");
-        const magna = calcularTotal(m, "litrosVendidos");
-        const premium = calcularTotal(p, "litrosVendidos");
-        const diesel = calcularTotal(d, "litrosVendidos");
-        const total = calcularTotal(litros, "litrosVendidos");
-        return { magna, premium, diesel, total };
-      },
-    },
-    totalCalculado: {
-      type: DataTypes.VIRTUAL,
-      get() {
-        if (!this.capturado) {
-          return 0;
-        }
-        const litros = JSON.parse(this.lecturas);
-        return calcularTotal(litros, "importe");
-      },
-    },
-    ventasPesos: {
-      type: DataTypes.VIRTUAL,
-      get() {
-        if (!this.capturado) {
-          return { efectivo: 0, vales: 0, total: 0 };
-        }
-
-        const efectivo = JSON.parse(JSON.stringify(this.efectivos));
-        const vales = JSON.parse(JSON.stringify(this.vales));
-
-        const Cefectivo = calcularTotal(efectivo, "monto");
-        const Cvales = calcularTotal(vales, "monto");
-        const total = Cefectivo + Cvales;
-        return { efectivo: Cefectivo, vales: Cvales, total };
-        // return { efectivo: 0, vales: 0, total: 0 };
-      },
-    },
   },
   {
     freezeTableName: true,
