@@ -9,11 +9,13 @@ const Cmadrugador = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    fecha: {
+    fecha_inicial: {
       type: DataTypes.DATEONLY,
       allowNull: true,
-      comment:
-        "esta fecha servira para localizar en que semana esta el rango de fecha",
+    },
+    fecha_final: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
     },
     idempleado: {
       type: DataTypes.INTEGER,
@@ -23,14 +25,16 @@ const Cmadrugador = sequelize.define(
       type: DataTypes.DECIMAL(19, 2),
       allowNull: false,
     },
+    devolucion: {
+      type: DataTypes.DECIMAL(19, 2),
+      allowNull: true,
+    },
+    sncs: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
   },
   {
-    hooks: {
-      beforeDestroy: (data, options) => {
-        console.log(data);
-        return true;
-      },
-    },
     freezeTableName: true,
   }
 );
