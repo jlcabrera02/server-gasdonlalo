@@ -159,6 +159,7 @@ export async function obtenerRegistros(req, res) {
 
     const response = await Cmadrugador.findAll({
       where: { sncs: { [Op.not]: null }, devolucion: { [Op.not]: null } },
+      include: [{ model: empleados, attributes: attributesPersonal }],
       order: [["fecha_inicial", "DESC"]],
     });
 
