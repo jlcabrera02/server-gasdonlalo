@@ -20,7 +20,7 @@
     }
   },
   "configSNC": {
-    "puntajeMinimo": 5,
+    "puntajeMinimo": 7,
     "sncacumuladas": [
       {
         "notificacion": "Monto Faltante",
@@ -58,6 +58,24 @@
         "descripcion": "El empleado ${empleado} tuvo no cumplio correctamente con el trabajo de mantenimiento por lo que no se autorizo el dia ${fecha}."
       }
     ]
+  },
+  "configRH": {
+    "concursoAceitoso": {
+      "porcentajes": {
+        "primerLugar": 8,
+        "segundoLugar": 3,
+        "tercerLugar": 2,
+        "cuartoLugar": 2
+      }
+    },
+    "concursoOctanoso": {
+      "efectivo": {
+        "primerLugar": 600,
+        "segundoLugar": 150,
+        "tercerLugar": 100,
+        "cuartoLugar": 100
+      }
+    }
   },
   "precioHoraOT": 22
 }
