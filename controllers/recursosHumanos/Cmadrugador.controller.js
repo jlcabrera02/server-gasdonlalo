@@ -168,7 +168,27 @@ export async function obtenerRegistros(req, res) {
     res.status(400).json({
       success: false,
       err,
-      msg: "Error al eliminar elemento",
+      msg: "Error al obtener registros",
+    });
+  }
+}
+
+export async function eliminarRegistros(req, res) {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { registros } = req.body;
+
+    const response = await Cmadrugador.destroy({
+      where: { idconcurso: registros.map((el) => el.idconcurso) },
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      err,
+      msg: "Error al eliminar registros",
     });
   }
 }
