@@ -4,7 +4,7 @@ import auth from "../../models/auth.model";
 import CatInc from "../../models/recursosHumanos/CategorizarInc.model";
 import { attributesPersonal } from "../../models/recursosHumanos/empleados.model";
 const { verificar } = auth;
-const { empleados, Cmadrugador, SNC, Incumplimientos } = rh;
+const { empleados, Cmadrugador, SNC, Incumplimientos, RM, departamentos } = rh;
 /* import { guardarBitacora } from "../../models/auditorias";
 const area = "Concurso Madrugador"; */
 
@@ -81,8 +81,13 @@ export async function obtenerConfiguracion(req, res) {
     });
 
     const response = await Cmadrugador.findAll({
-      where: { sncs: null, devolucion: null },
-      include: [{ model: empleados, attributes: attributesPersonal }],
+      include: [
+        {
+          model: empleados,
+          attributes: attributesPersonal,
+          include: departamentos,
+        },
+      ],
     });
 
     res
@@ -100,27 +105,27 @@ export async function obtenerConfiguracion(req, res) {
 
 export async function guardarRegistros(req, res) {
   try {
-    const { datos, fechaI, fechaF, sncs, devolucion } = req.body;
+    const { datos, fechaI, fechaF } = req.body;
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
 
     const data = datos.map((el) => ({
       idconcurso: el.idconcurso,
+      empleado: el.empleado,
       idempleado: el.idEmpleado,
       precio: el.precio,
       fecha_inicial: fechaI,
       fecha_final: fechaF,
+      descuento: el.sncs.length === 0 ? "0" : el.sncs.length > 1 ? 100 : 50,
       devolucion: el.devolucion,
-      sncs: el.sncs,
+      cantidad_snc: el.sncs.length,
     }));
 
-    const response = await Cmadrugador.bulkCreate(data, {
-      updateOnDuplicate: ["fecha_inicial", "fecha_final", "sncs", "devolucion"],
+    const response = await RM.create({
+      datos: data,
+      fecha_inicial: fechaI,
+      fecha_final: fechaF,
     });
-
-    const create = await Cmadrugador.bulkCreate(
-      data.map(({ idempleado, precio }) => ({ idempleado, precio }))
-    );
 
     res.status(200).json({ success: true, response });
   } catch (err) {
@@ -156,16 +161,15 @@ export async function obtenerRegistros(req, res) {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
+    const filtros = {};
 
-    const response = await Cmadrugador.findAll({
-      where: { sncs: { [Op.not]: null }, devolucion: { [Op.not]: null } },
-      include: [{ model: empleados, attributes: attributesPersonal }],
+    const response = await RM.findAll({
+      where: filtros,
       order: [["fecha_inicial", "DESC"]],
     });
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     res.status(400).json({
       success: false,
       err,
@@ -178,10 +182,10 @@ export async function eliminarRegistros(req, res) {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
-    const { registros } = req.body;
+    const { idConcurso } = req.params;
 
-    const response = await Cmadrugador.destroy({
-      where: { idconcurso: registros.map((el) => el.idconcurso) },
+    const response = await RM.destroy({
+      where: { idconcurso: idConcurso },
     });
 
     res.status(200).json({ success: true, response });
@@ -190,6 +194,29 @@ export async function eliminarRegistros(req, res) {
       success: false,
       err,
       msg: "Error al eliminar registros",
+    });
+  }
+}
+
+export async function editarFechaPago(req, res) {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { idConcurso } = req.params;
+    const { fecha } = req.body;
+
+    const response = await RM.update(
+      { fecha_pago: fecha },
+      { where: { idconcurso: idConcurso } }
+    );
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      err,
+      msg: "Error al editar registro",
     });
   }
 }

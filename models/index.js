@@ -3,6 +3,7 @@ import empleados from "./recursosHumanos/empleados.model";
 import departamentos from "./recursosHumanos/departamentos.model";
 import detalleEmpleado from "./recursosHumanos/detalleEmpleado.model";
 import Cmadrugador from "./recursosHumanos/Cmadrugador.model.js";
+import RM from "./recursosHumanos/Registrosmadrugador.model.js";
 import HOT from "./mantenimiento/HistorialOrdenTrabajo.js";
 
 //Despacho
@@ -300,5 +301,6 @@ export default {
   RecursosDespachador,
   SncNotification,
   Cmadrugador,
+  RM,
   HOT,
 };
