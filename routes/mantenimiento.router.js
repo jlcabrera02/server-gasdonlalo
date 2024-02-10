@@ -14,6 +14,7 @@ route.put("/ordentrabajo/realizar/:idOT", ot.realizarOT);
 route.put("/ordentrabajo/finalizar/:idOT", ot.terminarOT);
 route.put("/ordentrabajo/liberar/:idOT", ot.liberarOT);
 route.get("/ordentrabajo/obtener", ot.obtenerOT);
+route.get("/ordentrabajo/historial", ot.historialOT);
 route.put("/ordentrabajo/configurarPrecioOT", ot.configurarPrecio);
 
 //Herramientas de trabajo

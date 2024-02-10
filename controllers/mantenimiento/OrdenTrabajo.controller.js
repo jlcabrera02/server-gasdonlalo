@@ -10,7 +10,7 @@ import Decimal from "decimal.js-light";
 import Utencilios from "../../models/mantenimiento/Utencilios";
 import { Op } from "sequelize";
 const { verificar } = auth;
-const { OT, PanicBtn, empleados, AT, SncNotification } = modelos;
+const { OT, PanicBtn, empleados, AT, SncNotification, HOT } = modelos;
 
 const controller = {};
 
@@ -498,59 +498,73 @@ controller.liberarOT = async (req, res) => {
         msg: "No se encontro una orden de trabajo",
       };
 
-    if (procedio) {
-      const response = await OT.update(
+    const response = sequelize.transaction(async (t) => {
+      await HOT.create(
         {
-          estatus: 4,
-          idliberante: idPersonal,
+          resultado: procedio ? "AUTORIZADO" : "NO-AUTORIZADO",
+          idorden_trabajo: idOT,
         },
-        { where: { idorden_trabajo: idOT } }
-      );
-      res.status(200).json({ success: true, response });
-    } else {
-      const response = await OT.update(
-        {
-          estatus: 2,
-          idliberante: idPersonal,
-        },
-        { where: { idorden_trabajo: idOT } }
+        { transaction: t }
       );
 
-      if (ot.dataValues.idpersonal) {
-        const sncNotificationFind =
-          obtenerConfiguraciones().configSNC.sncacumuladas.find(
-            (el) => el.notificacion === "Órden de trabajo no autorizada"
+      if (procedio) {
+        const response = await OT.update(
+          {
+            estatus: 4,
+            idliberante: idPersonal,
+          },
+          { where: { idorden_trabajo: idOT } }
+        );
+        return response;
+      } else {
+        const response = await OT.update(
+          {
+            estatus: 2,
+            idliberante: idPersonal,
+          },
+          { where: { idorden_trabajo: idOT } }
+        );
+
+        if (ot.dataValues.idpersonal) {
+          const sncNotificationFind =
+            obtenerConfiguraciones().configSNC.sncacumuladas.find(
+              (el) => el.notificacion === "Órden de trabajo no autorizada"
+            );
+
+          const empleadoName = await empleados.findOne({
+            attributes: [
+              "nombre",
+              "apellido_paterno",
+              "apellido_materno",
+              "nombre_completo",
+            ],
+            where: { idempleado: ot.dataValues.idpersonal },
+          });
+
+          const descripcion = sncNotificationFind.descripcion
+            .replaceAll(
+              `\$\{empleado\}`,
+              JSON.parse(
+                JSON.stringify(empleadoName)
+              ).nombre_completo.toLowerCase()
+            )
+            .replaceAll(`\$\{fecha\}`, format.tiempoLocalShort(fecha));
+
+          await SncNotification.create(
+            {
+              idincumplimiento: sncNotificationFind.idincumplimiento,
+              descripcion: descripcion,
+              idempleado: ot.dataValues.idpersonal,
+              fecha: fecha,
+            },
+            { transaction: t }
           );
-
-        const empleadoName = await empleados.findOne({
-          attributes: [
-            "nombre",
-            "apellido_paterno",
-            "apellido_materno",
-            "nombre_completo",
-          ],
-          where: { idempleado: ot.dataValues.idpersonal },
-        });
-
-        const descripcion = sncNotificationFind.descripcion
-          .replaceAll(
-            `\$\{empleado\}`,
-            JSON.parse(
-              JSON.stringify(empleadoName)
-            ).nombre_completo.toLowerCase()
-          )
-          .replaceAll(`\$\{fecha\}`, format.tiempoLocalShort(fecha));
-
-        await SncNotification.create({
-          idincumplimiento: sncNotificationFind.idincumplimiento,
-          descripcion: descripcion,
-          idempleado: ot.dataValues.idpersonal,
-          fecha: fecha,
-        });
+        }
+        return response;
       }
+    });
 
-      res.status(200).json({ success: true, response });
-    }
+    res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
@@ -573,6 +587,42 @@ controller.cancelarOT = async (req, res) => {
 
     res.status(200).json({ success: true, response: ot });
   } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.historialOT = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const filtros = {};
+    const filtrosOT = {};
+    const { resultado, fechaI, fechaF, idEmpleado } = req.query;
+
+    if (resultado) {
+      filtros.resultado = resultado;
+    }
+
+    if (fechaI && fechaF) {
+      filtrosOT.fecha_inicio = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (idEmpleado) {
+      filtrosOT.idempleado = idEmpleado;
+    }
+
+    const response = await HOT.findAll({
+      where: filtros,
+      include: [{ model: OT, where: filtrosOT }],
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
