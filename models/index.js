@@ -2,6 +2,9 @@ import nominas, { tiposNominas } from "./recursosHumanos/nominas.model";
 import empleados from "./recursosHumanos/empleados.model";
 import departamentos from "./recursosHumanos/departamentos.model";
 import detalleEmpleado from "./recursosHumanos/detalleEmpleado.model";
+import Cmadrugador from "./recursosHumanos/Cmadrugador.model.js";
+import RM from "./recursosHumanos/Registrosmadrugador.model.js";
+import HOT from "./mantenimiento/HistorialOrdenTrabajo.js";
 
 //Despacho
 import ChecklistRegistros from "./despacho/ChecklistRegistros.model";
@@ -43,6 +46,7 @@ import Pagares from "../models/pagares/Pagare.model";
 import OT from "./mantenimiento/OrdenesTrabajo.js";
 import AT from "./mantenimiento/AreasTrabajo.js";
 import TM from "./mantenimiento/TrabajosMantenimiento.js";
+import OrdenTrabajo from "./mantenimiento/OrdenesTrabajo.js";
 
 nominas.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(nominas, { foreignKey: "idempleado" });
@@ -256,6 +260,10 @@ LecturasFinales.belongsTo(Mangueras, { foreignKey: "idmanguera" });
 SncNotification.belongsTo(empleados, { foreignKey: "idempleado" });
 SncNotification.belongsTo(Incumplimientos, { foreignKey: "idincumplimiento" });
 
+Cmadrugador.belongsTo(empleados, { foreignKey: "idempleado" });
+
+HOT.belongsTo(OrdenTrabajo, { foreignKey: "idorden_trabajo" });
+
 export default {
   nominas,
   tiposNominas,
@@ -292,4 +300,7 @@ export default {
   RecursosDespachadorEv,
   RecursosDespachador,
   SncNotification,
+  Cmadrugador,
+  RM,
+  HOT,
 };

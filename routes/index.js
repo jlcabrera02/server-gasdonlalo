@@ -52,6 +52,9 @@ import dir from "./documentos.router";
 //Pagara
 import pagare from "./p.pagares.router";
 
+//Configuraciones
+import config from "./configuraciones.routes";
+
 //Salidas no conformes
 route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/incumplimiento", incumplimientoRouter);
@@ -99,5 +102,7 @@ route.use("/administrativo", administrativo);
 route.use("/documentos", dir);
 route.use("/pagare", pagare);
 route.use("/mantenimiento", mantenimiento);
+//configuraciones
+route.use("/config", config);
 
 export default route;

@@ -71,7 +71,7 @@ export async function obtenerRegistros(req, res) {
     const queryIncumplimientos = {};
 
     if (idIncumplimiento) {
-      queryIncumplimientos.idIncumplimiento = Number(idIncumplimiento);
+      querys.idincumplimiento = Number(idIncumplimiento);
     }
 
     if (etapa === "2") {
