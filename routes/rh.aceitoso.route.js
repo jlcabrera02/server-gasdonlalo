@@ -11,6 +11,7 @@ route.get(
 route.get("/reporte/:year/:month", acei.findVentasA);
 route.post("/registro", acei.insertVentaAceite);
 route.post("/obtener", acei.findVentasAXestacionXIntervaloTiempo);
+route.get("/obtener-ambos", acei.findVentasAXIntervaloTiempo);
 route.put("/edit/:idAceite", acei.updateVentaAceite);
 route.delete("/delete/:idAceite", acei.delete);
 

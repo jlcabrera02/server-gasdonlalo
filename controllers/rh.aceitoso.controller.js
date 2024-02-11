@@ -204,6 +204,114 @@ controller.findVentasAXestacionXIntervaloTiempo = async (req, res) => {
   }
 };
 
+controller.findVentasAXIntervaloTiempo = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization, 24);
+    if (!user.success) throw user;
+    const { fechaInicio, fechaFinal } = req.query;
+    const diaI = formatTiempo.tiempoLocal(fechaInicio).getDate();
+    const milisegundos =
+      new Date(fechaFinal).getTime() - new Date(fechaInicio).getTime();
+    const dias = milisegundos / (1000 * 60 * 60 * 24);
+
+    const empleados1 = await aceiM.obtenerEmpleadosXRegistroXintervalo([
+      1,
+      fechaInicio,
+      fechaFinal,
+    ]);
+    const empleados2 = await aceiM.obtenerEmpleadosXRegistroXintervalo([
+      2,
+      fechaInicio,
+      fechaFinal,
+    ]);
+    const estacion1 = [];
+    const estacion2 = [];
+
+    for (let i = 0; i < empleados1.length; i++) {
+      let dat = [];
+      let descalificado = false;
+      for (let j = diaI; j <= dias + diaI; j++) {
+        let fecha = new Date(
+          new Date(formatTiempo.tiempoLocal(fechaInicio)).setDate(j)
+        )
+          .toISOString()
+          .split("T")[0];
+        let cuerpo = [empleados1[i].idempleado, 1, fecha];
+        const data = await aceiM.findVentasAXestacion(cuerpo);
+        const salida = await salidaNCM.findTotalSalidasXDiaXEmpleado([
+          empleados1[i].idempleado,
+          fecha,
+          3,
+        ]);
+        if (data.length > 0) {
+          dat.push({ ...data[0], salidaNC: salida.total_salidas });
+          if (data[0].descalificado) descalificado = true;
+        } else {
+          dat.push({
+            idventa_aceite: null,
+            fecha: new Date(fecha).toISOString(),
+            idempleado: empleados1[i].idempleado,
+            idestacion_servicio: 1,
+            cantidad: 0,
+            nombre: empleados1[i].nombre,
+            apellido_paterno: empleados1[i].apellido_paterno,
+            apellido_materno: empleados1[i].apellido_materno,
+            salidaNC: salida.total_salidas,
+            descalificado: false,
+          });
+        }
+      }
+      estacion1.push({ descalificado, empleado: empleados1[i], datos: dat });
+    }
+
+    for (let i = 0; i < empleados2.length; i++) {
+      let dat = [];
+      let descalificado = false;
+      for (let j = diaI; j <= dias + diaI; j++) {
+        let fecha = new Date(
+          new Date(formatTiempo.tiempoLocal(fechaInicio)).setDate(j)
+        )
+          .toISOString()
+          .split("T")[0];
+        let cuerpo = [empleados2[i].idempleado, 2, fecha];
+        const data = await aceiM.findVentasAXestacion(cuerpo);
+        const salida = await salidaNCM.findTotalSalidasXDiaXEmpleado([
+          empleados2[i].idempleado,
+          fecha,
+          3,
+        ]);
+        if (data.length > 0) {
+          dat.push({ ...data[0], salidaNC: salida.total_salidas });
+          if (data[0].descalificado) descalificado = true;
+        } else {
+          dat.push({
+            idventa_aceite: null,
+            fecha: new Date(fecha).toISOString(),
+            idempleado: empleados2[i].idempleado,
+            idestacion_servicio: 2,
+            cantidad: 0,
+            nombre: empleados2[i].nombre,
+            apellido_paterno: empleados2[i].apellido_paterno,
+            apellido_materno: empleados2[i].apellido_materno,
+            salidaNC: salida.total_salidas,
+            descalificado: false,
+          });
+        }
+      }
+      estacion2.push({ descalificado, empleado: empleados2[i], datos: dat });
+    }
+
+    res.status(200).json({ success: true, estacion1, estacion2 });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.insertVentaAceite = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);
