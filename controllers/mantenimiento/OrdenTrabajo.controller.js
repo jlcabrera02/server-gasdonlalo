@@ -9,6 +9,7 @@ import format from "../../assets/formatTiempo";
 import Decimal from "decimal.js-light";
 import Utencilios from "../../models/mantenimiento/Utencilios";
 import { Op } from "sequelize";
+import { attributesPersonal } from "../../models/recursosHumanos/empleados.model";
 const { verificar } = auth;
 const { OT, PanicBtn, empleados, AT, SncNotification, HOT } = modelos;
 
@@ -487,7 +488,7 @@ controller.liberarOT = async (req, res) => {
 
     const fecha = format.tiempoDB(Date.now(), true);
     const { idOT } = req.params;
-    const { procedio } = req.body;
+    const { procedio, descripcion } = req.body;
 
     const ot = await OT.findOne({ where: { idorden_trabajo: idOT } });
 
@@ -502,6 +503,8 @@ controller.liberarOT = async (req, res) => {
       await HOT.create(
         {
           resultado: procedio ? "AUTORIZADO" : "NO-AUTORIZADO",
+          descripcion,
+          idautorizante: user.token.data.datos.idempleado,
           idorden_trabajo: idOT,
         },
         { transaction: t }
@@ -617,7 +620,14 @@ controller.historialOT = async (req, res) => {
 
     const response = await HOT.findAll({
       where: filtros,
-      include: [{ model: OT, where: filtrosOT }],
+      include: [
+        { model: OT, where: filtrosOT },
+        {
+          model: empleados,
+          attributes: attributesPersonal,
+          as: "empleado_autorizador",
+        },
+      ],
     });
 
     res.status(200).json({ success: true, response });

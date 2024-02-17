@@ -17,6 +17,15 @@ const HistorialOrdenTrabajo = sequelize.define(
       type: DataTypes.ENUM("AUTORIZADO", "NO-AUTORIZADO"),
       allowNull: false,
     },
+    descripcion: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    idautorizante: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      comment: "Este es el usuario que autorizo o denego la orden de trabajo",
+    },
   },
   {
     freezeTableName: true,

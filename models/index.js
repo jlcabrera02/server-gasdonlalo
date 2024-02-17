@@ -263,6 +263,10 @@ SncNotification.belongsTo(Incumplimientos, { foreignKey: "idincumplimiento" });
 Cmadrugador.belongsTo(empleados, { foreignKey: "idempleado" });
 
 HOT.belongsTo(OrdenTrabajo, { foreignKey: "idorden_trabajo" });
+HOT.belongsTo(empleados, {
+  foreignKey: "idautorizante",
+  as: "empleado_autorizador",
+});
 
 export default {
   nominas,
