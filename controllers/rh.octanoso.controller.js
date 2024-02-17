@@ -310,6 +310,160 @@ controller.octanosoC = async (req, res) => {
   }
 };
 
+controller.octanosoAmbos = async (req, res) => {
+  try {
+    const { fechaInicio, fechaFinal } = req.query;
+    const diaI = formatTiempo.tiempoLocal(fechaInicio).getDate();
+    const milisegundos =
+      new Date(fechaFinal).getTime() - new Date(fechaInicio).getTime();
+    const dias = milisegundos / (1000 * 60 * 60 * 24);
+    //Empleados que se encontraron en ese rango de fechas
+    const liq = await Liquidaciones.findAll({
+      attributes: {
+        include: [
+          [
+            sequelize.literal(
+              `JSON_ARRAYAGG(JSON_EXTRACT(JSON_UNQUOTE(lecturas), "$[*].litrosVendidos"))`
+            ),
+            "importes",
+          ],
+        ],
+      },
+      include: [
+        {
+          model: Horarios,
+          where: {
+            fechaturno: { [Op.between]: [fechaInicio, fechaFinal] },
+          },
+          include: empleados,
+        },
+      ],
+      where: { cancelado: null },
+      group: ["horario.idempleado", "horario.fechaturno"],
+    });
+
+    const liqParse = JSON.parse(JSON.stringify(liq));
+    if (liqParse.length === 0) {
+      throw {
+        success: false,
+        code: 400,
+        msg: "No se encontraron registros en la Base de datos",
+      };
+    }
+    //Agrupo por el id de los empleados para saber cuantos empleados estan involucrados
+    //ids1 = estacion1, ids2 = estacion2
+    const ids1 = agruparArr(
+      liqParse.filter((el) => el.horario.idestacion_servicio === 1),
+      (el) => el.horario.idempleado
+    ).values();
+
+    const ids2 = agruparArr(
+      liqParse.filter((el) => el.horario.idestacion_servicio === 2),
+      (el) => el.horario.idempleado
+    ).values();
+
+    const estacion1 = [],
+      estacion2 = [];
+
+    for (let i = 0; i < ids1.length; i++) {
+      let dat = [];
+      const { idempleado } = ids1[i][0].horario;
+      for (let j = diaI; j <= dias + diaI; j++) {
+        let fecha = new Date(
+          new Date(formatTiempo.tiempoLocal(fechaInicio)).setDate(j)
+        )
+          .toISOString()
+          .split("T")[0];
+        const data = liqParse.find(
+          (liq) =>
+            liq.horario.idempleado === idempleado &&
+            liq.horario.fechaturno === fecha
+        );
+        const salida = await salidaNCM.findTotalSalidasXDiaXEmpleado([
+          idempleado,
+          fecha,
+          2, //Este es el id del concurso
+        ]);
+
+        const temp = {
+          fecha,
+          idempleado,
+          idestacion_servicio: 1,
+          cantidad: 0,
+          salidaNC: salida.total_salidas,
+        };
+
+        if (data) {
+          dat.push({
+            ...temp,
+            cantidad: data.importes.flat().reduce((a, b) => a + b, 0),
+          });
+        } else {
+          dat.push(temp);
+        }
+      }
+
+      estacion1.push({
+        empleado: ids1[i][0].horario.empleado,
+        datos: dat,
+      });
+    }
+
+    for (let i = 0; i < ids2.length; i++) {
+      let dat = [];
+      const { idempleado } = ids2[i][0].horario;
+      for (let j = diaI; j <= dias + diaI; j++) {
+        let fecha = new Date(
+          new Date(formatTiempo.tiempoLocal(fechaInicio)).setDate(j)
+        )
+          .toISOString()
+          .split("T")[0];
+        const data = liqParse.find(
+          (liq) =>
+            liq.horario.idempleado === idempleado &&
+            liq.horario.fechaturno === fecha
+        );
+        const salida = await salidaNCM.findTotalSalidasXDiaXEmpleado([
+          idempleado,
+          fecha,
+          2, //Este es el id del concurso
+        ]);
+
+        const temp = {
+          fecha,
+          idempleado,
+          idestacion_servicio: 2,
+          cantidad: 0,
+          salidaNC: salida.total_salidas,
+        };
+
+        if (data) {
+          dat.push({
+            ...temp,
+            cantidad: data.importes.flat().reduce((a, b) => a + b, 0),
+          });
+        } else {
+          dat.push(temp);
+        }
+      }
+
+      estacion2.push({
+        empleado: ids2[i][0].horario.empleado,
+        datos: dat,
+      });
+    }
+
+    res.status(200).json({ success: true, estacion1, estacion2 });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.insertVentaLitros = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 24);

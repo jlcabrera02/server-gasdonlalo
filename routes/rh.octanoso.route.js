@@ -10,6 +10,7 @@ route.get(
 );
 route.get("/reporte/:year/:month", oct.findVentasL);
 route.post("/octanoso", oct.octanosoC);
+route.get("/octanoso-ambas", oct.octanosoAmbos);
 route.post("/obtener", oct.findVentasLXestacionXIntervaloTiempo);
 route.post("/registro", oct.insertVentaLitros);
 route.put("/edit/:idOct", oct.updateLitros);
