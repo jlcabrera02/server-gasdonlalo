@@ -604,7 +604,7 @@ controller.historialOT = async (req, res) => {
     if (!user.success) throw user;
     const filtros = {};
     const filtrosOT = {};
-    const { resultado, fechaI, fechaF, idEmpleado } = req.query;
+    const { resultado, fechaI, fechaF, idEmpleado, offset, limit } = req.query;
 
     if (resultado) {
       filtros.resultado = resultado;
@@ -615,19 +615,37 @@ controller.historialOT = async (req, res) => {
     }
 
     if (idEmpleado) {
-      filtrosOT.idempleado = idEmpleado;
+      filtrosOT.idpersonal = idEmpleado;
     }
 
-    const response = await HOT.findAll({
+    const response = await HOT.findAndCountAll({
       where: filtros,
+      order: [["createdAt", "DESC"]],
       include: [
-        { model: OT, where: filtrosOT },
+        {
+          model: OT,
+          where: filtrosOT,
+          include: [
+            {
+              model: empleados,
+              as: "personal",
+              attributes: [
+                "nombre",
+                "apellido_paterno",
+                "apellido_materno",
+                "nombre_completo",
+              ],
+            },
+          ],
+        },
         {
           model: empleados,
           attributes: attributesPersonal,
           as: "empleado_autorizador",
         },
       ],
+      offset: offset ? Number(offset) : null,
+      limit: limit ? Number(limit) || 10 : null,
     });
 
     res.status(200).json({ success: true, response });
