@@ -5,6 +5,7 @@ import sequelize from "../config/configdb";
 import { insertarMf } from "./d.montoFaltante.controller";
 import sncaM from "../models/s.acumular.model";
 import { Op } from "sequelize";
+import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
 const {
   Liquidaciones,
   ES,
@@ -348,7 +349,7 @@ controller.imprimir = async (req, res) => {
   }
 };
 
-controller.showMfMs = async (req, res) => {
+controller.administrarMfMs = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
@@ -365,6 +366,36 @@ controller.showMfMs = async (req, res) => {
       idempleado: user.token.data.datos.idempleado,
       accion: 1,
       idaffectado: folio,
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.showMfMs = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { order, limit, offset } = req.query;
+
+    const response = await Liquidaciones.findAndCountAll({
+      where: { [Op.or]: [{ show_ms: false }, { show_mf: false }] },
+      order: [["idliquidacion", order || "DESC"]],
+      include: [
+        {
+          model: Horarios,
+          include: [{ model: empleados, attributes: attributesPersonal }],
+        },
+      ],
+      offset: offset ? Number(offset) : null,
+      limit: limit ? Number(limit) || 10 : null,
     });
 
     res.status(200).json({ success: true, response });
