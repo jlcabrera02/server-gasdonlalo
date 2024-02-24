@@ -1,5 +1,9 @@
 import auth from "../models/auth.model";
 import models from "../models/";
+import {
+  escribirConfiguraciones,
+  obtenerConfiguraciones,
+} from "../services/configuracionesPersonalizables";
 const { CodigosUso, Auditoria } = models;
 const { verificar } = auth;
 
@@ -110,6 +114,86 @@ controller.eliminarCodigoUso = async (req, res) => {
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+//---Mantenimiento
+
+controller.configurarCUMantenimiento = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { identificador } = req.body;
+
+    const codigoUso = await CodigosUso.findOne({
+      where: { idcodigo_uso: identificador },
+    });
+
+    const configCU =
+      obtenerConfiguraciones().configLiquidacion.codigoUsoMantenimiento;
+    const editar = escribirConfiguraciones({
+      configLiquidacion: {
+        codigoUsoMantenimiento: [
+          ...configCU,
+          { identificador, descripcion: codigoUso.dataValues.descripcion },
+        ],
+      },
+    });
+
+    res.status(200).json({ success: true, response: true });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.obtenerCodigoUsoMantenimiento = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+
+    const response =
+      obtenerConfiguraciones().configLiquidacion.codigoUsoMantenimiento;
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.eliminarCUMantenimiento = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { identificador } = req.query;
+
+    const configCU =
+      obtenerConfiguraciones().configLiquidacion.codigoUsoMantenimiento;
+
+    const configuracionesRestantes = configCU.filter(
+      (el) => el.identificador !== identificador
+    );
+
+    const eliminar = escribirConfiguraciones({
+      configLiquidacion: {
+        codigoUsoMantenimiento: configuracionesRestantes,
+      },
+    });
+
+    res.status(200).json({ success: true, response: true });
+  } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {

@@ -5,6 +5,7 @@ import { Op } from "sequelize";
 import formatTiempo from "../assets/formatTiempo";
 import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
 import agruparArr from "../assets/agruparArr";
+import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
 const {
   InfoLecturas,
   LecturasFinales,
@@ -577,6 +578,7 @@ export const buscarLecturasXIdEmpleado = async ({
   fechaI,
   fechaF,
 }) => {
+  const { codigoUsoMantenimiento } = obtenerConfiguraciones().configLiquidacion;
   Mangueras.belongsTo(Islas, { foreignKey: "idisla" });
   Islas.hasMany(Mangueras, { foreignKey: "idisla" });
 
@@ -629,6 +631,9 @@ export const buscarLecturasXIdEmpleado = async ({
     querysCU.idcodigo_uso = { [Op.in]: cu };
   }
 
+  // obtenerConfiguraciones.configLiquidacion.
+  const filtrosMantenimiento = {};
+
   let response = await Liquidaciones.findAll({
     where: { ...querys },
     include: [
@@ -640,11 +645,13 @@ export const buscarLecturasXIdEmpleado = async ({
       },
       {
         model: Vales,
+        filtrosMantenimiento: {},
         include:
           codigoUso !== undefined ? { model: CodigosUso, where: querysCU } : [],
       },
       {
         model: Efectivo,
+        filtrosMantenimiento: {},
         include:
           codigoUso !== undefined ? { model: CodigosUso, where: querysCU } : [],
       },

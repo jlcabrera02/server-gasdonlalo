@@ -77,5 +77,11 @@
       }
     }
   },
+  "configLiquidacion": {
+    "codigoUsoMantenimiento": [
+      { "identificador": "C", "descripcion": "Calibracion de bomba profeco" },
+      { "identificador": "Z", "descripcion": "Mantenimiento Dispensario" }
+    ]
+  },
   "precioHoraOT": 22
 }

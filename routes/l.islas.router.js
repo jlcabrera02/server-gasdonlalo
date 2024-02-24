@@ -62,6 +62,16 @@ route.get("/codigo-uso/obtener", codigoUso.obtenerCodigoUso); //
 route.post("/codigo-uso/nuevo", codigoUso.nuevoCodigoUso); //
 route.put("/codigo-uso/editar/:idCodigoUso", codigoUso.editarCodigoUso); //
 route.delete("/codigo-uso/eliminar/:idCodigoUso", codigoUso.eliminarCodigoUso); //
+// --mantenimiento codigo de uso
+route.get("/codigo-uso/mantenimiento", codigoUso.obtenerCodigoUsoMantenimiento);
+route.post(
+  "/codigo-uso/configurar-mantenimiento",
+  codigoUso.configurarCUMantenimiento
+);
+route.delete(
+  "/codigo-uso/eliminar-mantenimiento",
+  codigoUso.eliminarCUMantenimiento
+);
 
 //Preliquidaciones
 route.get("/preliquidaciones", preliquidaciones.buscarPreliquidaciones); //
