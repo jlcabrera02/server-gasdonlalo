@@ -631,13 +631,11 @@ export const buscarLecturasXIdEmpleado = async ({
     querysCU.idcodigo_uso = { [Op.in]: cu };
   }
 
-  const filtrosMantenimiento = {
+  /* const filtrosMantenimiento = {
     idcodigo_uso: {
       [Op.notIn]: codigoUsoMantenimiento.map((el) => el.identificador),
     },
-  };
-
-  console.log(filtrosMantenimiento);
+  }; */
 
   let response = await Liquidaciones.findAll({
     where: { ...querys },
@@ -650,13 +648,13 @@ export const buscarLecturasXIdEmpleado = async ({
       },
       {
         model: Vales,
-        where: filtrosMantenimiento,
+        // where: filtrosMantenimiento,
         include:
           codigoUso !== undefined ? { model: CodigosUso, where: querysCU } : [],
       },
       {
         model: Efectivo,
-        where: filtrosMantenimiento,
+        // where: filtrosMantenimiento,
         include:
           codigoUso !== undefined ? { model: CodigosUso, where: querysCU } : [],
       },
