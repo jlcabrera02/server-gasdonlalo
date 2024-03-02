@@ -5,12 +5,15 @@ const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
-model.findEvaluacionXmensual = (data) =>
+model.findEvaluacionXmensual = (data, quincena) =>
   new Promise((resolve, reject) => {
+    console.log(data);
     let sql = `SELECT oyl.*, oylc.cumplimiento, emp.idempleado, emp.idchecador, emp.estatus, emp.nombre, emp.apellido_paterno,
 emp.apellido_materno, es.nombre estacion, incidentes FROM oyl, oyl_cumplimiento oylc, empleado emp, estacion_servicio es 
 WHERE oyl.idoyl_cumplimiento = oylc.idoyl_cumplimiento AND
-emp.idempleado = oyl.idempleado AND es.idestacion_servicio = oyl.idestacion_servicio AND oyl.fecha BETWEEN ? AND LAST_DAY(?)`;
+emp.idempleado = oyl.idempleado AND es.idestacion_servicio = oyl.idestacion_servicio AND oyl.fecha BETWEEN ? AND ${
+      quincena === "1" ? "?" : "LAST_DAY(?)"
+    }`;
 
     if (data.length > 2) {
       sql +=
@@ -18,6 +21,7 @@ emp.idempleado = oyl.idempleado AND es.idestacion_servicio = oyl.idestacion_serv
     }
 
     connection.query(sql, data, (err, res) => {
+      console.log(sql);
       if (err) return reject(errorDB());
       // if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);

@@ -92,14 +92,19 @@ controller.findEvaluacionXmensual = async (req, res) => {
     if (!user.success) throw user;
     const empleados = await empM.findEmpleadosXmesXiddepartamento(1);
     const { year, month, idEmpleado } = req.params;
+    const { quincena } = req.query;
     const fecha = `${year}-${month}-01`;
+    const fechas = !quincena
+      ? [fecha, fecha]
+      : quincena === "1"
+      ? [fecha, formatTiempo.tiempoDB(new Date(fecha).setDate(15))]
+      : [formatTiempo.tiempoDB(new Date(fecha).setDate(16)), fecha];
     let response = [];
     if (idEmpleado) {
-      const data = await oylM.findEvaluacionXmensual([
-        fecha,
-        fecha,
-        idEmpleado,
-      ]);
+      const data = await oylM.findEvaluacionXmensual(
+        [...fechas, idEmpleado],
+        quincena
+      );
       const puntos = data
         .map((el) => (el.cumple ? 1 : 0))
         .reduce((a, b) => a + b, 0);
@@ -134,8 +139,8 @@ controller.findEvaluacionXmensual = async (req, res) => {
           apellido_materno,
           idchecador,
         } = empleados[i];
-        const cuerpo = [fecha, fecha, idempleado];
-        const data = await oylM.findEvaluacionXmensual(cuerpo);
+        const cuerpo = [...fechas, idempleado];
+        const data = await oylM.findEvaluacionXmensual(cuerpo, quincena);
         let agrupar = {};
         const puntos = data
           .map((el) => (el.cumple ? 1 : 0))
