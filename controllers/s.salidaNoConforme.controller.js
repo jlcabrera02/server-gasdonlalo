@@ -219,6 +219,7 @@ controller.findSalidasXInconformidadXMesXiddepartemento = async (req, res) => {
       ]);
     res.status(200).json({ success: true, response });
   } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -231,12 +232,12 @@ controller.findSalidasXSemana = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 20);
     if (!user.success) throw user;
-    const { year, month, idSalida } = req.params;
+    const { year, month, iddepartamento } = req.params;
     const fecha = `${year}-${month}-01`;
     let diasDelMes = new Date(year, month, 0).getDate(); //Me obtiene el numero de dias del mes
     let numSemana = diasDelMes / 7 > 4 ? 5 : 4; //Me obtiene cuantas semanas tiene el mes
     let empleados = await empleadoM.findEmpleadosXmesXiddepartamento([
-      1,
+      iddepartamento,
       fecha,
     ]);
     let acumulador = [];

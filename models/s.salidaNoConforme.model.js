@@ -103,7 +103,9 @@ model.findSNCPendiente = (data) =>
 
 model.findSalidasXInconformidadXMesXiddepartemento = (data) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT inc.incumplimiento, COUNT(sn.idincumplimiento) AS total FROM salida_noconforme sn, incumplimiento inc, empleado emp WHERE sn.idincumplimiento = inc.idincumplimiento AND emp.idempleado = sn.idempleado AND sn.fecha BETWEEN ? AND LAST_DAY(?) AND emp.iddepartamento = ? GROUP BY sn.idincumplimiento ORDER BY inc.incumplimiento`;
+    let sql = data[2]
+      ? `SELECT inc.incumplimiento, COUNT(sn.idincumplimiento) AS total FROM salida_noconforme sn, incumplimiento inc, empleado emp WHERE sn.idincumplimiento = inc.idincumplimiento AND emp.idempleado = sn.idempleado AND sn.fecha BETWEEN ? AND LAST_DAY(?) AND emp.iddepartamento = ? GROUP BY sn.idincumplimiento ORDER BY inc.incumplimiento`
+      : `SELECT inc.incumplimiento, COUNT(sn.idincumplimiento) AS total FROM salida_noconforme sn, incumplimiento inc, empleado emp WHERE sn.idincumplimiento = inc.idincumplimiento AND emp.idempleado = sn.idempleado AND sn.fecha BETWEEN ? AND LAST_DAY(?)  GROUP BY sn.idincumplimiento ORDER BY inc.incumplimiento`;
     //data = ["2023-12-01", "2023-12-01", 1]
     connection.query(sql, data, (err, res) => {
       if (err) return reject(errorDB());
