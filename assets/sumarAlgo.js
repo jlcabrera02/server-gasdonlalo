@@ -3,7 +3,7 @@ const calcularTotal = (datos, propiedad) => {
   const cantidad =
     datos.length > 0
       ? datos
-          .map((el) => el[propiedad])
+          .map((el) => (propiedad ? el[propiedad] : el))
           .reduce((a, b) => new Decimal(a).add(new Decimal(b).toNumber(), 0))
       : 0;
   return Number(cantidad);

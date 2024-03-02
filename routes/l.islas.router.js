@@ -98,4 +98,7 @@ route.put("/cancelar", liquido.cancelarLiquido); //
 
 route.get("/capturados/:idliquidacion", liquido.consultarLiquido); //
 
+//pruebas
+route.get("/prueba", liquido.prueba);
+
 export default route;

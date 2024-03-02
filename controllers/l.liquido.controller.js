@@ -7,6 +7,7 @@ import sncaM from "../models/s.acumular.model";
 import { Op } from "sequelize";
 import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
 const {
+  LiquidacionesV2,
   Liquidaciones,
   ES,
   Horarios,
@@ -577,6 +578,22 @@ controller.consultarLiquidoHistorial = async (req, res) => {
       ],
     });
 
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.prueba = async (req, res) => {
+  try {
+    const response = await LiquidacionesV2.findAll({
+      limit: 1,
+    });
     res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
