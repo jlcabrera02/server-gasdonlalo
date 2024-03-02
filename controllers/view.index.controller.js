@@ -454,9 +454,14 @@ controller.boletasDespachador = async (req, res) => {
         estacion_servicio: true,
         empleado_saliente: true,
       },
+    }).then((res) => {
+      if (res === 0) return "NO APLICA";
+      return res;
     });
 
     const eu = await EV.findAll({ where: filtros }).then((res) => {
+      if (res.length === 0) return "NO APLICA";
+
       const convertObject = JSON.parse(JSON.stringify(res)).map((el) => ({
         cantidad: el.cumple ? 1 : 0,
       }));
@@ -466,6 +471,7 @@ controller.boletasDespachador = async (req, res) => {
     });
 
     const pd = await PD.findAll({ where: filtros }).then((res) => {
+      if (res.length === 0) return "NO APLICA";
       const convertObject = JSON.parse(JSON.stringify(res)).map((el) => ({
         cantidad: el.evaluacion ? 1 : 0,
       }));
@@ -476,16 +482,17 @@ controller.boletasDespachador = async (req, res) => {
 
     const rd = await RecursosDespachadorEv.findAll({ where: filtros }).then(
       (res) => {
+        if (res.length === 0) return "NO APLICA";
         const convertObject = JSON.parse(JSON.stringify(res)).map((el) => ({
           cantidad: el.evaluacion ? 1 : 0,
         }));
         const puntos = calcularTotal(convertObject, "cantidad");
-        const total = convertObject.length;
-        return Number(new Decimal(puntos).div(total).toFixed(2)) * 10;
+        return puntos;
       }
     );
 
     const oyl = await OyL.findAll({ where: filtros }).then((res) => {
+      if (res.length === 0) return "NO APLICA";
       const convertObject = JSON.parse(JSON.stringify(res)).map((el) => ({
         cantidad: el.cumple ? 1 : 0,
       }));
