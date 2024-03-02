@@ -112,8 +112,13 @@ controller.findEvaluacionMensual = async (req, res) => {
     let user = verificar(req.headers.authorization, 8);
     if (!user.success) throw user;
     const { year, month, idEmpleado } = req.params;
+    const { quincena } = req.query;
     const fecha = `${year}-${month}-01`;
-    const cuerpo = [fecha, fecha];
+    const cuerpo = !quincena
+      ? [fecha, fecha]
+      : quincena === "1"
+      ? [fecha, formatTiempo.tiempoDB(new Date(fecha).setDate(14))]
+      : [formatTiempo.tiempoDB(new Date(fecha).setDate(15)), fecha];
     const cumplimientos = await evaluacionUniformeM.findPasosEvUniforme();
     let response = [];
     const getData = async (empleados, response, cuerpo, cumplimientos) => {
@@ -127,7 +132,11 @@ controller.findEvaluacionMensual = async (req, res) => {
         idchecador,
       } = empleados;
 
-      const data = await evaluacionUniformeM.findEvaluacionMensual(cuerpo);
+      const data = !quincena
+        ? await evaluacionUniformeM.findEvaluacionMensual(cuerpo)
+        : quincena === "1"
+        ? await evaluacionUniformeM.findEvaluacionQuincenal(cuerpo)
+        : await evaluacionUniformeM.findEvaluacionMensual(cuerpo);
 
       if (data.length > 0) {
         data.forEach((el) => {

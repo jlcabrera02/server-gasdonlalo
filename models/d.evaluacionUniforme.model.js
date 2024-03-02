@@ -41,6 +41,21 @@ model.findEvaluacionMensual = (data) =>
     });
   });
 
+model.findEvaluacionQuincenal = (data) =>
+  new Promise((resolve, reject) => {
+    let sql = `SELECT ev.*, cu.cumplimiento, emp.nombre, emp.apellido_paterno, emp.apellido_materno FROM evaluacion_uniforme ev, cumplimiento_uniforme cu, empleado emp WHERE ev.idcumplimiento_uniforme = cu.idcumplimiento_uniforme AND emp.idempleado = ev.idempleado AND ev.fecha BETWEEN ? AND ?`;
+
+    if (data.length > 2) {
+      sql += ` AND ev.idempleado = ? ORDER BY ev.fecha`;
+    }
+
+    connection.query(sql, data, (err, res) => {
+      if (err) return reject(errorDB());
+      // if (res.length < 1) return reject(sinRegistro());
+      if (res) return resolve(res);
+    });
+  });
+
 //De aqui busco un empleado con sus puntos con su identificador
 model.findOne = (id) =>
   new Promise((resolve, reject) => {
