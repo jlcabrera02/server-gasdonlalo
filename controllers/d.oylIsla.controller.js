@@ -141,6 +141,9 @@ controller.findEvaluacionXmensual = async (req, res) => {
         } = empleados[i];
         const cuerpo = [...fechas, idempleado];
         const data = await oylM.findEvaluacionXmensual(cuerpo, quincena);
+        // if ( > 9) {
+        //   data.push;
+        // }
         let agrupar = {};
         const puntos = data
           .map((el) => (el.cumple ? 1 : 0))
@@ -163,7 +166,7 @@ controller.findEvaluacionXmensual = async (req, res) => {
           apellido_materno,
           apellido_paterno,
           evaluaciones: agrupar.length > 0 ? agrupar : null,
-          totalPuntos: puntos,
+          totalPuntos: data.length === 9 ? puntos + 1 : puntos,
         });
       }
     }

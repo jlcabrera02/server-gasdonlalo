@@ -7,7 +7,6 @@ const model = {};
 
 model.findEvaluacionXmensual = (data, quincena) =>
   new Promise((resolve, reject) => {
-    console.log(data);
     let sql = `SELECT oyl.*, oylc.cumplimiento, emp.idempleado, emp.idchecador, emp.estatus, emp.nombre, emp.apellido_paterno,
 emp.apellido_materno, es.nombre estacion, incidentes FROM oyl, oyl_cumplimiento oylc, empleado emp, estacion_servicio es 
 WHERE oyl.idoyl_cumplimiento = oylc.idoyl_cumplimiento AND
@@ -21,7 +20,6 @@ emp.idempleado = oyl.idempleado AND es.idestacion_servicio = oyl.idestacion_serv
     }
 
     connection.query(sql, data, (err, res) => {
-      console.log(sql);
       if (err) return reject(errorDB());
       // if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);
