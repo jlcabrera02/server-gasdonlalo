@@ -4,7 +4,7 @@ import modelos from "../models/";
 import sequelize from "../config/configdb";
 import { insertarMf } from "./d.montoFaltante.controller";
 import sncaM from "../models/s.acumular.model";
-import { Op } from "sequelize";
+import { Op, literal } from "sequelize";
 import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
 const {
   Liquidaciones,
@@ -18,6 +18,7 @@ const {
   LecturasFinales,
   Auditoria,
   Precios,
+  CodigosUso,
 } = modelos;
 const { verificar } = auth;
 
@@ -578,6 +579,87 @@ controller.consultarLiquidoHistorial = async (req, res) => {
     });
 
     res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.consultaFolios = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { filtrarFolio, fechaI, fechaF, excluirCU } = req.query;
+    const filtros = { [Op.and]: [] };
+
+    if (fechaI) {
+      if (fechaF) {
+        filtros[Op.and] = [
+          ...filtros[Op.and],
+          literal(`fechaturno BETWEEN '${fechaI}' AND '${fechaF}'`),
+        ];
+      } else {
+        filtros[Op.and] = [
+          ...filtros[Op.and],
+          sequelize.literal(`fechaturno > '2024-01-01'`),
+        ];
+      }
+    }
+
+    if (filtrarFolio) {
+      const folios = Array.isArray(filtrarFolio)
+        ? filtrarFolio
+        : [filtrarFolio];
+      filtros[Op.and] = [...filtros[Op.and], { folio: folios }];
+    }
+
+    if (excluirCU) {
+      const codigos = Array.isArray(excluirCU) ? excluirCU : [excluirCU];
+      filtros[Op.and] = [
+        ...filtros[Op.and],
+        { idcodigo_uso: { [Op.notIn]: [codigos] } },
+      ];
+    }
+
+    const efectivos = await Efectivo.findAll({
+      include: [
+        {
+          model: Liquidaciones,
+          attributes: ["idliquidacion"],
+          include: [
+            {
+              model: Horarios,
+              attributes: ["fechaturno"],
+            },
+          ],
+        },
+        { model: CodigosUso, attributes: ["descripcion"] },
+      ],
+      where: filtros,
+    });
+
+    const vales = await Vales.findAll({
+      include: [
+        {
+          model: Liquidaciones,
+          attributes: ["idliquidacion"],
+          include: [
+            {
+              model: Horarios,
+              attributes: ["fechaturno"],
+            },
+          ],
+        },
+        { model: CodigosUso, attributes: ["descripcion"] },
+      ],
+      where: filtros,
+    });
+
+    res.status(200).json({ success: true, response: { efectivos, vales } });
   } catch (err) {
     console.log(err);
     if (!err.code) {

@@ -88,7 +88,8 @@ route.get("/buscar-preliquidacion", preliquidaciones.buscarPreliquidacion); //
 //captura de liquidacion
 route.post("/capturar", liquido.insertarLiquidos); //
 route.get("/pendientes", liquido.liquidacionesPendientes); //
-route.get("/inactivosMSMF", liquido.showMfMs);
+route.get("/folios/buscar", liquido.consultaFolios); //
+route.get("/inactivosMSMF", liquido.showMfMs); //
 route.get("/historial", liquido.consultarLiquidoHistorial); //
 route.post("/reservar/:folio", liquido.reservarFolio); //
 route.delete("/noreservar/:folio", liquido.quitarReservarFolio); //
