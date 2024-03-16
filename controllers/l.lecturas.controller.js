@@ -482,12 +482,6 @@ controller.updateLecturaInicial = async (req, res) => {
   }
 };
 
-const montosFaltantes = () => async (req, res) => {
-  try {
-    const { year, month, fechaI, fechaF } = req.query;
-  } catch (err) {}
-};
-
 controller.historial = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
