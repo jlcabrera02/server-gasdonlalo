@@ -605,7 +605,7 @@ controller.consultaFolios = async (req, res) => {
       } else {
         filtros[Op.and] = [
           ...filtros[Op.and],
-          sequelize.literal(`fechaturno > '2024-01-01'`),
+          sequelize.literal(`fechaturno > ${fechaI}`),
         ];
       }
     }
