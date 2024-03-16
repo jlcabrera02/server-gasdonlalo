@@ -6,6 +6,7 @@ import { insertarMf } from "./d.montoFaltante.controller";
 import sncaM from "../models/s.acumular.model";
 import { Op } from "sequelize";
 import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
+import calcularTotal from "../assets/sumarAlgo";
 const {
   LiquidacionesV2,
   Liquidaciones,
@@ -85,10 +86,12 @@ controller.insertarLiquidos = async (req, res) => {
         transaction: t,
       });
 
-      const liquidaciones = await Liquidaciones.update(
+      const liquidaciones = await LiquidacionesV2.update(
         {
           lecturas: JSON.stringify(lecturas),
           capturado: true,
+          efectivo_entregado: calcularTotal(cuerpoEfectivo, "monto"),
+          vales_entregado: calcularTotal(cuerpoVales, "monto"),
           idempleado_captura: user.token.data.datos.idempleado,
         },
         {
