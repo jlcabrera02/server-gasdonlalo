@@ -98,6 +98,8 @@ route.put("/cancelar", liquido.cancelarLiquido); //
 
 route.get("/capturados/:idliquidacion", liquido.consultarLiquido); //
 
+route.get("/reporte-dashboard", liquido.reporteDashboard);
+
 //pruebas
 route.get("/prueba", liquido.prueba);
 

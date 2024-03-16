@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/configdb";
 import calcularTotal from "../../../assets/sumarAlgo";
-import agruparArr from "../../../assets/agruparArr";
+import Decimal from "decimal.js-light";
 
 const LiquidacionesV2 = sequelize.define(
   "liquidaciones",
@@ -62,8 +62,9 @@ const LiquidacionesV2 = sequelize.define(
     entregado: {
       type: DataTypes.VIRTUAL,
       get() {
-        console.log(this);
-        return "ojla";
+        const vales = this.vales_entregado || 0,
+          efectivo = this.efectivo_entregado || 0;
+        return calcularTotal([vales, efectivo]);
       },
     },
     calculados: {
@@ -94,6 +95,25 @@ const LiquidacionesV2 = sequelize.define(
           litros: { M: ML, P: PL, D: DL, total: calcularTotal([ML, PL, DL]) },
           pesos: { M: MP, P: PP, D: DP, total: calcularTotal([MP, PP, DP]) },
         };
+      },
+    },
+    efectivo_entregado: {
+      type: DataTypes.DECIMAL(19, 2),
+      allowNull: true,
+    },
+    vales_entregado: {
+      type: DataTypes.DECIMAL(19, 2),
+      allowNull: true,
+    },
+    diferencia: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        if (this.capturado) {
+          const calculado = this.calculados.pesos.total,
+            entregado = this.entregado;
+          return new Decimal(calculado).sub(entregado).toNumber();
+        }
+        return 0;
       },
     },
   },

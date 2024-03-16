@@ -269,6 +269,15 @@ HOT.belongsTo(empleados, {
   as: "empleado_autorizador",
 });
 
+// LiquidacionesV2 Relaciones
+
+LiquidacionesV2.belongsTo(Horarios, { foreignKey: "idhorario" });
+
+LiquidacionesV2.belongsTo(empleados, {
+  foreignKey: "idempleado_captura",
+  as: "empleado_captura",
+});
+
 export default {
   nominas,
   tiposNominas,

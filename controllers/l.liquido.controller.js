@@ -556,10 +556,7 @@ controller.consultarLiquidoHistorial = async (req, res) => {
       }
     }
 
-    LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
-    InfoLecturas.hasMany(LecturasFinales, { foreignKey: "idinfo_lectura" });
-
-    const response = await Liquidaciones.findAll({
+    const response = await LiquidacionesV2.findAll({
       where: querys,
       include: [
         {
@@ -567,9 +564,6 @@ controller.consultarLiquidoHistorial = async (req, res) => {
           where: querysL,
           include: [{ model: empleados }, { model: Turnos }, { model: ES }],
         },
-        { model: Efectivo },
-        { model: Vales },
-        { model: InfoLecturas, include: LecturasFinales },
         { model: empleados, as: "empleado_captura" },
       ],
       order: [
@@ -589,10 +583,49 @@ controller.consultarLiquidoHistorial = async (req, res) => {
   }
 };
 
+controller.reporteDashboard = async (req, res) => {
+  try {
+    const { fechaI, fechaF, estacionS, idEmpleado, idTurno } = req.query;
+    const filtrosHorario = {};
+
+    if (fechaI && fechaF) {
+      filtrosHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (estacionS) filtrosHorario.idestacion_servicio = estacionS;
+    if (idEmpleado) filtrosHorario.idempleado = idEmpleado;
+    if (idTurno) filtrosHorario.idturno = idTurno;
+
+    const response = await LiquidacionesV2.findAll({
+      include: [
+        {
+          model: Horarios,
+          attributes: ["idhorario", "fechaturno", "idempleado", "idturno"],
+          where: filtrosHorario,
+          include: [
+            { model: empleados, attributes: attributesPersonal },
+            { model: Turnos },
+            { model: ES },
+          ],
+        },
+      ],
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.prueba = async (req, res) => {
   try {
     const response = await LiquidacionesV2.findAll({
-      limit: 1,
+      limit: 100,
     });
     res.status(200).json({ success: true, response });
   } catch (err) {

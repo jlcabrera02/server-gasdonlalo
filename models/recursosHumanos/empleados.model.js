@@ -85,6 +85,7 @@ export const attributesPersonal = [
   "nombre_completo",
   "idempleado",
   "idchecador",
+  "estatus",
 ];
 
 export default empleados;
