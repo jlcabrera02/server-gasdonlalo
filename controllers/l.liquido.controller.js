@@ -7,6 +7,7 @@ import sncaM from "../models/s.acumular.model";
 import { Op } from "sequelize";
 import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
 import calcularTotal from "../assets/sumarAlgo";
+import Decimal from "decimal.js-light";
 const {
   LiquidacionesV2,
   Liquidaciones,
@@ -453,6 +454,99 @@ controller.liquidacionesPendientes = async (req, res) => {
       .status(200)
       .json({ success: true, response, totalLiquidaciones, anteriores });
   } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.acarreo = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+
+    const { fechaI, fechaF, idEmpleado } = req.query;
+    const filtrosHorario = {};
+
+    if (fechaI && fechaF) {
+      filtrosHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (idEmpleado) {
+      filtrosHorario.idempleado = idEmpleado;
+    }
+
+    const response = await Vales.findAll({
+      where: { idcodigo_uso: ["C", "Z"] },
+      include: [
+        {
+          model: Liquidaciones,
+          attributes: ["idliquidacion", "lecturas", "idislas"],
+          include: [
+            {
+              model: Horarios,
+              attributes: [
+                "idempleado",
+                "fechaturno",
+                "idturno",
+                "fechaliquidacion",
+                "idhorario",
+                "idestacion_servicio",
+              ],
+              where: filtrosHorario,
+            },
+          ],
+        },
+      ],
+    });
+
+    const respon = response
+      .filter((el) => el.liquidacione)
+      .map((el) => {
+        const datos = JSON.parse(el.dataValues.liquidacione.lecturas);
+        const { precioUnitario, combustible, idisla } = datos.find(
+          (d) => d.idgas === el.combustible
+        );
+
+        const dataIsla = el.dataValues.liquidacione.idislas;
+
+        const nisla = dataIsla.find((isla) => isla.idisla === idisla).nisla;
+
+        const {
+          idempleado,
+          fechaturno,
+          fechaliquidacion,
+          idturno,
+          idestacion_servicio,
+        } = el.dataValues.liquidacione.horario;
+        const monto = el.dataValues.monto;
+        const litrosJarreados = new Decimal(monto)
+          .div(precioUnitario)
+          .toNumber();
+
+        return {
+          idvale: el.dataValues.idvale,
+          idgas: el.dataValues.combustible,
+          monto,
+          litrosJarreados,
+          idcodigo_uso: el.dataValues.idcodigo_uso,
+          precioUnitario,
+          combustible,
+          idliquidacion: el.dataValues.liquidacione.idliquidacion,
+          idempleado,
+          idturno,
+          fechaturno,
+          fechaliquidacion,
+          idisla,
+          nisla,
+          idestacion_servicio,
+        };
+      });
+    res.status(200).json({ success: true, response: respon });
+  } catch (err) {
+    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
