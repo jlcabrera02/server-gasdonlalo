@@ -5,11 +5,16 @@ const { errorDB, sinRegistro, sinCambios } = resErr;
 
 const model = {};
 
-model.findPasosEvUniforme = () =>
+model.findPasosEvUniforme = (vigencia) =>
   new Promise((resolve, reject) => {
     let sql = `SELECT * FROM cumplimiento_uniforme`;
 
+    if (vigencia) {
+      sql += ` WHERE vigente = ${vigencia}`;
+    }
+
     connection.query(sql, (err, res) => {
+      console.log(err, sql);
       if (err) return reject(errorDB());
       if (res.length < 1) return reject(sinRegistro());
       if (res) return resolve(res);

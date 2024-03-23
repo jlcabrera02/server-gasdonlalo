@@ -96,7 +96,8 @@ controller.findPasosEvUniforme = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization, 8);
     if (!user.success) throw user;
-    let response = await evaluacionUniformeM.findPasosEvUniforme();
+    const { vigentes } = req.query;
+    let response = await evaluacionUniformeM.findPasosEvUniforme(vigentes);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -172,6 +173,8 @@ controller.findEvaluacionMensual = async (req, res) => {
 
       let promedio = 0;
       const enlistar = Object.values(agrupar);
+
+      console.log(enlistar);
 
       if (cantidad.length > 0) {
         const total = cantidad.map((el) => el.total).reduce((a, b) => a + b);
