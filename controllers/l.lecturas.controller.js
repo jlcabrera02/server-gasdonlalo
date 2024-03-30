@@ -90,8 +90,8 @@ controller.lecturasInicialesNew = async (req, res) => {
         { model: Gas },
         {
           model: LecturasFinales,
-          limit: 1,
-          include: [{ model: InfoLecturas }],
+          limit: 3,
+          include: [{ model: InfoLecturas, where: { cancelado: false } }],
           order: [["idinfo_lectura", "DESC"]],
         },
         {
