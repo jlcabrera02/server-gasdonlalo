@@ -6,7 +6,10 @@ import { insertarMf } from "./d.montoFaltante.controller";
 import sncaM from "../models/s.acumular.model";
 import { Op, literal } from "sequelize";
 import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
+import calcularTotal from "../assets/sumarAlgo";
+import Decimal from "decimal.js-light";
 const {
+  LiquidacionesV2,
   Liquidaciones,
   ES,
   Horarios,
@@ -85,10 +88,12 @@ controller.insertarLiquidos = async (req, res) => {
         transaction: t,
       });
 
-      const liquidaciones = await Liquidaciones.update(
+      const liquidaciones = await LiquidacionesV2.update(
         {
           lecturas: JSON.stringify(lecturas),
           capturado: true,
+          efectivo_entregado: calcularTotal(cuerpoEfectivo, "monto"),
+          vales_entregado: calcularTotal(cuerpoVales, "monto"),
           idempleado_captura: user.token.data.datos.idempleado,
         },
         {
@@ -458,6 +463,99 @@ controller.liquidacionesPendientes = async (req, res) => {
   }
 };
 
+controller.acarreo = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+
+    const { fechaI, fechaF, idEmpleado } = req.query;
+    const filtrosHorario = {};
+
+    if (fechaI && fechaF) {
+      filtrosHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (idEmpleado) {
+      filtrosHorario.idempleado = idEmpleado;
+    }
+
+    const response = await Vales.findAll({
+      where: { idcodigo_uso: ["C", "Z"] },
+      include: [
+        {
+          model: Liquidaciones,
+          attributes: ["idliquidacion", "lecturas", "idislas"],
+          include: [
+            {
+              model: Horarios,
+              attributes: [
+                "idempleado",
+                "fechaturno",
+                "idturno",
+                "fechaliquidacion",
+                "idhorario",
+                "idestacion_servicio",
+              ],
+              where: filtrosHorario,
+            },
+          ],
+        },
+      ],
+    });
+
+    const respon = response
+      .filter((el) => el.liquidacione)
+      .map((el) => {
+        const datos = JSON.parse(el.dataValues.liquidacione.lecturas);
+        const { precioUnitario, combustible, idisla } = datos.find(
+          (d) => d.idgas === el.combustible
+        );
+
+        const dataIsla = el.dataValues.liquidacione.idislas;
+
+        const nisla = dataIsla.find((isla) => isla.idisla === idisla).nisla;
+
+        const {
+          idempleado,
+          fechaturno,
+          fechaliquidacion,
+          idturno,
+          idestacion_servicio,
+        } = el.dataValues.liquidacione.horario;
+        const monto = el.dataValues.monto;
+        const litrosJarreados = new Decimal(monto)
+          .div(precioUnitario)
+          .toNumber();
+
+        return {
+          idvale: el.dataValues.idvale,
+          idgas: el.dataValues.combustible,
+          monto,
+          litrosJarreados,
+          idcodigo_uso: el.dataValues.idcodigo_uso,
+          precioUnitario,
+          combustible,
+          idliquidacion: el.dataValues.liquidacione.idliquidacion,
+          idempleado,
+          idturno,
+          fechaturno,
+          fechaliquidacion,
+          idisla,
+          nisla,
+          idestacion_servicio,
+        };
+      });
+    res.status(200).json({ success: true, response: respon });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.consultarLiquido = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
@@ -556,10 +654,7 @@ controller.consultarLiquidoHistorial = async (req, res) => {
       }
     }
 
-    LecturasFinales.belongsTo(InfoLecturas, { foreignKey: "idinfo_lectura" });
-    InfoLecturas.hasMany(LecturasFinales, { foreignKey: "idinfo_lectura" });
-
-    const response = await Liquidaciones.findAll({
+    const response = await LiquidacionesV2.findAll({
       where: querys,
       include: [
         {
@@ -567,9 +662,6 @@ controller.consultarLiquidoHistorial = async (req, res) => {
           where: querysL,
           include: [{ model: empleados }, { model: Turnos }, { model: ES }],
         },
-        { model: Efectivo },
-        { model: Vales },
-        { model: InfoLecturas, include: LecturasFinales },
         { model: empleados, as: "empleado_captura" },
       ],
       order: [
@@ -660,6 +752,116 @@ controller.consultaFolios = async (req, res) => {
     });
 
     res.status(200).json({ success: true, response: { efectivos, vales } });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.reporteDashboard = async (req, res) => {
+  try {
+    const { fechaI, fechaF, estacionS, idEmpleado, idTurno } = req.query;
+    const filtrosHorario = {};
+
+    if (fechaI && fechaF) {
+      filtrosHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (estacionS) filtrosHorario.idestacion_servicio = estacionS;
+    if (idEmpleado) filtrosHorario.idempleado = idEmpleado;
+    if (idTurno) filtrosHorario.idturno = idTurno;
+
+    const response = await LiquidacionesV2.findAll({
+      include: [
+        {
+          model: Horarios,
+          attributes: ["idhorario", "fechaturno", "idempleado", "idturno"],
+          where: filtrosHorario,
+          include: [
+            { model: empleados, attributes: attributesPersonal },
+            { model: Turnos },
+            { model: ES },
+          ],
+        },
+      ],
+      where: {
+        cancelado: { [Op.is]: null },
+        lecturas: { [Op.not]: null },
+        capturado: true,
+      },
+    });
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.reporteVentasDias = async (req, res) => {
+  try {
+    const { fechaI, fechaF, estacionS, idEmpleado, idTurno, idIsla, posicion } =
+      req.query;
+    const filtrosHorario = {};
+
+    if (fechaI && fechaF) {
+      filtrosHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (estacionS) filtrosHorario.idestacion_servicio = estacionS;
+    if (idEmpleado) filtrosHorario.idempleado = idEmpleado;
+    if (idTurno) filtrosHorario.idturno = idTurno;
+
+    const response = await LiquidacionesV2.findAll({
+      include: [
+        {
+          model: Horarios,
+          attributes: ["idhorario", "fechaturno", "idempleado", "idturno"],
+          where: filtrosHorario,
+          include: [
+            { model: empleados, attributes: attributesPersonal },
+            { model: Turnos },
+            { model: ES },
+          ],
+        },
+      ],
+      where: {
+        cancelado: { [Op.is]: null },
+        lecturas: { [Op.not]: null },
+        capturado: true,
+      },
+    });
+
+    //if()]*¨[]
+
+    if (idIsla) {
+      const lecturasRes = response.map((liq) => {
+        const lecturas = JSON.parse(liq.dataValues.lecturas);
+        const filtrarIslas = !posicion
+          ? lecturas.filter((isla) => isla.idisla === Number(idIsla))
+          : lecturas.filter(
+              (isla) =>
+                isla.idisla === Number(idIsla) &&
+                isla.posicion === Number(posicion)
+            );
+        return {
+          ...JSON.parse(JSON.stringify(liq)),
+          lecturas: JSON.stringify(filtrarIslas),
+        };
+      });
+
+      return res.status(200).json({ success: true, response: lecturasRes });
+    }
+
+    res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
     if (!err.code) {

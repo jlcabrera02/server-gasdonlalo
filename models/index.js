@@ -28,6 +28,7 @@ import Horarios from "./administrativo/liquidacion/horarios.model";
 import Vales from "./administrativo/liquidacion/vales.model";
 import Efectivo from "./administrativo/liquidacion/efectivo.model";
 import Liquidaciones from "./administrativo/liquidacion/liquidaciones.model";
+import LiquidacionesV2 from "./administrativo/liquidacion/liquidacionesV2.model";
 import Precios from "./administrativo/liquidacion/precios.model";
 import LlaveAcceso from "./administrativo/llavesAcceso.model";
 import LlaveAccesoChecklist from "./administrativo/llavesAccesoChecklist.model.js";
@@ -268,6 +269,15 @@ HOT.belongsTo(empleados, {
   as: "empleado_autorizador",
 });
 
+// LiquidacionesV2 Relaciones
+
+LiquidacionesV2.belongsTo(Horarios, { foreignKey: "idhorario" });
+
+LiquidacionesV2.belongsTo(empleados, {
+  foreignKey: "idempleado_captura",
+  as: "empleado_captura",
+});
+
 export default {
   nominas,
   tiposNominas,
@@ -288,6 +298,7 @@ export default {
   Efectivo,
   Vales,
   Liquidaciones,
+  LiquidacionesV2,
   LlaveAcceso,
   LlaveAccesoChecklist,
   Auditoria,

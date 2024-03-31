@@ -89,7 +89,8 @@ route.get("/buscar-preliquidacion", preliquidaciones.buscarPreliquidacion); //
 route.post("/capturar", liquido.insertarLiquidos); //
 route.get("/pendientes", liquido.liquidacionesPendientes); //
 route.get("/folios/buscar", liquido.consultaFolios); //
-route.get("/inactivosMSMF", liquido.showMfMs); //
+route.get("/jarreo", liquido.acarreo); //
+route.get("/inactivosMSMF", liquido.showMfMs);
 route.get("/historial", liquido.consultarLiquidoHistorial); //
 route.post("/reservar/:folio", liquido.reservarFolio); //
 route.delete("/noreservar/:folio", liquido.quitarReservarFolio); //
@@ -98,5 +99,11 @@ route.put("/update-show-mf-ms/:folio", liquido.administrarMfMs); //
 route.put("/cancelar", liquido.cancelarLiquido); //
 
 route.get("/capturados/:idliquidacion", liquido.consultarLiquido); //
+
+route.get("/reporte-dashboard", liquido.reporteDashboard);
+route.get("/reporte-ventas-dias", liquido.reporteVentasDias);
+
+//pruebas
+route.get("/prueba", liquido.prueba);
 
 export default route;
