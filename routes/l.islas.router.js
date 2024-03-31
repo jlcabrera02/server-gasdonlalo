@@ -100,6 +100,7 @@ route.put("/cancelar", liquido.cancelarLiquido); //
 route.get("/capturados/:idliquidacion", liquido.consultarLiquido); //
 
 route.get("/reporte-dashboard", liquido.reporteDashboard);
+route.get("/reporte-ventas-dias", liquido.reporteVentasDias);
 
 //pruebas
 route.get("/prueba", liquido.prueba);

@@ -724,6 +724,72 @@ controller.reporteDashboard = async (req, res) => {
   }
 };
 
+controller.reporteVentasDias = async (req, res) => {
+  try {
+    const { fechaI, fechaF, estacionS, idEmpleado, idTurno, idIsla, posicion } =
+      req.query;
+    const filtrosHorario = {};
+
+    if (fechaI && fechaF) {
+      filtrosHorario.fechaturno = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (estacionS) filtrosHorario.idestacion_servicio = estacionS;
+    if (idEmpleado) filtrosHorario.idempleado = idEmpleado;
+    if (idTurno) filtrosHorario.idturno = idTurno;
+
+    const response = await LiquidacionesV2.findAll({
+      include: [
+        {
+          model: Horarios,
+          attributes: ["idhorario", "fechaturno", "idempleado", "idturno"],
+          where: filtrosHorario,
+          include: [
+            { model: empleados, attributes: attributesPersonal },
+            { model: Turnos },
+            { model: ES },
+          ],
+        },
+      ],
+      where: {
+        cancelado: { [Op.is]: null },
+        lecturas: { [Op.not]: null },
+        capturado: true,
+      },
+    });
+
+    //if()]*¨[]
+
+    if (idIsla) {
+      const lecturasRes = response.map((liq) => {
+        const lecturas = JSON.parse(liq.dataValues.lecturas);
+        const filtrarIslas = !posicion
+          ? lecturas.filter((isla) => isla.idisla === Number(idIsla))
+          : lecturas.filter(
+              (isla) =>
+                isla.idisla === Number(idIsla) &&
+                isla.posicion === Number(posicion)
+            );
+        return {
+          ...JSON.parse(JSON.stringify(liq)),
+          lecturas: JSON.stringify(filtrarIslas),
+        };
+      });
+
+      return res.status(200).json({ success: true, response: lecturasRes });
+    }
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.prueba = async (req, res) => {
   try {
     const response = await LiquidacionesV2.findAll({
