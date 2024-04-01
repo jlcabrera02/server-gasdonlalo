@@ -111,16 +111,6 @@ controller.insertarLiquidos = async (req, res) => {
         });
       }
 
-      console.log(liquidacion);
-      if (diferencia > 0) {
-        await sncaM.insert([
-          6,
-          liquidacion.dataValues.horario.dataValues.idempleado,
-          liquidacion.dataValues.horario.dataValues.fechaturno,
-          `Registro un Monto Faltante de $${diferencia}`,
-        ]);
-      }
-
       await Auditoria.create(
         {
           peticion: area,
