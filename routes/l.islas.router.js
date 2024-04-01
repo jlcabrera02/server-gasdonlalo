@@ -104,6 +104,6 @@ route.get("/reporte-dashboard", liquido.reporteDashboard);
 route.get("/reporte-ventas-dias", liquido.reporteVentasDias);
 
 //pruebas
-route.get("/prueba", liquido.prueba);
+//route.get("/prueba", liquido.prueba); //
 
 export default route;
