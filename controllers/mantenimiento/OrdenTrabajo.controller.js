@@ -584,7 +584,7 @@ controller.cancelarOT = async (req, res) => {
     const { idOT } = req.params;
 
     const ot = await OT.update(
-      { estatus: 1, fechaInicio: null, fechaTermino: null, idPersonal: null },
+      { estatus: 1, fecha_termino: null, idPersonal: null },
       { where: { idorden_trabajo: idOT } }
     );
 
