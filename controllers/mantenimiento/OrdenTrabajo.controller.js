@@ -406,12 +406,19 @@ controller.terminarOT = async (req, res) => {
     if (!user.success) throw user;
     let idPersonal = user.token.data.datos.idempleado;
     const { idOT } = req.params;
-    const { tipoPersonal, descripcionTrabajo, herramientas, observaciones } =
-      req.body;
+    const {
+      tipoPersonal,
+      descripcionTrabajo,
+      herramientas,
+      observaciones,
+      fechaInicio,
+    } = req.body;
+
+    console.log(req.body);
 
     const ot = await OT.findOne({ where: { idorden_trabajo: idOT } });
 
-    const isFechaTermino = ot.dataValues.fecha_termino;
+    const isFechaTermino = req.body.fechaTermino;
 
     if (!ot)
       throw {
@@ -430,7 +437,7 @@ controller.terminarOT = async (req, res) => {
 
     const totalTiempo =
       new Date(fechaTermino).getTime() -
-      new Date(ot.dataValues.fecha_inicio).getTime();
+      new Date(fechaInicio || ot.dataValues.fecha_inicio).getTime();
 
     const trasformHours = new Decimal(totalTiempo)
       .div(new Decimal(60000 * 60))
