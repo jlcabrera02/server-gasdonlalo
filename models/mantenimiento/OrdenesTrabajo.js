@@ -42,7 +42,14 @@ const OrdenTrabajo = sequelize.define(
       allowNull: false,
     },
     estatus: {
-      type: DataTypes.ENUM("solicitud", "realizando", "terminado", "liberado"),
+      type: DataTypes.ENUM(
+        "solicitud",
+        "realizando",
+        "terminado",
+        "liberado",
+        "cancelado",
+        "eliminado"
+      ),
       allowNull: false,
       defaultValue: "solicitud",
     },
