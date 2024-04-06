@@ -589,14 +589,13 @@ controller.cancelarOT = async (req, res) => {
 
 controller.historialOT = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization);
-    if (!user.success) throw user;
-    const filtros = {};
-    const filtrosOT = {};
+    // let user = verificar(req.headers.authorization);
+    // if (!user.success) throw user;
+    const filtrosOT = { estatus: ["liberado", "cancelado"] };
     const { resultado, fechaI, fechaF, idEmpleado, offset, limit } = req.query;
 
     if (resultado) {
-      filtros.resultado = resultado;
+      filtrosOT.resultado = resultado;
     }
 
     if (fechaI && fechaF) {
@@ -607,30 +606,19 @@ controller.historialOT = async (req, res) => {
       filtrosOT.idpersonal = idEmpleado;
     }
 
-    const response = await HOT.findAndCountAll({
-      where: filtros,
-      order: [["createdAt", "DESC"]],
+    const response = await OT.findAndCountAll({
+      where: filtrosOT,
+      order: [["updatedAt", "DESC"]],
       include: [
         {
-          model: OT,
-          where: filtrosOT,
-          include: [
-            {
-              model: empleados,
-              as: "personal",
-              attributes: [
-                "nombre",
-                "apellido_paterno",
-                "apellido_materno",
-                "nombre_completo",
-              ],
-            },
-          ],
-        },
-        {
           model: empleados,
-          attributes: attributesPersonal,
-          as: "empleado_autorizador",
+          as: "personal",
+          attributes: [
+            "nombre",
+            "apellido_paterno",
+            "apellido_materno",
+            "nombre_completo",
+          ],
         },
       ],
       offset: offset ? Number(offset) : null,
@@ -647,27 +635,5 @@ controller.historialOT = async (req, res) => {
     }
   }
 };
-
-/*
-
- const response = await sequelize.transaction(async (t) => {
-      const ot = await OT.findOne({
-        where: { idorden_trabajo: idOT },
-        transaction: t,
-      });
-
-      const cuerpo = { ...ot.dataValues, estatus: 1 };
-      //eliminar attributos que no se necesitan para crear una nueva OT
-      delete cuerpo.idorden_trabajo;
-      delete cuerpo.createdAt;
-      delete cuerpo.updatedAt;
-
-      await OT.update({ estatus: 4 }, { where: { idorden_trabajo: idOT } });
-
-      const createOT = await OT.create(cuerpo);
-
-      return createOT;
-    });
-*/
 
 export default controller;
