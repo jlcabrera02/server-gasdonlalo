@@ -507,17 +507,23 @@ controller.liberarOT = async (req, res) => {
       };
 
     const response = sequelize.transaction(async (t) => {
-      await HOT.create(
-        {
-          resultado: procedio ? "AUTORIZADO" : "NO-AUTORIZADO",
-          descripcion,
-          idautorizante: user.token.data.datos.idempleado,
-          idorden_trabajo: idOT,
-        },
-        { transaction: t }
-      );
+      if (!procedio) {
+        const cuerpo = { ...ot.dataValues, estatus: 2 };
+        //eliminar attributos que no se necesitan para crear una nueva OT
+        delete cuerpo.idorden_trabajo;
+        delete cuerpo.descripcion;
+        delete cuerpo.createdAt;
+        delete cuerpo.updatedAt;
 
-      if (procedio) {
+        await OT.update(
+          { estatus: 5, descripcion },
+          { where: { idorden_trabajo: idOT }, transaction: t }
+        );
+
+        const createOT = await OT.create(cuerpo, { transaction: t });
+
+        return createOT;
+      } else {
         const response = await OT.update(
           {
             estatus: 4,
@@ -525,51 +531,6 @@ controller.liberarOT = async (req, res) => {
           },
           { where: { idorden_trabajo: idOT } }
         );
-        return response;
-      } else {
-        const response = await OT.update(
-          {
-            estatus: 2,
-            idliberante: idPersonal,
-          },
-          { where: { idorden_trabajo: idOT } }
-        );
-
-        if (ot.dataValues.idpersonal) {
-          const sncNotificationFind =
-            obtenerConfiguraciones().configSNC.sncacumuladas.find(
-              (el) => el.notificacion === "Órden de trabajo no autorizada"
-            );
-
-          const empleadoName = await empleados.findOne({
-            attributes: [
-              "nombre",
-              "apellido_paterno",
-              "apellido_materno",
-              "nombre_completo",
-            ],
-            where: { idempleado: ot.dataValues.idpersonal },
-          });
-
-          const descripcion = sncNotificationFind.descripcion
-            .replaceAll(
-              `\$\{empleado\}`,
-              JSON.parse(
-                JSON.stringify(empleadoName)
-              ).nombre_completo.toLowerCase()
-            )
-            .replaceAll(`\$\{fecha\}`, format.tiempoLocalShort(fecha));
-
-          await SncNotification.create(
-            {
-              idincumplimiento: sncNotificationFind.idincumplimiento,
-              descripcion: descripcion,
-              idempleado: ot.dataValues.idpersonal,
-              fecha: fecha,
-            },
-            { transaction: t }
-          );
-        }
         return response;
       }
     });
@@ -686,5 +647,27 @@ controller.historialOT = async (req, res) => {
     }
   }
 };
+
+/*
+
+ const response = await sequelize.transaction(async (t) => {
+      const ot = await OT.findOne({
+        where: { idorden_trabajo: idOT },
+        transaction: t,
+      });
+
+      const cuerpo = { ...ot.dataValues, estatus: 1 };
+      //eliminar attributos que no se necesitan para crear una nueva OT
+      delete cuerpo.idorden_trabajo;
+      delete cuerpo.createdAt;
+      delete cuerpo.updatedAt;
+
+      await OT.update({ estatus: 4 }, { where: { idorden_trabajo: idOT } });
+
+      const createOT = await OT.create(cuerpo);
+
+      return createOT;
+    });
+*/
 
 export default controller;
