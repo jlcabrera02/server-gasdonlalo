@@ -83,6 +83,10 @@ const OrdenTrabajo = sequelize.define(
       allowNull: true,
       defaultValue: "Personal Externo",
     },
+    descripcion: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     freezeTableName: true,
