@@ -577,6 +577,27 @@ controller.liberarOT = async (req, res) => {
   }
 };
 
+controller.eliminarOT = async (req, res) => {
+  try {
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
+    const { idOT } = req.params;
+
+    const response = await OT.update(
+      { estatus: "eliminado" },
+      { where: { idorden_trabajo: idOT } }
+    );
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
 controller.cancelarOT = async (req, res) => {
   try {
     let user = verificar(req.headers.authorization);
