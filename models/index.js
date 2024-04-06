@@ -262,6 +262,11 @@ SncNotification.belongsTo(Incumplimientos, { foreignKey: "idincumplimiento" });
 
 Cmadrugador.belongsTo(empleados, { foreignKey: "idempleado" });
 
+OrdenTrabajo.belongsTo(empleados, {
+  foreignKey: "idliberante",
+  as: "empleado_autorizador",
+});
+
 // LiquidacionesV2 Relaciones
 
 LiquidacionesV2.belongsTo(Horarios, { foreignKey: "idhorario" });

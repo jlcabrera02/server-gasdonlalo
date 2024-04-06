@@ -589,8 +589,8 @@ controller.cancelarOT = async (req, res) => {
 
 controller.historialOT = async (req, res) => {
   try {
-    // let user = verificar(req.headers.authorization);
-    // if (!user.success) throw user;
+    let user = verificar(req.headers.authorization);
+    if (!user.success) throw user;
     const filtrosOT = { estatus: ["liberado", "cancelado"] };
     const { resultado, fechaI, fechaF, idEmpleado, offset, limit } = req.query;
 
@@ -619,6 +619,11 @@ controller.historialOT = async (req, res) => {
             "apellido_materno",
             "nombre_completo",
           ],
+        },
+        {
+          model: empleados,
+          attributes: attributesPersonal,
+          as: "empleado_autorizador",
         },
       ],
       offset: offset ? Number(offset) : null,
