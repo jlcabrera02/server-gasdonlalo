@@ -4,7 +4,6 @@ import departamentos from "./recursosHumanos/departamentos.model";
 import detalleEmpleado from "./recursosHumanos/detalleEmpleado.model";
 import Cmadrugador from "./recursosHumanos/Cmadrugador.model.js";
 import RM from "./recursosHumanos/Registrosmadrugador.model.js";
-import HOT from "./mantenimiento/HistorialOrdenTrabajo.js";
 
 //Despacho
 import ChecklistRegistros from "./despacho/ChecklistRegistros.model";
@@ -263,12 +262,6 @@ SncNotification.belongsTo(Incumplimientos, { foreignKey: "idincumplimiento" });
 
 Cmadrugador.belongsTo(empleados, { foreignKey: "idempleado" });
 
-HOT.belongsTo(OrdenTrabajo, { foreignKey: "idorden_trabajo" });
-HOT.belongsTo(empleados, {
-  foreignKey: "idautorizante",
-  as: "empleado_autorizador",
-});
-
 // LiquidacionesV2 Relaciones
 
 LiquidacionesV2.belongsTo(Horarios, { foreignKey: "idhorario" });
@@ -317,5 +310,4 @@ export default {
   SncNotification,
   Cmadrugador,
   RM,
-  HOT,
 };
