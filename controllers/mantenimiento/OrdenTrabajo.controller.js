@@ -11,7 +11,7 @@ import Utencilios from "../../models/mantenimiento/Utencilios";
 import { Op } from "sequelize";
 import { attributesPersonal } from "../../models/recursosHumanos/empleados.model";
 const { verificar } = auth;
-const { OT, PanicBtn, empleados, AT, SncNotification, HOT } = modelos;
+const { OT, PanicBtn, empleados, AT, SncNotification } = modelos;
 
 const controller = {};
 
@@ -625,6 +625,7 @@ controller.historialOT = async (req, res) => {
           attributes: attributesPersonal,
           as: "empleado_autorizador",
         },
+        { model: AT },
       ],
       offset: offset ? Number(offset) : null,
       limit: limit ? Number(limit) || 10 : null,
