@@ -8,7 +8,8 @@ import models from "../models";
 import sequelize from "../config/configdb";
 import agruparArr from "../assets/agrupar";
 import { Op } from "sequelize";
-const { Liquidaciones, Horarios, empleados } = models;
+import Decimal from "decimal.js-light";
+const { Liquidaciones, Horarios, empleados, Vales } = models;
 const { verificar } = auth;
 
 const controller = {};
@@ -215,6 +216,37 @@ controller.octanosoC = async (req, res) => {
     const milisegundos =
       new Date(fechaFinal).getTime() - new Date(fechaInicio).getTime();
     const dias = milisegundos / (1000 * 60 * 60 * 24);
+
+    const codigosUsoMantenimiento = await Vales.findAll({
+      where: { idcodigo_uso: ["C", "Z"] },
+      include: [
+        {
+          model: Liquidaciones,
+          attributes: ["idliquidacion", "lecturas", "idislas"],
+          include: [
+            {
+              model: Horarios,
+              attributes: [
+                "idempleado",
+                "fechaturno",
+                "idturno",
+                "fechaliquidacion",
+                "idhorario",
+                "idestacion_servicio",
+              ],
+              where: {
+                fechaturno: { [Op.between]: [fechaInicio, fechaFinal] },
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const filtrarVacios = codigosUsoMantenimiento.filter(
+      (el) => el.liquidacione
+    );
+
     //Empleados que se encontraron en ese rango de fechas
     const liq = await Liquidaciones.findAll({
       attributes: {
@@ -280,10 +312,31 @@ controller.octanosoC = async (req, res) => {
           idempleado,
           idestacion_servicio: Number(idEstacionServicio),
           cantidad: 0,
+          jarreosLitros: 0,
           salidaNC: salida.total_salidas,
         };
 
         if (data) {
+          const jarreoExist = filtrarVacios.find(
+            (jarreo) =>
+              jarreo.dataValues.liquidacione.dataValues.idliquidacion ===
+              ids[i][0].idliquidacion
+          );
+
+          if (jarreoExist) {
+            const datos = JSON.parse(
+              jarreoExist.dataValues.liquidacione.lecturas
+            );
+            const { monto } = jarreoExist.dataValues;
+            const { precioUnitario } = datos.find(
+              (d) => d.idgas === jarreoExist.combustible
+            );
+
+            temp.jarreosLitros = new Decimal(monto)
+              .div(precioUnitario)
+              .toNumber();
+          }
+
           dat.push({
             ...temp,
             cantidad: data.importes.flat().reduce((a, b) => a + b, 0),
@@ -301,7 +354,6 @@ controller.octanosoC = async (req, res) => {
 
     res.status(200).json({ success: true, response });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
@@ -317,6 +369,37 @@ controller.octanosoAmbos = async (req, res) => {
     const milisegundos =
       new Date(fechaFinal).getTime() - new Date(fechaInicio).getTime();
     const dias = milisegundos / (1000 * 60 * 60 * 24);
+
+    const codigosUsoMantenimiento = await Vales.findAll({
+      where: { idcodigo_uso: ["C", "Z"] },
+      include: [
+        {
+          model: Liquidaciones,
+          attributes: ["idliquidacion", "lecturas", "idislas"],
+          include: [
+            {
+              model: Horarios,
+              attributes: [
+                "idempleado",
+                "fechaturno",
+                "idturno",
+                "fechaliquidacion",
+                "idhorario",
+                "idestacion_servicio",
+              ],
+              where: {
+                fechaturno: { [Op.between]: [fechaInicio, fechaFinal] },
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const filtrarVacios = codigosUsoMantenimiento.filter(
+      (el) => el.liquidacione
+    );
+
     //Empleados que se encontraron en ese rango de fechas
     const liq = await Liquidaciones.findAll({
       attributes: {
@@ -390,10 +473,31 @@ controller.octanosoAmbos = async (req, res) => {
           idempleado,
           idestacion_servicio: 1,
           cantidad: 0,
+          jarreosLitros: 0,
           salidaNC: salida.total_salidas,
         };
 
         if (data) {
+          const jarreoExist = filtrarVacios.find(
+            (jarreo) =>
+              jarreo.dataValues.liquidacione.dataValues.idliquidacion ===
+              ids1[i][0].idliquidacion
+          );
+
+          if (jarreoExist) {
+            const datos = JSON.parse(
+              jarreoExist.dataValues.liquidacione.lecturas
+            );
+            const { monto } = jarreoExist.dataValues;
+            const { precioUnitario } = datos.find(
+              (d) => d.idgas === jarreoExist.combustible
+            );
+
+            temp.jarreosLitros = new Decimal(monto)
+              .div(precioUnitario)
+              .toNumber();
+          }
+
           dat.push({
             ...temp,
             cantidad: data.importes.flat().reduce((a, b) => a + b, 0),
@@ -434,10 +538,31 @@ controller.octanosoAmbos = async (req, res) => {
           idempleado,
           idestacion_servicio: 2,
           cantidad: 0,
+          jarreosLitros: 0,
           salidaNC: salida.total_salidas,
         };
 
         if (data) {
+          const jarreoExist = filtrarVacios.find(
+            (jarreo) =>
+              jarreo.dataValues.liquidacione.dataValues.idliquidacion ===
+              ids2[i][0].idliquidacion
+          );
+
+          if (jarreoExist) {
+            const datos = JSON.parse(
+              jarreoExist.dataValues.liquidacione.lecturas
+            );
+            const { monto } = jarreoExist.dataValues;
+            const { precioUnitario } = datos.find(
+              (d) => d.idgas === jarreoExist.combustible
+            );
+
+            temp.jarreosLitros = new Decimal(monto)
+              .div(precioUnitario)
+              .toNumber();
+          }
+
           dat.push({
             ...temp,
             cantidad: data.importes.flat().reduce((a, b) => a + b, 0),
@@ -455,7 +580,6 @@ controller.octanosoAmbos = async (req, res) => {
 
     res.status(200).json({ success: true, estacion1, estacion2 });
   } catch (err) {
-    console.log(err);
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
     } else {
