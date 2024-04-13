@@ -1,6 +1,13 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/configdb";
 
+//Puntajes Minimos
+/* tendencia_oyl;
+tendencia_evaluacion_uniforme;
+tendencia_pasos_despacho;
+tendencia_recursos_despachador;
+cantidad_minima_recursos_despachador; */
+
 const PuntajeMin = sequelize.define(
   "puntajes_minimos",
   {

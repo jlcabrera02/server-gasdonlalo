@@ -38,6 +38,7 @@ import ControlVol from "./administrativo/liquidacion/control_volumetrico";
 import Preliquidaciones from "./administrativo/liquidacion/preliquidaciones.model";
 import PanicBtn from "./administrativo/panicBtn.model";
 import SncNotification from "./snc/sncAcumuladas.model.js";
+import PM from "./administrativo/PuntajesMinimos.js";
 
 //pagares
 import Pagares from "../models/pagares/Pagare.model";
@@ -315,4 +316,5 @@ export default {
   SncNotification,
   Cmadrugador,
   RM,
+  PM,
 };
