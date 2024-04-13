@@ -14,7 +14,7 @@ import EvPasosDespachar, {
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 const { sinRegistro } = errRes;
-const { SncNotification, empleados } = models;
+const { SncNotification, empleados, PM } = models;
 
 const controller = {};
 
@@ -80,8 +80,12 @@ controller.obtenerEvaluacion = async (req, res) => {
       },
     });
 
-    const puntajeMinimo =
-      obtenerConfiguraciones().configDespacho.PasosDespachar.puntajeMinimo;
+    const puntajeMinimo = await PM.findAll({
+      where: {
+        evaluacion: "tendencia_pasos_despacho",
+      },
+      attributes: ["evaluacion", "fecha", "cantidad"],
+    });
 
     res.status(200).json({ success: true, response, puntajeMinimo });
   } catch (err) {

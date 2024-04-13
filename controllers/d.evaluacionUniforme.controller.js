@@ -13,7 +13,7 @@ import EvUniforme, {
 import { Op } from "sequelize";
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
-const { SncNotification, empleados } = models;
+const { SncNotification, empleados, PM } = models;
 
 const controller = {};
 const area = "Evaluación Uniforme";
@@ -78,8 +78,12 @@ controller.obtenerEvaluacion = async (req, res) => {
       },
     });
 
-    const puntajeMinimo =
-      obtenerConfiguraciones().configDespacho.EvaluacionUniforme.puntajeMinimo;
+    const puntajeMinimo = await PM.findAll({
+      where: {
+        evaluacion: "tendencia_evaluacion_uniforme",
+      },
+      attributes: ["evaluacion", "fecha", "cantidad"],
+    });
 
     res.status(200).json({ success: true, response, puntajeMinimo });
   } catch (err) {

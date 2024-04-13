@@ -10,7 +10,7 @@ import { obtenerConfiguraciones } from "../services/configuracionesPersonalizabl
 import { Op } from "sequelize";
 import sequelize from "../config/configdb";
 import OyL, { CumplimientosOyL } from "../models/despacho/OyL.model";
-const { SncNotification, empleados } = models;
+const { SncNotification, empleados, PM } = models;
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 
@@ -72,8 +72,12 @@ controller.obtenerEvaluacion = async (req, res) => {
       },
     });
 
-    const puntajeMinimo =
-      obtenerConfiguraciones().configDespacho.OyL.puntajeMinimo;
+    const puntajeMinimo = await PM.findAll({
+      where: {
+        evaluacion: "tendencia_oyl",
+      },
+      attributes: ["evaluacion", "fecha", "cantidad"],
+    });
 
     res.status(200).json({ success: true, response, puntajeMinimo });
   } catch (err) {

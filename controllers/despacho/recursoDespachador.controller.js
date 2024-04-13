@@ -7,6 +7,7 @@ const {
   RecursosDespachadorEv,
   RecursosDespachador,
   Auditoria,
+  PM,
   empleados,
   SncNotification,
 } = models;
@@ -30,8 +31,15 @@ controller.getEv = async (req, res) => {
     const filtrosEv = {};
     const filtrosEmpleado = { iddepartamento: 1 };
 
-    const puntajeMinimo =
-      obtenerConfiguraciones().configDespacho.RecursosDespachador.puntajeMinimo;
+    const puntajeMinimo = await PM.findAll({
+      where: {
+        evaluacion: [
+          "tendencia_recursos_despachador",
+          "cantidad_minima_recursos_despachador",
+        ],
+      },
+      attributes: ["evaluacion", "fecha", "cantidad"],
+    });
 
     if (month && year) {
       filtrosEv[Op.and] = [
@@ -95,6 +103,7 @@ controller.getEv = async (req, res) => {
       return res.status(200).json({
         success: true,
         response: newResponse,
+        puntajeMinimo,
       });
     }
 
