@@ -83,6 +83,10 @@ controller.obtenerEvaluacion = async (req, res) => {
         evaluacion: "tendencia_evaluacion_uniforme",
       },
       attributes: ["evaluacion", "fecha", "cantidad"],
+      order: [
+        ["fecha", "DESC"],
+        ["createdAt", "DESC"],
+      ],
     });
 
     res.status(200).json({ success: true, response, puntajeMinimo });

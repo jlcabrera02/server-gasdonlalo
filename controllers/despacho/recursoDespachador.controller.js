@@ -39,6 +39,10 @@ controller.getEv = async (req, res) => {
         ],
       },
       attributes: ["evaluacion", "fecha", "cantidad"],
+      order: [
+        ["fecha", "DESC"],
+        ["createdAt", "DESC"],
+      ],
     });
 
     if (month && year) {

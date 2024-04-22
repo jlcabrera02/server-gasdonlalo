@@ -66,6 +66,18 @@ controller.capturarControlV = async (req, res) => {
     if (!user.success) throw user;
     const { litros, fecha, idEstacion } = req.body;
 
+    const buscarCoincidencias = await ControlVol.findOne({
+      where: { fecha, idestacion_servicio: idEstacion },
+    });
+
+    if (buscarCoincidencias) {
+      throw {
+        msg: "Ya existe datos ingresados para la estación de servicio en la fecha ingresada.",
+        code: 400,
+        success: false,
+      };
+    }
+
     const response = await ControlVol.create({
       fecha,
       idestacion_servicio: idEstacion,
