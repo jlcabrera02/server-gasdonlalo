@@ -26,7 +26,11 @@ controller.find = async (req, res) => {
     }
 
     if (estatus) {
-      filtros.estatus = estatus;
+      if (typeof estatus === "object") {
+        filtros.estatus = estatus.map((s) => Number(s));
+      } else {
+        filtros.estatus = Number(estatus);
+      }
     }
 
     const response = await empleados.findAll({
