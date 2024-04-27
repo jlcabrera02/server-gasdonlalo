@@ -30,7 +30,9 @@ model.findSolicitud = (id) =>
 
 model.findXEstatus = (id) =>
   new Promise((resolve, reject) => {
-    let sql = `SELECT emp.*, dep.departamento, cd.update_time AS update_time_imss, cd.idcontrol_documento idimss FROM departamento dep, empleado emp LEFT JOIN (SELECT update_time, idempleado, idcontrol_documento FROM control_documento WHERE iddocumento = 8) cd ON cd.idempleado = emp.idempleado WHERE emp.iddepartamento = dep.iddepartamento AND emp.estatus = ?`;
+    let sql = `SELECT emp.*, dep.departamento, cd.update_time AS update_time_imss, cd.idcontrol_documento idimss FROM departamento dep, empleado emp LEFT JOIN (SELECT update_time, idempleado, idcontrol_documento FROM control_documento WHERE iddocumento = 8) cd ON cd.idempleado = emp.idempleado WHERE emp.iddepartamento = dep.iddepartamento AND emp.estatus ${
+      id === 1 ? "IN (1,6)" : "= ?"
+    }`;
 
     connection.query(sql, id, (err, res) => {
       if (err) return reject(errorDB());
