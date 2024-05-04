@@ -18,12 +18,12 @@ const Auditoria = sequelize.define(
       allowNull: false,
     },
     idaffectado: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     accion: {
       type: DataTypes.ENUM("GET", "POST", "PUT", "DELETE"),
-      allowNull: true,
+      allowNull: false,
     },
   },
   {

@@ -1,9 +1,10 @@
 import router from "express-promise-router";
 import montoFaltante from "../controllers/d.montoFaltante.controller";
+import { verificarToken } from "../middleware/token";
 
 const route = router();
 
-route.get("/semanas/:year/:month", montoFaltante.findXSemana);
+route.get("/semanas/:year/:month", verificarToken, montoFaltante.findXSemana);
 route.get("/total-mes-empleado/:year/:month", montoFaltante.findXMesXEmpleado);
 route.get(
   "/total-mes-empleado/:year/:month/:idEmpleado",

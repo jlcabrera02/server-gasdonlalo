@@ -9,6 +9,7 @@ import sncaM from "../models/s.acumular.model";
 import auth from "../models/auth.model";
 import { obtenerConfiguraciones } from "../services/configuracionesPersonalizables";
 import models from "../models";
+import Auditoria from "../models/administrativo/auditoria.model";
 const { verificar } = auth;
 const { errorMath, sinRegistro } = resErr;
 const { SncNotification, empleados } = models;
@@ -18,8 +19,6 @@ const area = "Montos Faltantes";
 
 controller.findXSemana = async (req, res) => {
   try {
-    let user = verificar(req.headers.authorization, 2);
-    if (!user.success) throw user;
     const { year, month } = req.params;
     let fecha = `${year}-${month}-01`;
     let diasDelMes = new Date(year, month, 0).getDate(); //Me obtiene el numero de dias del mes
@@ -74,7 +73,6 @@ controller.findXSemana = async (req, res) => {
           ),
       });
     }
-    // await guardarBitacora([area, user.token.data.datos.idempleado, 1, null]);
 
     res.status(200).json({
       success: true,
