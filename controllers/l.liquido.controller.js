@@ -458,7 +458,7 @@ controller.acarreo = async (req, res) => {
     let user = verificar(req.headers.authorization);
     if (!user.success) throw user;
 
-    const { fechaI, fechaF, idEmpleado } = req.query;
+    const { fechaI, fechaF, idEmpleado, idEstacion } = req.query;
     const filtrosHorario = {};
 
     if (fechaI && fechaF) {
@@ -467,6 +467,10 @@ controller.acarreo = async (req, res) => {
 
     if (idEmpleado) {
       filtrosHorario.idempleado = idEmpleado;
+    }
+
+    if (idEstacion) {
+      filtrosHorario.idestacion_servicio = idEstacion;
     }
 
     const response = await Vales.findAll({
