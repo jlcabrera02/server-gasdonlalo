@@ -460,7 +460,8 @@ controller.octanosoAmbos = async (req, res) => {
         const data = liqParse.find(
           (liq) =>
             liq.horario.idempleado === idempleado &&
-            liq.horario.fechaturno === fecha
+            liq.horario.fechaturno === fecha &&
+            liq.horario.idestacion_servicio === 1
         );
         const salida = await salidaNCM.findTotalSalidasXDiaXEmpleado([
           idempleado,
@@ -525,7 +526,8 @@ controller.octanosoAmbos = async (req, res) => {
         const data = liqParse.find(
           (liq) =>
             liq.horario.idempleado === idempleado &&
-            liq.horario.fechaturno === fecha
+            liq.horario.fechaturno === fecha &&
+            liq.horario.idestacion_servicio === 2
         );
         const salida = await salidaNCM.findTotalSalidasXDiaXEmpleado([
           idempleado,
@@ -578,7 +580,7 @@ controller.octanosoAmbos = async (req, res) => {
       });
     }
 
-    res.status(200).json({ success: true, estacion1, estacion2 });
+    res.status(200).json({ success: true, estacion1, estacion2, liqParse });
   } catch (err) {
     if (!err.code) {
       res.status(400).json({ msg: "datos no enviados correctamente" });
