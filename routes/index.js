@@ -55,6 +55,9 @@ import pagare from "./p.pagares.router";
 //Configuraciones
 import config from "./configuraciones.routes";
 
+//Pronosticos
+import pronosticos from "./pronosticos/pronosticos.routes";
+
 //Salidas no conformes
 route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/incumplimiento", incumplimientoRouter);
@@ -104,5 +107,8 @@ route.use("/pagare", pagare);
 route.use("/mantenimiento", mantenimiento);
 //configuraciones
 route.use("/config", config);
+
+//Pronosticos
+route.use("/pronosticos", pronosticos);
 
 export default route;

@@ -49,6 +49,9 @@ import AT from "./mantenimiento/AreasTrabajo.js";
 import TM from "./mantenimiento/TrabajosMantenimiento.js";
 import OrdenTrabajo from "./mantenimiento/OrdenesTrabajo.js";
 
+//Pronostico
+import Pronosticos from "./pronosticos/Pronostico.model.js";
+
 nominas.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(nominas, { foreignKey: "idempleado" });
 
@@ -277,6 +280,9 @@ LiquidacionesV2.belongsTo(empleados, {
   as: "empleado_captura",
 });
 
+Pronosticos.belongsTo(Gas, { foreignKey: "combustible", as: "gas" });
+Pronosticos.belongsTo(ES, { foreignKey: "idestacion_servicio" });
+
 export default {
   nominas,
   tiposNominas,
@@ -317,4 +323,5 @@ export default {
   Cmadrugador,
   RM,
   PM,
+  Pronosticos,
 };
