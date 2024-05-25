@@ -1,6 +1,7 @@
 import Decimal from "decimal.js-light";
 import models from "../../models";
 import { Op } from "sequelize";
+import sequelize from "../../config/configdb";
 const { Pronosticos, ES, Gas } = models;
 
 async function obtenerPronosticosXcombustible(req, res) {
@@ -98,6 +99,86 @@ async function obtenerPronosticosXES(req, res) {
   }
 }
 
+async function guardarPronostico(req, res) {
+  try {
+    const cuerpo = [];
+    const { estacion1, estacion2, fecha, registro } = req.body;
+    const keysEs1 = Object.keys(estacion1);
+    const keysEs2 = Object.keys(estacion2);
+
+    //Informacion para la GDL1
+    for (const element of keysEs1) {
+      const {
+        existencia_litros,
+        compra_litros,
+        ventas_litros,
+        limite,
+        promedio_ventas_mes,
+      } = estacion1[element];
+
+      cuerpo.push({
+        combustible: element.charAt().toUpperCase(),
+        existencia_litros,
+        compra_litros,
+        ventas_litros,
+        limite,
+        fecha,
+        registro,
+        idestacion_servicio: 1,
+        promedio_ventas_mes,
+      });
+    }
+
+    //Informacion para la GDL2
+    for (const element of keysEs2) {
+      const {
+        existencia_litros,
+        compra_litros,
+        ventas_litros,
+        limite,
+        promedio_ventas_mes,
+      } = estacion2[element];
+
+      cuerpo.push({
+        combustible: element.charAt().toUpperCase(),
+        existencia_litros,
+        compra_litros,
+        ventas_litros,
+        limite,
+        fecha,
+        registro,
+        idestacion_servicio: 2,
+        promedio_ventas_mes,
+      });
+    }
+
+    const response = await sequelize.transaction(async (t) => {
+      const data = await Pronosticos.findAll({
+        where: { fecha },
+        transaction: t,
+      });
+
+      if (data.length > 0) {
+        throw { code: 400, msg: "Ya existen valores", success: false };
+      }
+
+      const guardarPronostico = await Pronosticos.bulkCreate(cuerpo, {
+        transaction: t,
+      });
+
+      return guardarPronostico;
+    });
+
+    res.status(200).json({ success: true, response: response });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      err,
+      msg: err.msg || "Error al ingresar la información",
+    });
+  }
+}
+
 async function pruebas(req, res) {
   try {
     const data = await Pronosticos.findAll({ where: { fecha: "2024-04-15" } });
@@ -164,4 +245,5 @@ export default {
   obtenerPronosticosXcombustible,
   obtenerPronosticosXES,
   pruebas,
+  guardarPronostico,
 };
