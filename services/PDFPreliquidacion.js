@@ -540,7 +540,7 @@ const PDFPreliquidacion = ({ data, otherData }) => {
               backgroundColor: "#e2e2e2",
             }}
           >
-            <Text>{format.formatDinero(data.diferencia)}</Text>
+            <Text>{format.formatDinero(data.diferencia).replace("-", "")}</Text>
           </View>
           <View>
             <Text style={{ fontFamily: "calibriN", marginTop: "5px" }}>
