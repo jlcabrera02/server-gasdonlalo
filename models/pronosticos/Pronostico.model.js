@@ -42,6 +42,10 @@ const Pagare = sequelize.define(
       allowNull: false,
       comment: "Es el limite que se configuro en el momento",
     },
+    promedio_ventas_mes: {
+      type: DataTypes.DECIMAL(19, 2),
+      allowNull: false,
+    },
   },
   {
     freezeTableName: true,
