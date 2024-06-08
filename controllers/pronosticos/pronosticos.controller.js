@@ -2,6 +2,7 @@ import Decimal from "decimal.js-light";
 import models from "../../models";
 import { Op } from "sequelize";
 import sequelize from "../../config/configdb";
+import { obtenerConfiguraciones } from "../../services/configuracionesPersonalizables";
 const { Pronosticos, ES, Gas } = models;
 
 async function obtenerPronosticosXcombustible(req, res) {
@@ -40,7 +41,7 @@ async function obtenerPronosticosXcombustible(req, res) {
 
 async function obtenerPronosticosXES(req, res) {
   try {
-    const { fechaI, fechaF } = req.query;
+    const { fechaI, fechaF, limit, order } = req.query;
     const filtros = {};
 
     if (fechaI && fechaF) {
@@ -67,7 +68,8 @@ async function obtenerPronosticosXES(req, res) {
           combustible: "M",
         },
         include: [{ model: Gas, as: "gas" }, { model: ES }],
-        order: [["fecha", "ASC"]],
+        order: [["fecha", order ? order : "ASC"]],
+        limit: Number(limit) || null,
       });
       const premium = await Pronosticos.findAll({
         where: {
@@ -76,7 +78,8 @@ async function obtenerPronosticosXES(req, res) {
           combustible: "P",
         },
         include: [{ model: Gas, as: "gas" }, { model: ES }],
-        order: [["fecha", "ASC"]],
+        order: [["fecha", order ? order : "ASC"]],
+        limit: Number(limit) || null,
       });
       const diesel = await Pronosticos.findAll({
         where: {
@@ -85,13 +88,16 @@ async function obtenerPronosticosXES(req, res) {
           combustible: "D",
         },
         include: [{ model: Gas, as: "gas" }, { model: ES }],
-        order: [["fecha", "ASC"]],
+        order: [["fecha", order ? order : "ASC"]],
+        limit: Number(limit) || null,
       });
 
       response.push({ idestacion: idestacion, magna, premium, diesel });
     }
 
-    res.status(200).json({ success: true, response });
+    const configuraciones = obtenerConfiguraciones().configPronosticos;
+
+    res.status(200).json({ success: true, response, configuraciones });
   } catch (err) {
     res
       .status(400)
