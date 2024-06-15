@@ -48,6 +48,10 @@ import OT from "./mantenimiento/OrdenesTrabajo.js";
 import AT from "./mantenimiento/AreasTrabajo.js";
 import TM from "./mantenimiento/TrabajosMantenimiento.js";
 import OrdenTrabajo from "./mantenimiento/OrdenesTrabajo.js";
+import {
+  Actividades,
+  FechasActividades,
+} from "./mantenimiento/ProgramaMantenimiento.js";
 
 //Pronostico
 import Pronosticos from "./pronosticos/Pronostico.model.js";
@@ -219,6 +223,9 @@ OT.belongsTo(empleados, { foreignKey: "idsolicitante", as: "solicitante" });
 OT.belongsTo(empleados, { foreignKey: "idliberante", as: "liberante" });
 AT.belongsTo(TM, { foreignKey: "idmantenimiento" });
 TM.hasMany(AT, { foreignKey: "idmantenimiento" });
+//mantenimiento programa
+Actividades.hasMany(FechasActividades, { foreignKey: "idactividad" });
+OT.belongsTo(FechasActividades, { foreignKey: "idorden_trabajo" });
 
 RecursosDespachador.belongsToMany(empleados, {
   through: RecursosDespachadorEv,
@@ -324,4 +331,6 @@ export default {
   RM,
   PM,
   Pronosticos,
+  Actividades,
+  FechasActividades,
 };
