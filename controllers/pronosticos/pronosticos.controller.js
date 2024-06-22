@@ -1,9 +1,11 @@
 import Decimal from "decimal.js-light";
 import models from "../../models";
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 import sequelize from "../../config/configdb";
 import { obtenerConfiguraciones } from "../../services/configuracionesPersonalizables";
-const { Pronosticos, ES, Gas } = models;
+import prediccionCombustible from "../../services/ModeloPredictivoPronostico";
+
+const { Pronosticos, ES, Gas, Pedidos } = models;
 
 async function obtenerPronosticosXcombustible(req, res) {
   try {
@@ -41,8 +43,10 @@ async function obtenerPronosticosXcombustible(req, res) {
 
 async function obtenerPronosticosXES(req, res) {
   try {
-    const { fechaI, fechaF, limit, order } = req.query;
+    const { fechaI, fechaF, limit, order, pronostico } = req.query;
     const filtros = {};
+    const combustible = ["magna", "premium", "diesel"];
+    const dias = Number(pronostico) || 0;
 
     if (fechaI && fechaF) {
       filtros.fecha = { [Op.between]: [fechaI, fechaF] };
@@ -59,46 +63,120 @@ async function obtenerPronosticosXES(req, res) {
       };
     }
 
-    for (const i of estaciones) {
-      const idestacion = i.dataValues.idestacion_servicio;
-      const magna = await Pronosticos.findAll({
-        where: {
-          ...filtros,
-          idestacion_servicio: idestacion,
-          combustible: "M",
-        },
-        include: [{ model: Gas, as: "gas" }, { model: ES }],
-        order: [["fecha", order ? order : "ASC"]],
-        limit: Number(limit) || null,
-      });
-      const premium = await Pronosticos.findAll({
-        where: {
-          ...filtros,
-          idestacion_servicio: idestacion,
-          combustible: "P",
-        },
-        include: [{ model: Gas, as: "gas" }, { model: ES }],
-        order: [["fecha", order ? order : "ASC"]],
-        limit: Number(limit) || null,
-      });
-      const diesel = await Pronosticos.findAll({
-        where: {
-          ...filtros,
-          idestacion_servicio: idestacion,
-          combustible: "D",
-        },
-        include: [{ model: Gas, as: "gas" }, { model: ES }],
-        order: [["fecha", order ? order : "ASC"]],
-        limit: Number(limit) || null,
-      });
+    const lastDate = await Pronosticos.findOne({
+      where: { registro: "Real" },
+      order: [["fecha", "DESC"]],
+    });
 
-      response.push({ idestacion: idestacion, magna, premium, diesel });
+    for (const i of estaciones) {
+      const dataC = [];
+      const idestacion = i.dataValues.idestacion_servicio;
+      for (const c of combustible) {
+        const res = await Pronosticos.findAll({
+          where: {
+            ...filtros,
+            idestacion_servicio: idestacion,
+            combustible: c.charAt(0).toUpperCase(),
+          },
+          include: [{ model: Gas, as: "gas" }, { model: ES }],
+          order: [["fecha", order ? order : "ASC"]],
+          limit: Number(limit) || null,
+        });
+        dataC.push(res);
+      }
+
+      response.push({
+        idestacion: idestacion,
+        magna: dataC[0],
+        premium: dataC[1],
+        diesel: dataC[2],
+      });
     }
 
     const configuraciones = obtenerConfiguraciones().configPronosticos;
 
-    res.status(200).json({ success: true, response, configuraciones });
+    const funtionR = async (dias = 7) => {
+      if (dias === 0) return;
+      //Arreglo donde se guardaran los combustibles para saber cuales son los que requeiren reabastecimiento
+      const pilaC = [];
+      for (const i in estaciones) {
+        for (const c of combustible) {
+          //Si no se encontro informacion no returnamos nada
+          if (response[i][c].length < 1) return;
+          const temp = {};
+          let peso = 0;
+          const prediccion = await prediccionCombustible(response[i][c], dias);
+          // response[i][c].unshift(...prediccion.reverse());
+          response[i][c].unshift(prediccion[0]);
+          temp.combustible = c;
+          temp.fecha = prediccion[0].fecha;
+          temp.estacion = Number(i) + 1;
+          temp.idestacion_servicio = Number(i) + 1;
+          temp.promedio_ventas_mes = prediccion[0].promedio_ventas_mes;
+          temp.existencia_litros = prediccion[0].existencia_litros;
+          temp.ventas_litros = prediccion[0].ventas_litros;
+          temp.compra_litros = null;
+          temp.registro = "Pronostico";
+          temp.peso = peso;
+
+          if (new Date(temp.fecha).getDay() != 6) {
+            if (
+              new Decimal(configuraciones.tanques[`gdl${Number(i) + 1}`][c])
+                .sub(prediccion[0].existencia_litros)
+                .toNumber() > 20000
+            ) {
+              temp.peso += 1;
+            }
+
+            if (prediccion[0].existencia_litros < prediccion[0].limite) {
+              temp.peso += 2;
+            }
+          }
+
+          pilaC.push(temp);
+        }
+      }
+
+      //Ordenamos de mayor a menor los combustibles
+      const orderAsc = pilaC
+        .filter((el) => el.peso > 0)
+        .sort((a, b) => (b.peso > b.peso ? 0 : 1))
+        .slice(0, 2);
+
+      for (let i = 0; i < orderAsc.length; i++) {
+        const el = orderAsc[i];
+        const index = response[Number(el.estacion) - 1][
+          el.combustible
+        ].findIndex((el) => el.fecha === el.fecha);
+
+        if (orderAsc.length > 1) {
+          response[Number(el.estacion) - 1][el.combustible][
+            index
+          ].compra_litros = 20000;
+        } else {
+          if (el.combustible === "magna" && el.peso > 2) {
+            response[Number(el.estacion) - 1][el.combustible][
+              index
+            ].compra_litros = 40000;
+          }
+        }
+      }
+
+      if (dias > 1) {
+        await funtionR(dias - 1);
+      }
+    };
+
+    await funtionR(dias);
+
+    res.status(200).json({
+      success: true,
+      response,
+      configuraciones,
+      ultimaFechaReal: lastDate.dataValues.fecha,
+    });
   } catch (err) {
+    console.log(err);
     res
       .status(400)
       .json({ success: false, err, msg: "Error al obtener la información" });
@@ -185,6 +263,100 @@ async function guardarPronostico(req, res) {
   }
 }
 
+async function guardarPedidos(req, res) {
+  try {
+    const cuerpo = req.body;
+
+    const cuerpoParse = cuerpo.map((el) => ({
+      idestacion_servicio: el.idestacion,
+      combustible: el.combustible,
+      fecha: el.fecha,
+      cantidad: el.cantidad,
+    }));
+
+    const response = await Pedidos.bulkCreate(cuerpoParse);
+
+    res.status(200).json({ success: true, response: response });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      err,
+      msg: err.msg || "Error al ingresar la información",
+    });
+  }
+}
+
+async function obtenerPedidos(req, res) {
+  try {
+    const { month, year } = req.query;
+    const filtros = {};
+
+    if (month && year) {
+      filtros[Op.and] = [
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+    }
+
+    const response = await Pedidos.findAll({
+      where: filtros,
+      order: [["fecha", "DESC"]],
+      include: [{ model: Gas, as: "gas" }],
+    });
+
+    res.status(200).json({ success: true, response: response });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      err,
+      msg: err.msg || "Error al ingresar la información",
+    });
+  }
+}
+
+async function editarPedidos(req, res) {
+  try {
+    const { idpedidos } = req.params;
+    const { nLemargo, nConductor, fechaDescarga } = req.body;
+
+    const response = await Pedidos.update(
+      {
+        n_lemargo: nLemargo,
+        n_conductor: nConductor,
+        fecha_descarga: fechaDescarga,
+      },
+      { where: { idpedidos } }
+    );
+
+    res.status(200).json({ success: true, response: response });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      err,
+      msg: err.msg || "Error al ingresar la información",
+    });
+  }
+}
+
+async function eliminarPedidos(req, res) {
+  try {
+    const { idpedidos } = req.params;
+
+    const response = await Pedidos.destroy({ where: { idpedidos } });
+
+    res.status(200).json({ success: true, response: response });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      err,
+      msg: err.msg || "Error al eliminar el pedido",
+    });
+  }
+}
+
 async function pruebas(req, res) {
   try {
     const data = await Pronosticos.findAll({ where: { fecha: "2024-04-15" } });
@@ -252,4 +424,8 @@ export default {
   obtenerPronosticosXES,
   pruebas,
   guardarPronostico,
+  guardarPedidos,
+  obtenerPedidos,
+  editarPedidos,
+  eliminarPedidos,
 };

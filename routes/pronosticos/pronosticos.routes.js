@@ -5,13 +5,23 @@ const {
   obtenerPronosticosXES,
   pruebas,
   guardarPronostico,
+  guardarPedidos,
+  obtenerPedidos,
+  editarPedidos,
+  eliminarPedidos,
 } = controlador;
 const route = router();
 
 route.get("/registrosXcombustible", obtenerPronosticosXcombustible);
 route.get("/registrosXES", obtenerPronosticosXES);
-route.post("/guardar", guardarPronostico);
+route.get("/pedidos/obtener", obtenerPedidos);
 
+route.post("/guardar", guardarPronostico);
+route.post("/pedidos/guardar", guardarPedidos);
+
+route.put("/pedidos/editar/:idpedidos", editarPedidos);
 route.post("/pruebas", pruebas);
+
+route.delete("/pedidos/eliminar/:idpedidos", eliminarPedidos);
 
 export default route;
