@@ -7,7 +7,6 @@ controller.findTurnos = async (req, res) => {
   try {
     const { idEstacion } = req.params;
     let response = await estacionServiceM.findTurnos(idEstacion);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -34,7 +33,6 @@ controller.findAllTurnos = async (req, res) => {
 controller.find = async (req, res) => {
   try {
     let response = await estacionServiceM.find();
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -55,7 +53,6 @@ controller.insert = async (req, res) => {
       imagen,
     };
     let response = await estacionServiceM.insert(cuerpo);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -78,7 +75,6 @@ controller.update = async (req, res) => {
     };
     const data = [cuerpo, id];
     let response = await estacionServiceM.update(data);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
@@ -93,7 +89,6 @@ controller.delete = async (req, res) => {
   try {
     const { id } = req.params;
     let response = await estacionServiceM.delete(id);
-    console.log(response);
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
