@@ -32,7 +32,7 @@ export const FechasActividades = sequelize.define("fechas_actividades", {
   fecha_realizada: {
     type: DataTypes.DATEONLY,
   },
-  idorden_trabajo: {
+  id_ot: {
     type: DataTypes.INTEGER,
   },
   idactividad: {

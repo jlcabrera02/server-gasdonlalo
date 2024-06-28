@@ -1,6 +1,6 @@
 import modelos from "../../models";
 
-const { Actividades, FechasActividades } = modelos;
+const { Actividades, FechasActividades, OT } = modelos;
 
 export class Controller {
   modelo;
@@ -25,8 +25,33 @@ export class Controller {
         response,
       });
     } catch (err) {
+      console.log(err);
       if (!err.code) {
-        res.status(400).json({ msg: "datos no enviados correctamente" });
+        res.status(400).json({ msg: "datos no enviados correctamente", err });
+      } else {
+        res.status(err.code).json(err);
+      }
+    }
+  };
+
+  obtenerUno = async (req, res) => {
+    const querys = req.query;
+
+    try {
+      const response = await this.findAll(
+        querys
+          ? { where: querys, include: this.modeloIncluir }
+          : { include: this.modeloIncluir }
+      );
+
+      return res.status(200).json({
+        success: true,
+        response,
+      });
+    } catch (err) {
+      console.log(err);
+      if (!err.code) {
+        res.status(400).json({ msg: "datos no enviados correctamente", err });
       } else {
         res.status(err.code).json(err);
       }
@@ -68,10 +93,41 @@ export class Controller {
       }
     }
   };
+
+  eliminar = async (req, res) => {
+    const { query } = req;
+
+    console.log(query);
+    try {
+      const response = await this.deleteOne(query);
+
+      return res.status(200).json({
+        success: true,
+        response,
+      });
+    } catch (err) {
+      if (!err.code) {
+        res.status(400).json({ msg: "datos no enviados correctamente" });
+      } else {
+        res.status(err.code).json(err);
+      }
+    }
+  };
+
   //servicios
   findAll = async (querys, include) => {
     try {
       const response = await this.modelo.findAll(querys);
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  findOne = async (querys) => {
+    try {
+      const response = await this.modelo.findOne(querys);
 
       return response;
     } catch (error) {
@@ -96,7 +152,18 @@ export class Controller {
       throw error;
     }
   };
+  deleteOne = async (query) => {
+    try {
+      const response = await this.modelo.destroy({ where: query });
+
+      console.log(response);
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  };
 }
 
 export const actividades = new Controller(Actividades, FechasActividades);
-export const fechas = new Controller(FechasActividades);
+export const fechas = new Controller(FechasActividades, OT);
