@@ -1,6 +1,10 @@
 import router from "express-promise-router";
 import ot from "../controllers/mantenimiento/OrdenTrabajo.controller";
 import at from "../controllers/mantenimiento/AreasTrabajo.controller";
+import {
+  actividades,
+  fechas,
+} from "../controllers/mantenimiento/ProgramaMantenimiento";
 
 const route = router();
 
@@ -29,5 +33,22 @@ route.post("/areastrabajo/crear", at.crearAreaT);
 route.get("/areastrabajo/obtener", at.obtenerAreaT);
 route.put("/areastrabajo/editar/:idarea", at.editarArea);
 route.delete("/areastrabajo/eliminar/:idarea", at.eliminarArea);
+
+//programa de mantenimiento
+route.get("/actividades", actividades.obtenerTodos);
+
+route.post("/actividades/crear", actividades.crear);
+route.put("/actividades/editar/:idactividad", (req, res) =>
+  actividades.actualizar(req, res, ["nombre", "periodo_actividades"])
+);
+route.delete("/actividades/eliminar", actividades.eliminar);
+
+route.get("/fechas-actividades", fechas.obtenerTodos);
+route.get("/fechas-actividades/obtener-uno", fechas.obtenerUno);
+route.post("/fechas-actividades/crear", fechas.crear);
+route.put(
+  "/fechas-actividades/editar/:idfechas_actividades",
+  fechas.actualizar
+);
 
 export default route;
