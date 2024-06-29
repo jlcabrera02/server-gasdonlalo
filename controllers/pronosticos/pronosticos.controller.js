@@ -1,9 +1,10 @@
 import Decimal from "decimal.js-light";
 import models from "../../models";
-import { Op, where } from "sequelize";
+import { Op } from "sequelize";
 import sequelize from "../../config/configdb";
 import { obtenerConfiguraciones } from "../../services/configuracionesPersonalizables";
 import prediccionCombustible from "../../services/ModeloPredictivoPronostico";
+import formatTiempo from "../../assets/formatTiempo";
 
 const { Pronosticos, ES, Gas, Pedidos } = models;
 
@@ -43,6 +44,7 @@ async function obtenerPronosticosXcombustible(req, res) {
 
 async function obtenerPronosticosXES(req, res) {
   try {
+    const configPronostico = obtenerConfiguraciones().configPronosticos;
     const { fechaI, fechaF, limit, order, pronostico } = req.query;
     const filtros = {};
     const combustible = ["magna", "premium", "diesel"];
@@ -103,6 +105,14 @@ async function obtenerPronosticosXES(req, res) {
         for (const c of combustible) {
           //Si no se encontro informacion no returnamos nada
           if (response[i][c].length < 1) return;
+          if (!response[i][c][0].ventas_litros) {
+            // response[i][c][0].ventas_litros = 100;
+            response[i][c][0].ventas_litros =
+              configPronostico.ventas_promedio[`gdl${Number(i) + 1}`][
+                c.charAt().toLocaleUpperCase()
+              ];
+            // console.log(`gdl${Number(i) + 1}`);
+          }
           const temp = {};
           let peso = 0;
           const prediccion = await prediccionCombustible(response[i][c], dias);
@@ -183,12 +193,60 @@ async function obtenerPronosticosXES(req, res) {
   }
 }
 
+async function antesEigualDe(req, res) {
+  //Exclusivo para obtener un registro para la parte de crear registro de pronosticos menu pronosticos
+  try {
+    const { fecha } = req.query;
+    const estaciones = await ES.findAll({});
+    const combustible = ["magna", "premium", "diesel"];
+    const filtros = { fecha: { [Op.lte]: fecha } };
+    const response = [];
+
+    for (const i of estaciones) {
+      const dataC = [];
+      const idestacion = i.dataValues.idestacion_servicio;
+      for (const c of combustible) {
+        const res = await Pronosticos.findAll({
+          where: {
+            ...filtros,
+            idestacion_servicio: idestacion,
+            combustible: c.charAt(0).toUpperCase(),
+          },
+          include: [{ model: Gas, as: "gas" }, { model: ES }],
+          order: [["fecha", "DESC"]],
+          limit: 2,
+        });
+        dataC.push(res);
+      }
+
+      response.push({
+        idestacion: idestacion,
+        magna: dataC[0],
+        premium: dataC[1],
+        diesel: dataC[2],
+      });
+    }
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      err,
+      msg: err.msg || "Error al ingresar la información",
+    });
+  }
+}
+
 async function guardarPronostico(req, res) {
   try {
     const cuerpo = [];
     const { estacion1, estacion2, fecha, registro } = req.body;
     const keysEs1 = Object.keys(estacion1);
     const keysEs2 = Object.keys(estacion2);
+    const fechaAnterior = formatTiempo.tiempoDB(
+      new Date(fecha).setDate(new Date(fecha).getDate() - 1)
+    );
 
     //Informacion para la GDL1
     for (const element of keysEs1) {
@@ -246,6 +304,42 @@ async function guardarPronostico(req, res) {
         throw { code: 400, msg: "Ya existen valores", success: false };
       }
 
+      const configPronostico = obtenerConfiguraciones().configPronosticos;
+
+      for (const element of cuerpo) {
+        const findElemento = await Pronosticos.findOne({
+          where: {
+            fecha: fechaAnterior,
+            combustible: element.combustible,
+            idestacion_servicio: element.idestacion_servicio,
+          },
+          transaction: t,
+        });
+
+        await Pronosticos.update(
+          { ventas_litros: element.ventas_litros },
+          {
+            where: { idpronostico: findElemento.dataValues.idpronostico },
+            transaction: t,
+          }
+        );
+      }
+
+      cuerpo.forEach((el) => {
+        const limite =
+          configPronostico.limite[`gdl${el.idestacion_servicio}`][
+            el.combustible
+          ];
+        const ventaP =
+          configPronostico.ventas_promedio[`gdl${el.idestacion_servicio}`][
+            el.combustible
+          ];
+        el.limite = limite;
+        el.promedio_ventas_mes = ventaP;
+        el.ventas_litros = null;
+        if (!el.compra_litros) el.compra_litros = null;
+      });
+
       const guardarPronostico = await Pronosticos.bulkCreate(cuerpo, {
         transaction: t,
       });
@@ -255,6 +349,106 @@ async function guardarPronostico(req, res) {
 
     res.status(200).json({ success: true, response: response });
   } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      err,
+      msg: err.msg || "Error al ingresar la información",
+    });
+  }
+}
+
+async function editarPronostico(req, res) {
+  try {
+    const cuerpo = [];
+    const { estacion1, estacion2, fecha, registro } = req.body;
+    const keysEs1 = Object.keys(estacion1);
+    const keysEs2 = Object.keys(estacion2);
+    //Informacion para la GDL1
+    for (const element of keysEs1) {
+      const {
+        existencia_litros,
+        compra_litros,
+        ventas_litros,
+        limite,
+        promedio_ventas_mes,
+        idpronostico,
+        idpronosticoAnterior,
+      } = estacion1[element];
+
+      cuerpo.push({
+        combustible: element.charAt().toUpperCase(),
+        existencia_litros,
+        compra_litros,
+        ventas_litros,
+        limite,
+        fecha,
+        registro,
+        idestacion_servicio: 1,
+        promedio_ventas_mes,
+        idpronostico,
+        idpronosticoAnterior,
+      });
+    }
+
+    //Informacion para la GDL2
+    for (const element of keysEs2) {
+      const {
+        existencia_litros,
+        compra_litros,
+        ventas_litros,
+        limite,
+        promedio_ventas_mes,
+        idpronostico,
+        idpronosticoAnterior,
+      } = estacion2[element];
+
+      cuerpo.push({
+        combustible: element.charAt().toUpperCase(),
+        existencia_litros,
+        compra_litros,
+        ventas_litros,
+        limite,
+        fecha,
+        registro,
+        idestacion_servicio: 2,
+        promedio_ventas_mes,
+        idpronostico,
+        idpronosticoAnterior,
+      });
+    }
+
+    const response = await sequelize.transaction(async (t) => {
+      const dataUpdate = [];
+      cuerpo.forEach((el) => {
+        dataUpdate.push({
+          idpronostico: el.idpronostico,
+          data: {
+            compra_litros: el.compra_litros || null,
+            existencia_litros: el.existencia_litros,
+          },
+        });
+        dataUpdate.push({
+          idpronostico: el.idpronosticoAnterior,
+          data: {
+            ventas_litros: el.ventas_litros,
+          },
+        });
+      });
+
+      for (const element of dataUpdate) {
+        await Pronosticos.update(
+          { ...element.data },
+          { where: { idpronostico: element.idpronostico }, transaction: t }
+        );
+      }
+
+      return dataUpdate;
+    });
+
+    res.status(200).json({ success: true, response: response });
+  } catch (err) {
+    console.log(err);
     res.status(400).json({
       success: false,
       err,
@@ -277,6 +471,55 @@ async function guardarPedidos(req, res) {
     const response = await Pedidos.bulkCreate(cuerpoParse);
 
     res.status(200).json({ success: true, response: response });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      err,
+      msg: err.msg || "Error al ingresar la información",
+    });
+  }
+}
+
+async function editarPedidos(req, res) {
+  try {
+    const { idpedidos } = req.params;
+    const { fecha_descarga, cantidad, combustible, idestacion_servicio } =
+      req.body;
+
+    const buscarRegistro = await Pronosticos.findOne({
+      where: {
+        registro: "Real",
+        combustible,
+        fecha: fecha_descarga,
+        idestacion_servicio,
+      },
+    });
+
+    if (!buscarRegistro) {
+      throw {
+        code: 400,
+        success: false,
+        msg: "No se encontro un registro para almacenar la carga real",
+      };
+    }
+
+    const response = await sequelize.transaction(async (t) => {
+      await Pronosticos.update(
+        { compra_litros: cantidad },
+        {
+          where: { idpronostico: buscarRegistro.dataValues.idpronostico },
+          transaction: t,
+        }
+      );
+      const response = await Pedidos.update(
+        { fecha_descarga },
+        { where: { idpedidos }, transaction: t }
+      );
+      return response;
+    });
+
+    res.status(200).json({ success: true, response });
   } catch (err) {
     console.log(err);
     res.status(400).json({
@@ -315,16 +558,14 @@ async function obtenerPedidos(req, res) {
   }
 }
 
-async function editarPedidos(req, res) {
+async function notificarPedidos(req, res) {
   try {
     const { idpedidos } = req.params;
-    const { nLemargo, nConductor, fechaDescarga } = req.body;
+    const { notificacion, valor } = req.body;
 
     const response = await Pedidos.update(
       {
-        n_lemargo: nLemargo,
-        n_conductor: nConductor,
-        fecha_descarga: fechaDescarga,
+        [notificacion]: valor,
       },
       { where: { idpedidos } }
     );
@@ -424,8 +665,11 @@ export default {
   obtenerPronosticosXES,
   pruebas,
   guardarPronostico,
+  editarPronostico,
   guardarPedidos,
   obtenerPedidos,
-  editarPedidos,
+  notificarPedidos,
   eliminarPedidos,
+  editarPedidos,
+  antesEigualDe,
 };

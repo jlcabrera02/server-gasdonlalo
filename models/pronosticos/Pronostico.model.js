@@ -23,7 +23,7 @@ const Pronosticos = sequelize.define(
     },
     existencia_litros: {
       type: DataTypes.DECIMAL(19, 2),
-      allowNull: false,
+      allowNull: true,
     },
     compra_litros: {
       type: DataTypes.DECIMAL(19, 2),

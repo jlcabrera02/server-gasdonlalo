@@ -13,7 +13,7 @@ async function prediccionCombustible(data, dias = 7) {
   arrayPronostico.push(dataLast);
 
   const fechaInit = new Date(dataLast.fecha);
-  const ventaPromedio = dataLast.promedio_ventas_mes;
+  const ventaPromedio = dataLast.ventas_litros;
 
   for (let i = 0; i < dias; i++) {
     fechaInit.setDate(fechaInit.getDate() + 1);
