@@ -54,7 +54,7 @@ async function obtenerPronosticosXES(req, res) {
       filtros.fecha = { [Op.between]: [fechaI, fechaF] };
     }
 
-    const estaciones = await ES.findAll({});
+    const estaciones = await ES.findAll({ limit: 2 });
     const response = [];
 
     if (estaciones.length < 1) {
@@ -197,7 +197,7 @@ async function antesEigualDe(req, res) {
   //Exclusivo para obtener un registro para la parte de crear registro de pronosticos menu pronosticos
   try {
     const { fecha } = req.query;
-    const estaciones = await ES.findAll({});
+    const estaciones = await ES.findAll({ limit: 2 });
     const combustible = ["magna", "premium", "diesel"];
     const filtros = { fecha: { [Op.lte]: fecha } };
     const response = [];
