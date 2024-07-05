@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/configdb";
 
-const Pagare = sequelize.define(
+const Pronosticos = sequelize.define(
   "pronosticos",
   {
     idpronostico: {
@@ -15,7 +15,7 @@ const Pagare = sequelize.define(
     },
     fecha: {
       type: DataTypes.DATEONLY,
-      allowNull: false,
+      allowNull: true,
     },
     registro: {
       type: DataTypes.ENUM("Pronostico", "Real"),
@@ -23,7 +23,7 @@ const Pagare = sequelize.define(
     },
     existencia_litros: {
       type: DataTypes.DECIMAL(19, 2),
-      allowNull: false,
+      allowNull: true,
     },
     compra_litros: {
       type: DataTypes.DECIMAL(19, 2),
@@ -46,10 +46,14 @@ const Pagare = sequelize.define(
       type: DataTypes.DECIMAL(19, 2),
       allowNull: false,
     },
+    fecha_pedido: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
   },
   {
     freezeTableName: true,
   }
 );
 
-export default Pagare;
+export default Pronosticos;
