@@ -500,11 +500,38 @@ async function editarPedidos(req, res) {
       throw {
         code: 400,
         success: false,
-        msg: "No se encontro un registro para almacenar la carga real",
+        msg:
+          "No se encontro un registro para almacenar la carga real, porfavor guarde las existencias y ventas del día " +
+          fecha_descarga,
       };
     }
 
     const response = await sequelize.transaction(async (t) => {
+      const pedidoAnterior = await Pedidos.findOne({
+        where: { idpedidos: idpedidos },
+        transaction: t,
+      });
+
+      if (pedidoAnterior) {
+        console.log(pedidoAnterior.dataValues, fecha_descarga, "hola");
+        if (pedidoAnterior.dataValues.fecha_descarga !== fecha_descarga) {
+          //Si la fecha anterior comparada con la fecha actual es diferente entonces el usuario se equivoco de fecha por lo tanto hay que eliminar el registro de compra de litros proveniente de la tabla pronosticos.
+          console.log("procedio");
+          Pronosticos.update(
+            { compra_litros: null },
+            {
+              where: {
+                combustible,
+                fecha: pedidoAnterior.dataValues.fecha_descarga,
+                idestacion_servicio,
+                registro: "Real",
+              },
+              transaction: t,
+            }
+          );
+        }
+      }
+
       await Pronosticos.update(
         { compra_litros: cantidad },
         {
@@ -513,7 +540,7 @@ async function editarPedidos(req, res) {
         }
       );
       const response = await Pedidos.update(
-        { fecha_descarga },
+        { fecha_descarga, litros_descarga: cantidad },
         { where: { idpedidos }, transaction: t }
       );
       return response;
@@ -544,7 +571,7 @@ async function obtenerPedidos(req, res) {
 
     const response = await Pedidos.findAll({
       where: filtros,
-      order: [["fecha", "DESC"]],
+      // order: [["fecha", "DESC"]],
       include: [{ model: Gas, as: "gas" }],
     });
 
