@@ -2,7 +2,10 @@ import Decimal from "decimal.js-light";
 import models from "../../models";
 import { Op } from "sequelize";
 import sequelize from "../../config/configdb";
-import { obtenerConfiguraciones } from "../../services/configuracionesPersonalizables";
+import {
+  escribirConfiguraciones,
+  obtenerConfiguraciones,
+} from "../../services/configuracionesPersonalizables";
 import prediccionCombustible from "../../services/ModeloPredictivoPronostico";
 import formatTiempo from "../../assets/formatTiempo";
 
@@ -45,7 +48,7 @@ async function obtenerPronosticosXcombustible(req, res) {
 async function obtenerPronosticosXES(req, res) {
   try {
     const configPronostico = obtenerConfiguraciones().configPronosticos;
-    const { fechaI, fechaF, limit, order, pronostico } = req.query;
+    const { fechaI, fechaF, limit, order, pronostico, evitarC } = req.query;
     const filtros = {};
     const combustible = ["magna", "premium", "diesel"];
     const dias = Number(pronostico) || 0;
@@ -97,7 +100,7 @@ async function obtenerPronosticosXES(req, res) {
 
     const configuraciones = obtenerConfiguraciones().configPronosticos;
 
-    const funtionR = async (dias = 7) => {
+    const funtionR = async (dias = 7, evitarCompras = false) => {
       if (dias === 0) return;
       //Arreglo donde se guardaran los combustibles para saber cuales son los que requeiren reabastecimiento
       const pilaC = [];
@@ -136,10 +139,12 @@ async function obtenerPronosticosXES(req, res) {
                 .toNumber() > 20000
             ) {
               temp.peso += 1;
-            }
-
-            if (prediccion[0].existencia_litros < prediccion[0].limite) {
-              temp.peso += 2;
+              // if (prediccion[0].combustible === "M") {
+              //   temp.peso += 2;
+              // }
+              if (prediccion[0].existencia_litros < prediccion[0].limite) {
+                temp.peso += 2;
+              }
             }
           }
 
@@ -147,37 +152,39 @@ async function obtenerPronosticosXES(req, res) {
         }
       }
 
-      //Ordenamos de mayor a menor los combustibles
-      const orderAsc = pilaC
-        .filter((el) => el.peso > 0)
-        .sort((a, b) => (b.peso > b.peso ? 0 : 1))
-        .slice(0, 2);
+      if (!evitarCompras) {
+        //Ordenamos de mayor a menor los combustibles
+        const orderAsc = pilaC
+          .filter((el) => el.peso > 0)
+          .sort((a, b) => (b.peso > b.peso ? 0 : 1))
+          .slice(0, 2);
 
-      for (let i = 0; i < orderAsc.length; i++) {
-        const el = orderAsc[i];
-        const index = response[Number(el.estacion) - 1][
-          el.combustible
-        ].findIndex((el) => el.fecha === el.fecha);
+        for (let i = 0; i < orderAsc.length; i++) {
+          const el = orderAsc[i];
+          const index = response[Number(el.estacion) - 1][
+            el.combustible
+          ].findIndex((el) => el.fecha === el.fecha);
 
-        if (orderAsc.length > 1) {
-          response[Number(el.estacion) - 1][el.combustible][
-            index
-          ].compra_litros = 20000;
-        } else {
-          if (el.combustible === "magna" && el.peso > 2) {
+          if (orderAsc.length > 1) {
             response[Number(el.estacion) - 1][el.combustible][
               index
-            ].compra_litros = 40000;
+            ].compra_litros = 20000;
+          } else {
+            if (el.combustible === "magna" && el.peso > 2) {
+              response[Number(el.estacion) - 1][el.combustible][
+                index
+              ].compra_litros = 40000;
+            }
           }
         }
       }
 
       if (dias > 1) {
-        await funtionR(dias - 1);
+        await funtionR(dias - 1, evitarCompras);
       }
     };
 
-    await funtionR(dias);
+    await funtionR(dias, evitarC);
 
     res.status(200).json({
       success: true,
@@ -500,11 +507,36 @@ async function editarPedidos(req, res) {
       throw {
         code: 400,
         success: false,
-        msg: "No se encontro un registro para almacenar la carga real",
+        msg:
+          "No se encontro un registro para almacenar la carga real, porfavor guarde las existencias y ventas del día " +
+          fecha_descarga,
       };
     }
 
     const response = await sequelize.transaction(async (t) => {
+      const pedidoAnterior = await Pedidos.findOne({
+        where: { idpedidos: idpedidos },
+        transaction: t,
+      });
+
+      if (pedidoAnterior) {
+        if (pedidoAnterior.dataValues.fecha_descarga !== fecha_descarga) {
+          //Si la fecha anterior comparada con la fecha actual es diferente entonces el usuario se equivoco de fecha por lo tanto hay que eliminar el registro de compra de litros proveniente de la tabla pronosticos.
+          Pronosticos.update(
+            { compra_litros: null },
+            {
+              where: {
+                combustible,
+                fecha: pedidoAnterior.dataValues.fecha_descarga,
+                idestacion_servicio,
+                registro: "Real",
+              },
+              transaction: t,
+            }
+          );
+        }
+      }
+
       await Pronosticos.update(
         { compra_litros: cantidad },
         {
@@ -513,7 +545,7 @@ async function editarPedidos(req, res) {
         }
       );
       const response = await Pedidos.update(
-        { fecha_descarga },
+        { fecha_descarga, litros_descarga: cantidad },
         { where: { idpedidos }, transaction: t }
       );
       return response;
@@ -532,7 +564,7 @@ async function editarPedidos(req, res) {
 
 async function obtenerPedidos(req, res) {
   try {
-    const { month, year } = req.query;
+    const { month, year, fecha } = req.query;
     const filtros = {};
 
     if (month && year) {
@@ -542,9 +574,13 @@ async function obtenerPedidos(req, res) {
       ];
     }
 
+    if (fecha) {
+      filtros.fecha = fecha;
+    }
+
     const response = await Pedidos.findAll({
       where: filtros,
-      order: [["fecha", "DESC"]],
+      order: [["fecha", "ASC"]],
       include: [{ model: Gas, as: "gas" }],
     });
 
@@ -598,61 +634,26 @@ async function eliminarPedidos(req, res) {
   }
 }
 
-async function pruebas(req, res) {
+async function obtenerConfigPronostico(req, res) {
   try {
-    const data = await Pronosticos.findAll({ where: { fecha: "2024-04-15" } });
-    const prioridades = {
-      combustible: { M: 3, P: 2, D: 1 },
-      estaciones: { 1: 2, 2: 1 },
-      capacidad: [
-        //Capacidad si hay para 2000 L asignar 1, si hay para  4000L asignar 2, si hay para 6000, asignar 3
-        { estacion: 1, magna: 70000, premium: 30000, disiel: 30000 },
-        { estacion: 2, magna: 40000, premium: 40000, disiel: 40000 },
-      ],
-      limite: [
-        //Ordenar la capacidad
-        { estacion: 1, magna: 46000, premium: 10000, disiel: 10000 },
-        { estacion: 2, magna: 20000, premium: 20000, disiel: 20000 },
-      ],
-    };
+    const response = obtenerConfiguraciones().configPronosticos;
 
-    const ordenarXMayorFaltante = data.sort(
-      (a, b) =>
-        new Decimal(a.dataValues.limite)
-          .sub(a.dataValues.existencia_litros)
-          .toNumber() -
-        new Decimal(b.dataValues.limite)
-          .sub(b.dataValues.existencia_litros)
-          .toNumber()
-    );
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    res
+      .status(400)
+      .json({ success: false, err, msg: "Error al obtener la información" });
+  }
+}
 
-    for (const index in ordenarXMayorFaltante) {
-      const element = ordenarXMayorFaltante[index].dataValues;
-      const {
-        combustible,
-        idestacion_servicio,
-        limite,
-        existencia_litros,
-        ventas_litros,
-      } = element;
-      const diferencia = new Decimal(limite).sub(existencia_litros).toNumber();
-      let peso = 0;
-      peso += prioridades.combustible[combustible];
-      // peso += prioridades.estaciones[idestacion_servicio];
-      if (Number(existencia_litros) <= Number(limite)) peso += 3;
-      if (Number(existencia_litros) * 2 <= Number(ventas_litros)) peso += 3;
-      element.diferencia = diferencia;
+async function escribirConfigPronostico(req, res) {
+  try {
+    const { propiedad, estacion, combustible, valor } = req.body;
+    const config = obtenerConfiguraciones().configPronosticos;
+    config[propiedad][estacion][combustible] = Number(valor);
+    const response = escribirConfiguraciones({ configPronosticos: config });
 
-      if (diferencia > 1) {
-        peso += Number(index);
-      }
-
-      element.peso = peso;
-    }
-
-    const ordenar = data.sort((a, b) => b.dataValues.peso - a.dataValues.peso);
-
-    res.status(200).json({ success: true, response: ordenar });
+    res.status(200).json({ success: true, response });
   } catch (err) {
     res
       .status(400)
@@ -663,7 +664,8 @@ async function pruebas(req, res) {
 export default {
   obtenerPronosticosXcombustible,
   obtenerPronosticosXES,
-  pruebas,
+  obtenerConfigPronostico,
+  escribirConfigPronostico,
   guardarPronostico,
   editarPronostico,
   guardarPedidos,

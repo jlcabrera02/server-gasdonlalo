@@ -10,6 +10,7 @@ import Decimal from "decimal.js-light";
 import Utencilios from "../../models/mantenimiento/Utencilios";
 import { Op } from "sequelize";
 import { attributesPersonal } from "../../models/recursosHumanos/empleados.model";
+import { FechasActividades } from "../../models/mantenimiento/ProgramaMantenimiento";
 const { verificar } = auth;
 const { OT, PanicBtn, empleados, AT, SncNotification } = modelos;
 
@@ -414,11 +415,17 @@ controller.terminarOT = async (req, res) => {
       fechaInicio,
     } = req.body;
 
-    console.log(req.body);
-
     const ot = await OT.findOne({ where: { idorden_trabajo: idOT } });
 
     const isFechaTermino = req.body.fechaTermino;
+
+    const fechaProgMant = await FechasActividades.findOne({
+      where: { id_ot: idOT },
+    });
+
+    if (fechaProgMant) {
+      fechaProgMant.update({ fecha_realizada: isFechaTermino });
+    }
 
     if (!ot)
       throw {
@@ -498,6 +505,9 @@ controller.liberarOT = async (req, res) => {
     const { procedio, descripcion } = req.body;
 
     const ot = await OT.findOne({ where: { idorden_trabajo: idOT } });
+    const fechaProgMant = await FechasActividades.findOne({
+      where: { id_ot: idOT },
+    });
 
     if (!ot)
       throw {
@@ -521,6 +531,13 @@ controller.liberarOT = async (req, res) => {
         );
 
         const createOT = await OT.create(cuerpo, { transaction: t });
+
+        if (fechaProgMant) {
+          fechaProgMant.update({
+            fecha_realizada: null,
+            id_ot: createOT.dataValues.idorden_trabajo,
+          });
+        }
 
         return createOT;
       } else {

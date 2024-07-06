@@ -36,6 +36,7 @@ route.delete("/areastrabajo/eliminar/:idarea", at.eliminarArea);
 
 //programa de mantenimiento
 route.get("/actividades", actividades.obtenerTodos);
+route.post("/actividades", actividades.obtenerTodos);
 
 route.post("/actividades/crear", actividades.crear);
 route.put("/actividades/editar/:idactividad", (req, res) =>

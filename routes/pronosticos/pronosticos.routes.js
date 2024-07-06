@@ -3,7 +3,8 @@ import controlador from "../../controllers/pronosticos/pronosticos.controller";
 const {
   obtenerPronosticosXcombustible,
   obtenerPronosticosXES,
-  pruebas,
+  obtenerConfigPronostico,
+  escribirConfigPronostico,
   guardarPronostico,
   guardarPedidos,
   obtenerPedidos,
@@ -19,14 +20,15 @@ route.get("/registrosXcombustible", obtenerPronosticosXcombustible);
 route.get("/registrosXES", obtenerPronosticosXES);
 route.get("/pedidos/obtener", obtenerPedidos);
 route.get("/antesEigualDe/", antesEigualDe);
+route.get("/configuraciones", obtenerConfigPronostico);
 
 route.post("/guardar", guardarPronostico);
 route.post("/pedidos/guardar", guardarPedidos);
 
+route.put("/escribir/configuracion", escribirConfigPronostico);
 route.put("/pedidos/notificar/:idpedidos", notificarPedidos);
 route.put("/pedidos/editar/:idpedidos", editarPedidos);
 route.put("/editar", editarPronostico);
-route.post("/pruebas", pruebas);
 
 route.delete("/pedidos/eliminar/:idpedidos", eliminarPedidos);
 
