@@ -4,6 +4,7 @@ import { Op } from "sequelize";
 const { Actividades, FechasActividades, OT } = modelos;
 
 export class Controller {
+  operators = { between: Op.between };
   modelo;
   modelosIncluir;
   constructor(modelo, modelosIncluir = []) {
@@ -15,26 +16,31 @@ export class Controller {
     const { fechaI, fechaF, dateProp, include, joinIndex, ...querys } =
       req.query;
 
-    if (req.method === "POST") {
-      console.log(req.body);
-    }
-
     const filter = {};
 
     try {
       if (include && this.modelosIncluir.length > 0) {
         filter.include = JSON.parse(include).map((value, index) => {
           const { name, ...model } = this.modelosIncluir[value];
-          if (joinIndex && Number(joinIndex) === index) {
+
+          if (req.method === "POST" && req.body.hasOwnProperty("joinFilters")) {
+            const { joinFilters } = req.body;
+            const op = {};
+
+            joinFilters[value].operators.forEach((element) => {
+              console.log(element);
+              op[element.property] = {
+                [this.operators[element.type]]: element.value,
+              };
+            });
             return {
               ...model,
               where: {
-                [dateProp]: {
-                  [Op.between]: [fechaI, fechaF],
-                },
+                ...op,
               },
             };
           }
+
           return model;
         });
 
