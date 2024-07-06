@@ -559,7 +559,7 @@ async function editarPedidos(req, res) {
 
 async function obtenerPedidos(req, res) {
   try {
-    const { month, year } = req.query;
+    const { month, year, fecha } = req.query;
     const filtros = {};
 
     if (month && year) {
@@ -568,6 +568,12 @@ async function obtenerPedidos(req, res) {
         sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
       ];
     }
+
+    if (fecha) {
+      filtros.fecha = fecha;
+    }
+
+    console.log(filtros);
 
     const response = await Pedidos.findAll({
       where: filtros,
