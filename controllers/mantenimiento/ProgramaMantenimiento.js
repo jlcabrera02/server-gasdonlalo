@@ -1,31 +1,74 @@
 import modelos from "../../models";
+import { Op } from "sequelize";
 
 const { Actividades, FechasActividades, OT } = modelos;
 
 export class Controller {
+  operators = { between: Op.between };
   modelo;
-  modeloIncluir;
-  constructor(modelo, modeloIncluir = null) {
+  modelosIncluir;
+  constructor(modelo, modelosIncluir = []) {
     this.modelo = modelo;
-    this.modeloIncluir = modeloIncluir;
+    this.modelosIncluir = modelosIncluir;
   }
 
   obtenerTodos = async (req, res) => {
-    const querys = req.query;
+    const { fechaI, fechaF, dateProp, include, joinIndex, ...querys } =
+      req.query;
+
+    const filter = {};
 
     try {
-      const response = await this.findAll(
-        querys
-          ? { where: querys, include: this.modeloIncluir }
-          : { include: this.modeloIncluir }
-      );
+      if (include && this.modelosIncluir.length > 0) {
+        filter.include = JSON.parse(include).map((value, index) => {
+          const { name, ...model } = this.modelosIncluir[value];
+
+          if (req.method === "POST" && req.body.hasOwnProperty("joinFilters")) {
+            const { joinFilters } = req.body;
+            const op = {};
+
+            joinFilters[value].operators.forEach((element) => {
+              console.log(element);
+              op[element.property] = {
+                [this.operators[element.type]]: element.value,
+              };
+            });
+            return {
+              ...model,
+              where: {
+                ...op,
+              },
+            };
+          }
+
+          return model;
+        });
+
+        console.log(filter.include);
+      } //permite incluir modelos a voluntad del usuario
+      if (dateProp && fechaF && fechaI && !joinIndex) {
+        filter.where = filter.hasOwnProperty("where")
+          ? { ...filter.where, [dateProp]: { [Op.between]: [fechaI, fechaF] } }
+          : { [dateProp]: { [Op.between]: [fechaI, fechaF] } };
+      } //permite filtrar fechas
+      if (Object.keys(querys).length > 0) {
+        filter.where = filter.hasOwnProperty("where")
+          ? { ...querys, ...filter.where }
+          : querys;
+      } //filtra por propiedades
+
+      const response = await this.findAll(filter);
 
       return res.status(200).json({
         success: true,
         response,
+        joinsAvaliable: this.modelosIncluir.map((el) => el.name),
       });
     } catch (err) {
-      console.log(err);
+      console.log(err.message);
+      if (err instanceof TypeError) {
+        res.status(400).json({ msg: "Join a incluir no identificado." });
+      }
       if (!err.code) {
         res.status(400).json({ msg: "datos no enviados correctamente", err });
       } else {
@@ -40,8 +83,8 @@ export class Controller {
     try {
       const response = await this.findAll(
         querys
-          ? { where: querys, include: this.modeloIncluir }
-          : { include: this.modeloIncluir }
+          ? { where: querys, include: this.modelosIncluir }
+          : { include: this.modelosIncluir }
       );
 
       return res.status(200).json({
@@ -115,7 +158,7 @@ export class Controller {
   };
 
   //servicios
-  findAll = async (querys, include) => {
+  findAll = async (querys) => {
     try {
       const response = await this.modelo.findAll(querys);
 
@@ -155,9 +198,6 @@ export class Controller {
   deleteOne = async (query) => {
     try {
       const response = await this.modelo.destroy({ where: query });
-
-      console.log(response);
-
       return response;
     } catch (error) {
       throw error;
@@ -165,5 +205,10 @@ export class Controller {
   };
 }
 
-export const actividades = new Controller(Actividades, FechasActividades);
-export const fechas = new Controller(FechasActividades, OT);
+export const actividades = new Controller(Actividades, [
+  { model: FechasActividades, name: "actividades" },
+]);
+export const fechas = new Controller(FechasActividades, [
+  { model: OT, name: "ordenTrabajo" },
+  { model: Actividades, as: "actividad", name: "actividades" },
+]);
