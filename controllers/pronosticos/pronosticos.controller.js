@@ -45,7 +45,7 @@ async function obtenerPronosticosXcombustible(req, res) {
 async function obtenerPronosticosXES(req, res) {
   try {
     const configPronostico = obtenerConfiguraciones().configPronosticos;
-    const { fechaI, fechaF, limit, order, pronostico } = req.query;
+    const { fechaI, fechaF, limit, order, pronostico, evitarC } = req.query;
     const filtros = {};
     const combustible = ["magna", "premium", "diesel"];
     const dias = Number(pronostico) || 0;
@@ -97,7 +97,7 @@ async function obtenerPronosticosXES(req, res) {
 
     const configuraciones = obtenerConfiguraciones().configPronosticos;
 
-    const funtionR = async (dias = 7) => {
+    const funtionR = async (dias = 7, evitarCompras = false) => {
       if (dias === 0) return;
       //Arreglo donde se guardaran los combustibles para saber cuales son los que requeiren reabastecimiento
       const pilaC = [];
@@ -147,37 +147,39 @@ async function obtenerPronosticosXES(req, res) {
         }
       }
 
-      //Ordenamos de mayor a menor los combustibles
-      const orderAsc = pilaC
-        .filter((el) => el.peso > 0)
-        .sort((a, b) => (b.peso > b.peso ? 0 : 1))
-        .slice(0, 2);
+      if (!evitarCompras) {
+        //Ordenamos de mayor a menor los combustibles
+        const orderAsc = pilaC
+          .filter((el) => el.peso > 0)
+          .sort((a, b) => (b.peso > b.peso ? 0 : 1))
+          .slice(0, 2);
 
-      for (let i = 0; i < orderAsc.length; i++) {
-        const el = orderAsc[i];
-        const index = response[Number(el.estacion) - 1][
-          el.combustible
-        ].findIndex((el) => el.fecha === el.fecha);
+        for (let i = 0; i < orderAsc.length; i++) {
+          const el = orderAsc[i];
+          const index = response[Number(el.estacion) - 1][
+            el.combustible
+          ].findIndex((el) => el.fecha === el.fecha);
 
-        if (orderAsc.length > 1) {
-          response[Number(el.estacion) - 1][el.combustible][
-            index
-          ].compra_litros = 20000;
-        } else {
-          if (el.combustible === "magna" && el.peso > 2) {
+          if (orderAsc.length > 1) {
             response[Number(el.estacion) - 1][el.combustible][
               index
-            ].compra_litros = 40000;
+            ].compra_litros = 20000;
+          } else {
+            if (el.combustible === "magna" && el.peso > 2) {
+              response[Number(el.estacion) - 1][el.combustible][
+                index
+              ].compra_litros = 40000;
+            }
           }
         }
       }
 
       if (dias > 1) {
-        await funtionR(dias - 1);
+        await funtionR(dias - 1, evitarCompras);
       }
     };
 
-    await funtionR(dias);
+    await funtionR(dias, evitarC);
 
     res.status(200).json({
       success: true,
@@ -513,10 +515,8 @@ async function editarPedidos(req, res) {
       });
 
       if (pedidoAnterior) {
-        console.log(pedidoAnterior.dataValues, fecha_descarga, "hola");
         if (pedidoAnterior.dataValues.fecha_descarga !== fecha_descarga) {
           //Si la fecha anterior comparada con la fecha actual es diferente entonces el usuario se equivoco de fecha por lo tanto hay que eliminar el registro de compra de litros proveniente de la tabla pronosticos.
-          console.log("procedio");
           Pronosticos.update(
             { compra_litros: null },
             {
@@ -572,8 +572,6 @@ async function obtenerPedidos(req, res) {
     if (fecha) {
       filtros.fecha = fecha;
     }
-
-    console.log(filtros);
 
     const response = await Pedidos.findAll({
       where: filtros,
