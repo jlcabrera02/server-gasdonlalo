@@ -221,7 +221,8 @@ INSERT INTO area_trabajo VALUES
 (8, "Administrativos"),
 (9, "Seguridad"),
 (10, "Documentos SGG"),
-(11, "Liquidación");
+(11, "Liquidación"),
+(12, "Pronosticos");
 
 INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) VALUES 
 (1, "Universal", "Universal", 1, "Permiso para el superusuario"),
@@ -270,7 +271,9 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 (66, "Corregir Preliquidación", "Captura", 11, "Das la opción de que el usuario editar una preliquidación"),
 (67, "Dar de baja MF o MS", "Reportes", 11, "Das la opción de que el usuario pueda manipular el mostrar o no un monto faltante o sobrante"),
 (68, "Acceder a botón de pánico", "Permisos", 8, "Das la opción de que el usuario tenga acceso al modulo de botón de pánico"),
-(69, "Manipular configuraciones", "Permisos", 8, "Das la opción de que el usuario pueda configurar variables que estan predefinidas");
+(69, "Manipular configuraciones", "Permisos", 8, "Das la opción de que el usuario pueda configurar variables que estan predefinidas"),
+(70, "Acceso al modulo de pronosticos", "Permisos", 12, "Das la opción de que el usuario manipular información del modulo de pronosticos");
+(71, "Configuración]", "Permisos", 12, "Das la opción de que el usuario pueda configurar elementos de configuración de pronosticos");
 
 
 INSERT INTO acceso (user, idpermiso) VALUES 

@@ -38,6 +38,10 @@ const Pedidos = sequelize.define(
       type: DataTypes.BOOLEAN,
       allowNull: true,
     },
+    litros_descarga: {
+      type: DataTypes.DECIMAL(19, 2),
+      allowNull: false,
+    },
   },
   {
     freezeTableName: true,
