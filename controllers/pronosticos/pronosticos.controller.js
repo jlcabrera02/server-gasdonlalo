@@ -2,7 +2,10 @@ import Decimal from "decimal.js-light";
 import models from "../../models";
 import { Op } from "sequelize";
 import sequelize from "../../config/configdb";
-import { obtenerConfiguraciones } from "../../services/configuracionesPersonalizables";
+import {
+  escribirConfiguraciones,
+  obtenerConfiguraciones,
+} from "../../services/configuracionesPersonalizables";
 import prediccionCombustible from "../../services/ModeloPredictivoPronostico";
 import formatTiempo from "../../assets/formatTiempo";
 
@@ -136,6 +139,9 @@ async function obtenerPronosticosXES(req, res) {
                 .toNumber() > 20000
             ) {
               temp.peso += 1;
+              // if (prediccion[0].combustible === "M") {
+              //   temp.peso += 2;
+              // }
               if (prediccion[0].existencia_litros < prediccion[0].limite) {
                 temp.peso += 2;
               }
@@ -164,11 +170,7 @@ async function obtenerPronosticosXES(req, res) {
               index
             ].compra_litros = 20000;
           } else {
-            if (
-              el.combustible === "magna" &&
-              el.peso > 2 &&
-              el.idestacion_servicio === 1
-            ) {
+            if (el.combustible === "magna" && el.peso > 2) {
               response[Number(el.estacion) - 1][el.combustible][
                 index
               ].compra_litros = 40000;
@@ -578,7 +580,7 @@ async function obtenerPedidos(req, res) {
 
     const response = await Pedidos.findAll({
       where: filtros,
-      // order: [["fecha", "DESC"]],
+      order: [["fecha", "ASC"]],
       include: [{ model: Gas, as: "gas" }],
     });
 
@@ -632,61 +634,26 @@ async function eliminarPedidos(req, res) {
   }
 }
 
-async function pruebas(req, res) {
+async function obtenerConfigPronostico(req, res) {
   try {
-    const data = await Pronosticos.findAll({ where: { fecha: "2024-04-15" } });
-    const prioridades = {
-      combustible: { M: 3, P: 2, D: 1 },
-      estaciones: { 1: 2, 2: 1 },
-      capacidad: [
-        //Capacidad si hay para 2000 L asignar 1, si hay para  4000L asignar 2, si hay para 6000, asignar 3
-        { estacion: 1, magna: 70000, premium: 30000, disiel: 30000 },
-        { estacion: 2, magna: 40000, premium: 40000, disiel: 40000 },
-      ],
-      limite: [
-        //Ordenar la capacidad
-        { estacion: 1, magna: 46000, premium: 10000, disiel: 10000 },
-        { estacion: 2, magna: 20000, premium: 20000, disiel: 20000 },
-      ],
-    };
+    const response = obtenerConfiguraciones().configPronosticos;
 
-    const ordenarXMayorFaltante = data.sort(
-      (a, b) =>
-        new Decimal(a.dataValues.limite)
-          .sub(a.dataValues.existencia_litros)
-          .toNumber() -
-        new Decimal(b.dataValues.limite)
-          .sub(b.dataValues.existencia_litros)
-          .toNumber()
-    );
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    res
+      .status(400)
+      .json({ success: false, err, msg: "Error al obtener la información" });
+  }
+}
 
-    for (const index in ordenarXMayorFaltante) {
-      const element = ordenarXMayorFaltante[index].dataValues;
-      const {
-        combustible,
-        idestacion_servicio,
-        limite,
-        existencia_litros,
-        ventas_litros,
-      } = element;
-      const diferencia = new Decimal(limite).sub(existencia_litros).toNumber();
-      let peso = 0;
-      peso += prioridades.combustible[combustible];
-      // peso += prioridades.estaciones[idestacion_servicio];
-      if (Number(existencia_litros) <= Number(limite)) peso += 3;
-      if (Number(existencia_litros) * 2 <= Number(ventas_litros)) peso += 3;
-      element.diferencia = diferencia;
+async function escribirConfigPronostico(req, res) {
+  try {
+    const { propiedad, estacion, combustible, valor } = req.body;
+    const config = obtenerConfiguraciones().configPronosticos;
+    config[propiedad][estacion][combustible] = Number(valor);
+    const response = escribirConfiguraciones({ configPronosticos: config });
 
-      if (diferencia > 1) {
-        peso += Number(index);
-      }
-
-      element.peso = peso;
-    }
-
-    const ordenar = data.sort((a, b) => b.dataValues.peso - a.dataValues.peso);
-
-    res.status(200).json({ success: true, response: ordenar });
+    res.status(200).json({ success: true, response });
   } catch (err) {
     res
       .status(400)
@@ -697,7 +664,8 @@ async function pruebas(req, res) {
 export default {
   obtenerPronosticosXcombustible,
   obtenerPronosticosXES,
-  pruebas,
+  obtenerConfigPronostico,
+  escribirConfigPronostico,
   guardarPronostico,
   editarPronostico,
   guardarPedidos,
