@@ -136,10 +136,9 @@ async function obtenerPronosticosXES(req, res) {
                 .toNumber() > 20000
             ) {
               temp.peso += 1;
-            }
-
-            if (prediccion[0].existencia_litros < prediccion[0].limite) {
-              temp.peso += 2;
+              if (prediccion[0].existencia_litros < prediccion[0].limite) {
+                temp.peso += 2;
+              }
             }
           }
 
@@ -165,7 +164,11 @@ async function obtenerPronosticosXES(req, res) {
               index
             ].compra_litros = 20000;
           } else {
-            if (el.combustible === "magna" && el.peso > 2) {
+            if (
+              el.combustible === "magna" &&
+              el.peso > 2 &&
+              el.idestacion_servicio === 1
+            ) {
               response[Number(el.estacion) - 1][el.combustible][
                 index
               ].compra_litros = 40000;
