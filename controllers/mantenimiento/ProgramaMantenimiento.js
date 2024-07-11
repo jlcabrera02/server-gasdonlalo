@@ -1,7 +1,9 @@
 import modelos from "../../models";
-import { Op, or } from "sequelize";
+import { Op } from "sequelize";
+import model from "../../models/auth.model";
 
 const { Actividades, FechasActividades, OT } = modelos;
+const { verificar } = model;
 
 export class Controller {
   operators = { between: Op.between };
@@ -19,8 +21,10 @@ export class Controller {
     const filter = {};
 
     try {
+      const user = verificar(req.headers.authorization);
+      if (!user.success) throw "No autorizado";
       if (include && this.modelosIncluir.length > 0) {
-        filter.include = JSON.parse(include).map((value, index) => {
+        filter.include = JSON.parse(include).map((value) => {
           const { name, ...model } = this.modelosIncluir[value];
 
           if (req.method === "POST" && req.body.hasOwnProperty("joinFilters")) {
@@ -81,6 +85,9 @@ export class Controller {
     const querys = req.query;
 
     try {
+      const user = verificar(req.headers.authorization);
+      if (!user.success) throw "No autorizado";
+
       const response = await this.findAll(
         querys
           ? { where: querys, include: this.modelosIncluir }
@@ -104,6 +111,9 @@ export class Controller {
   crear = async (req, res) => {
     const { body } = req;
     try {
+      const user = verificar(req.headers.authorization);
+      if (!user.success) throw "No autorizado";
+
       const response = await this.insertOne(body);
 
       return res.status(200).json({
@@ -122,6 +132,9 @@ export class Controller {
   actualizar = async (req, res) => {
     const { params, body } = req;
     try {
+      const user = verificar(req.headers.authorization);
+      if (!user.success) throw "No autorizado";
+
       const response = await this.update(body, params);
 
       return res.status(200).json({
@@ -140,6 +153,9 @@ export class Controller {
   eliminar = async (req, res) => {
     const { query } = req;
     try {
+      const user = verificar(req.headers.authorization);
+      if (!user.success) throw "No autorizado";
+
       const response = await this.deleteOne(query);
 
       return res.status(200).json({
