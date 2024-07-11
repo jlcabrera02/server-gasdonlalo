@@ -51,5 +51,6 @@ route.put(
   "/fechas-actividades/editar/:idfechas_actividades",
   fechas.actualizar
 );
+route.delete("/fechas-actividades/eliminar", fechas.eliminar);
 
 export default route;

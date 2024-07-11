@@ -1,5 +1,5 @@
 import modelos from "../../models";
-import { Op } from "sequelize";
+import { Op, or } from "sequelize";
 
 const { Actividades, FechasActividades, OT } = modelos;
 
@@ -139,8 +139,6 @@ export class Controller {
 
   eliminar = async (req, res) => {
     const { query } = req;
-
-    console.log(query);
     try {
       const response = await this.deleteOne(query);
 
@@ -150,7 +148,7 @@ export class Controller {
       });
     } catch (err) {
       if (!err.code) {
-        res.status(400).json({ msg: "datos no enviados correctamente" });
+        res.status(400).json({ msg: "datos no enviados correctamente", err });
       } else {
         res.status(err.code).json(err);
       }
@@ -205,9 +203,26 @@ export class Controller {
   };
 }
 
+/* class ActividadesController extends Controller {
+  crearSolicitud = async (req, res) => {
+    const { idfechas_actividades, ...body } = req.body;
+
+    console.log(body);
+    const ot = await OT.create(body);
+
+    const fecha = await FechasActividades.findOne({
+      where: { idfechas_actividades },
+    });
+    fecha.update({ id_ot: ot.dataValues.idorden_trabajo });
+
+    return res.status(200).json({ msg: "datos enviados correctamente" });
+  };
+} */
+
 export const actividades = new Controller(Actividades, [
   { model: FechasActividades, name: "actividades" },
 ]);
+
 export const fechas = new Controller(FechasActividades, [
   { model: OT, name: "ordenTrabajo" },
   { model: Actividades, as: "actividad", name: "actividades" },
