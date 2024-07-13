@@ -46,10 +46,11 @@ route.delete("/actividades/eliminar", actividades.eliminar);
 
 route.get("/fechas-actividades", fechas.obtenerTodos);
 route.get("/fechas-actividades/obtener-uno", fechas.obtenerUno);
-route.post("/fechas-actividades/crear", fechas.crear);
+route.post("/fechas-actividades/crear", fechas.asignarActividadesAFechas);
 route.put(
   "/fechas-actividades/editar/:idfechas_actividades",
   fechas.actualizar
 );
+route.delete("/fechas-actividades/eliminar", fechas.eliminar);
 
 export default route;
