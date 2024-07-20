@@ -1,10 +1,9 @@
 import modelos from "../../models";
 import { Op } from "sequelize";
 import model from "../../models/auth.model";
-import moment from "moment";
 import formatTiempo from "../../assets/formatTiempo";
 
-const { Actividades, FechasActividades, OT } = modelos;
+const { Actividades, FechasActividades, OT, AT, ES } = modelos;
 const { verificar } = model;
 
 export class Controller {
@@ -34,7 +33,6 @@ export class Controller {
             const op = {};
 
             joinFilters[value].operators.forEach((element) => {
-              console.log(element);
               op[element.property] = {
                 [this.operators[element.type]]: element.value,
               };
@@ -49,8 +47,6 @@ export class Controller {
 
           return model;
         });
-
-        console.log(filter.include);
       } //permite incluir modelos a voluntad del usuario
       if (dateProp && fechaF && fechaI && !joinIndex) {
         filter.where = filter.hasOwnProperty("where")
@@ -71,7 +67,6 @@ export class Controller {
         joinsAvaliable: this.modelosIncluir.map((el) => el.name),
       });
     } catch (err) {
-      console.log(err.message);
       if (err instanceof TypeError) {
         res.status(400).json({ msg: "Join a incluir no identificado." });
       }
@@ -85,16 +80,25 @@ export class Controller {
 
   obtenerUno = async (req, res) => {
     const querys = req.query;
-
     try {
       const user = verificar(req.headers.authorization);
       if (!user.success) throw "No autorizado";
+      const filtros = { ...querys };
+      let include = null;
+      delete filtros.include;
 
-      const response = await this.findAll(
-        querys
-          ? { where: querys, include: this.modelosIncluir }
-          : { include: this.modelosIncluir }
-      );
+      if (querys.include && this.modelosIncluir.length > 0) {
+        const modelosIncluir = JSON.parse(querys.include).map(
+          (value) => this.modelosIncluir[value]
+        );
+
+        include = modelosIncluir;
+      }
+
+      const response = await this.findAll({
+        where: filtros,
+        include: include || null,
+      });
 
       return res.status(200).json({
         success: true,
@@ -145,6 +149,9 @@ export class Controller {
           fechas.push({
             fecha_programada: formatTiempo.tiempoDB(new Date(fechaActual)),
             idactividad: body.idactividad,
+            idarea_trabajo: body.idArea,
+            idestacion_servicio: body.idEstacionServicio,
+            idsolicitante: user.token.data.datos.idempleado,
           });
           switch (periodo) {
             case "semanal":
@@ -179,15 +186,14 @@ export class Controller {
         body.periodo
       );
 
-      console.log(fechas);
-
       const response = await this.insertMany(fechas);
 
-      return res.status(400).json({
+      return res.status(200).json({
         success: true,
         response,
       });
     } catch (err) {
+      console.log(err);
       if (!err.code) {
         res.status(400).json({ msg: "datos no enviados correctamente" });
       } else {
@@ -302,4 +308,6 @@ export const actividades = new Controller(Actividades, [
 export const fechas = new Controller(FechasActividades, [
   { model: OT, name: "ordenTrabajo" },
   { model: Actividades, as: "actividad", name: "actividades" },
+  { model: AT, name: "areas_trabajo" },
+  { model: ES, name: "estacion_servicio" },
 ]);

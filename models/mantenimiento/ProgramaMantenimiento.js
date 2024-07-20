@@ -39,4 +39,16 @@ export const FechasActividades = sequelize.define("fechas_actividades", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  idarea_trabajo: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  idestacion_servicio: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  idsolicitante: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 });

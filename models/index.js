@@ -224,6 +224,7 @@ OT.belongsTo(empleados, { foreignKey: "idsolicitante", as: "solicitante" });
 OT.belongsTo(empleados, { foreignKey: "idliberante", as: "liberante" });
 AT.belongsTo(TM, { foreignKey: "idmantenimiento" });
 TM.hasMany(AT, { foreignKey: "idmantenimiento" });
+
 //mantenimiento programa
 Actividades.hasMany(FechasActividades, {
   foreignKey: "idactividad",
@@ -233,6 +234,8 @@ FechasActividades.belongsTo(Actividades, {
   as: "actividad",
 });
 
+FechasActividades.belongsTo(AT, { foreignKey: "idarea_trabajo" });
+FechasActividades.belongsTo(ES, { foreignKey: "idestacion_servicio" });
 FechasActividades.belongsTo(OT, { foreignKey: "id_ot" });
 
 RecursosDespachador.belongsToMany(empleados, {

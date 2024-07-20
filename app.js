@@ -7,6 +7,7 @@ import fileUpload from "express-fileupload";
 import path from "path";
 import morgan from "morgan";
 import indexV from "./routes/view.index.router";
+import "./services/cronograma";
 
 dotenv.config(); //Inicializo lectura de variables de entorno
 
@@ -35,5 +36,6 @@ app.use(morgan("dev"));
 app.use(fileUpload()); //Para subir archivos
 
 app.use("/api", routes);
+// job();
 
 export default app;
