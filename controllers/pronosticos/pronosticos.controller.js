@@ -73,6 +73,18 @@ async function obtenerPronosticosXES(req, res) {
       order: [["fecha", "DESC"]],
     });
 
+    const pedidos = JSON.parse(
+      JSON.stringify(
+        await Pedidos.findAll({
+          where: { fecha: { [Op.gt]: lastDate.dataValues.fecha } },
+          order: [["fecha", "ASC"]],
+        })
+      )
+    );
+
+    const ultimaFechaPedido =
+      pedidos.length > 0 ? new Date(pedidos[pedidos.length - 1].fecha) : null;
+
     for (const i of estaciones) {
       const dataC = [];
       const idestacion = i.dataValues.idestacion_servicio;
@@ -153,6 +165,25 @@ async function obtenerPronosticosXES(req, res) {
       }
 
       if (!evitarCompras) {
+        for (let i = 0; i < pedidos.length; i++) {
+          const p = pedidos[i];
+          const combustible =
+            p.combustible === "M"
+              ? "magna"
+              : p.combustible === "P"
+              ? "premium"
+              : "diesel";
+          const index = response[Number(p.idestacion_servicio) - 1][
+            combustible
+          ].findIndex((el) => el.fecha === p.fecha);
+
+          if (index >= 0) {
+            response[Number(p.idestacion_servicio) - 1][combustible][
+              index
+            ].compra_litros = p.cantidad;
+          }
+        }
+
         //Ordenamos de mayor a menor los combustibles
         const orderAsc = pilaC
           .filter((el) => el.peso > 0)
@@ -164,6 +195,10 @@ async function obtenerPronosticosXES(req, res) {
           const index = response[Number(el.estacion) - 1][
             el.combustible
           ].findIndex((el) => el.fecha === el.fecha);
+
+          if (ultimaFechaPedido && new Date(el.fecha) <= ultimaFechaPedido) {
+            break;
+          }
 
           if (orderAsc.length > 1) {
             response[Number(el.estacion) - 1][el.combustible][
