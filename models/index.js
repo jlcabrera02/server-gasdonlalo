@@ -57,6 +57,12 @@ import {
 import Pronosticos from "./pronosticos/Pronostico.model.js";
 import Pedidos from "./pronosticos/Pedidos.model.js";
 
+//Proveedores
+import Proveedores from "./directorio_proveedores/Proveedores.model.js";
+import EvProveedores from "./directorio_proveedores/EvProveedores.model.js";
+import ActProveedores from "./directorio_proveedores/ActividadesProveedores.model.js";
+import AtProveedores from "./directorio_proveedores/AtencionProveedores.model.js";
+
 nominas.belongsTo(empleados, { foreignKey: "idempleado" });
 empleados.hasMany(nominas, { foreignKey: "idempleado" });
 
@@ -348,4 +354,8 @@ export default {
   Pedidos,
   Actividades,
   FechasActividades,
+  Proveedores,
+  EvProveedores,
+  ActProveedores,
+  AtProveedores,
 };
