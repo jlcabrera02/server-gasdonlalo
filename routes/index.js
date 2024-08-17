@@ -58,6 +58,9 @@ import config from "./configuraciones.routes";
 //Pronosticos
 import pronosticos from "./pronosticos/pronosticos.routes";
 
+//Directorio Proveedores
+import directorio_proveedores from "./directorioProveedores.routes";
+
 //Salidas no conformes
 route.use("/salida-no-conforme", salidaNoConformeRouter);
 route.use("/incumplimiento", incumplimientoRouter);
@@ -110,5 +113,8 @@ route.use("/config", config);
 
 //Pronosticos
 route.use("/pronosticos", pronosticos);
+
+//Proveedores
+route.use("/directorio-proveedores", directorio_proveedores);
 
 export default route;

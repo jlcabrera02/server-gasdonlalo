@@ -222,7 +222,8 @@ INSERT INTO area_trabajo VALUES
 (9, "Seguridad"),
 (10, "Documentos SGG"),
 (11, "Liquidación"),
-(12, "Pronosticos");
+(12, "Pronosticos"),
+(13, "Proveedores");
 
 INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) VALUES 
 (1, "Universal", "Universal", 1, "Permiso para el superusuario"),

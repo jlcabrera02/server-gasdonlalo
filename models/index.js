@@ -310,6 +310,15 @@ Pronosticos.belongsTo(ES, { foreignKey: "idestacion_servicio" });
 Pedidos.belongsTo(Gas, { foreignKey: "combustible", as: "gas" });
 Pronosticos.belongsTo(ES, { foreignKey: "idestacion_servicio" });
 
+ActProveedores.belongsTo(EvProveedores, { foreignKey: "idevaluacion" });
+EvProveedores.hasMany(ActProveedores, { foreignKey: "idevaluacion" });
+
+AtProveedores.belongsTo(EvProveedores, { foreignKey: "idevaluacion" });
+EvProveedores.hasMany(AtProveedores, { foreignKey: "idevaluacion" });
+
+Proveedores.hasMany(EvProveedores, { foreignKey: "idproveedor" });
+EvProveedores.belongsTo(Proveedores, { foreignKey: "idproveedor" });
+
 export default {
   nominas,
   tiposNominas,

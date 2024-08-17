@@ -21,6 +21,7 @@ const EvProveedores = sequelize.define(
     valoracion: {
       type: DataTypes.ENUM("Excelente", "Regular", "Deficiente"),
       allowNull: false,
+      defaultValue: "Deficiente",
     },
   },
   {

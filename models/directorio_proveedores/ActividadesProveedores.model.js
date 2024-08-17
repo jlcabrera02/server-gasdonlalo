@@ -20,6 +20,7 @@ const EvProveedores = sequelize.define(
     cumple: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
+      defaultValue: false,
     },
   },
   {
