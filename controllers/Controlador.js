@@ -97,8 +97,6 @@ class Controlador {
   getAll = async (req, res) => {
     try {
       const options = this.filterAndOptions(req);
-      console.log(options);
-
       const response = await this.model.findAll(options);
 
       res.status(200).json({ success: true, response });
@@ -207,6 +205,8 @@ class Controlador {
 
       res.status(201).json({ success: true, response });
     } catch (err) {
+      console.log("Eliminar: ", err);
+
       if (!err.code) {
         res.status(400).json({ msg: "datos no enviados correctamente" });
       } else {

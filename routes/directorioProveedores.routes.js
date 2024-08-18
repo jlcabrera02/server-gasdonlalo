@@ -8,4 +8,6 @@ route.get("/proveedores/obtener", CProveedores.getAll);
 route.post("/proveedores/evaluar", CProveedores.guardarEvaluacion);
 route.post("/proveedores/nuevo", CProveedores.create);
 
+route.delete("/proveedores/evaluaciones/eliminar/:id", CEvaluaciones.delete);
+
 export default route;
