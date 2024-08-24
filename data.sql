@@ -274,7 +274,10 @@ INSERT INTO permiso (idpermiso, permiso, peticion, idarea_trabajo, descripcion) 
 (68, "Acceder a botón de pánico", "Permisos", 8, "Das la opción de que el usuario tenga acceso al modulo de botón de pánico"),
 (69, "Manipular configuraciones", "Permisos", 8, "Das la opción de que el usuario pueda configurar variables que estan predefinidas"),
 (70, "Acceso al modulo de pronosticos", "Permisos", 12, "Das la opción de que el usuario manipular información del modulo de pronosticos");
-(71, "Configuración]", "Permisos", 12, "Das la opción de que el usuario pueda configurar elementos de configuración de pronosticos");
+(71, "Configuración", "Permisos", 12, "Das la opción de que el usuario pueda configurar elementos de configuración de pronosticos"),
+(72, "Ver directorio", "Permisos", 13, "El usuario solo podra ver el directorio de los proveedores"),
+(73, "Agregar proveedor", "Permisos", 13, "El usuario podra agregar y editar información de proveedores"),
+(74, "Evaluar", "Permisos", 13, "El usuario podra hacer una evaluación a los proveedores almacenados en la BD");
 
 
 INSERT INTO acceso (user, idpermiso) VALUES 

@@ -173,14 +173,11 @@ class Controlador {
         return res.status(404).json({ error: "Recurso no encontrado" });
       }
 
-      const data = {};
+      const data = req.body;
 
       //Permite hacer un filtrado de los campos que no se aceptaran ingresar
-      this.notAllowedFields.forEach((field) => {
-        if (!req.body[field]) {
-          data[field] = req.body[field];
-        }
-      });
+
+      console.log(data);
 
       await response.update(data);
 
