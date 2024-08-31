@@ -84,6 +84,7 @@ class GuardarEv extends Controlador {
 
 const CEvaluaciones = new Controlador(models.EvProveedores, {
   allowedIncludes,
+  allowedFilters: ["idproveedor"],
 });
 
 const CProveedores = new GuardarEv(models.Proveedores, {
