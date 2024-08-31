@@ -9,6 +9,7 @@ route.get(
   "/:year/:month/:idEmpleado/:quincena?",
   pasosDespachar.findEvaluacionesXEmpleado
 );
+route.get("/evaluaciones", pasosDespachar.obtenerEvaluacionMensual);
 route.get("/get-pasos", pasosDespachar.findPasos);
 route.get("/:identificador", pasosDespachar.findOne);
 route.post("/buscar", pasosDespachar.findEvaluacionesXTiempo);

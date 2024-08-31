@@ -11,6 +11,9 @@ import { Op } from "sequelize";
 import EvPasosDespachar, {
   pasosDes,
 } from "../models/despacho/PasosDespachar.model";
+import sequelize from "../config/configdb";
+import agruparArr from "../assets/agruparArr";
+import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 const { sinRegistro } = errRes;
@@ -19,6 +22,44 @@ const { SncNotification, empleados, PM } = models;
 const controller = {};
 
 const area = "Evaluación Pasos de despacho";
+
+//Funcion que obtiene las evaluaciones
+controller.obtenerEvaluacionMensual = async (req, res) => {
+  try {
+    const { month, year, quincena } = req.query;
+    const filtros = {};
+
+    if (year && month) {
+      filtros[Op.and] = [
+        ...(filtros[Op.and] || []),
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+    }
+
+    EvPasosDespachar.belongsTo(empleados, { foreignKey: "idempleado" });
+
+    const response = await EvPasosDespachar.findAll({
+      where: filtros,
+      include: [{ model: empleados, attributes: attributesPersonal }],
+    });
+    const dataParse = JSON.parse(JSON.stringify(response));
+
+    // const agruparEmpleados = agruparArr(dataParse)
+
+    /* res
+      .status(200)
+      .json({ success: true, response: dfd.toJSON(groupByEmpleado) }); */
+    res.status(200).json({ success: true, response: dataParse });
+  } catch (err) {
+    console.log(err);
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
 
 controller.obtenerEvaluacion = async (req, res) => {
   try {
