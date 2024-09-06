@@ -14,6 +14,8 @@ import EvPasosDespachar, {
 import sequelize from "../config/configdb";
 import agruparArr from "../assets/agruparArr";
 import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
+import calcularTotal from "../assets/sumarAlgo";
+import Decimal from "decimal.js-light";
 const { tiempoDB } = formatTiempo;
 const { verificar } = auth;
 const { sinRegistro } = errRes;
@@ -28,6 +30,7 @@ controller.obtenerEvaluacionMensual = async (req, res) => {
   try {
     const { month, year, quincena } = req.query;
     const filtros = {};
+    const promedios = [];
 
     if (year && month) {
       filtros[Op.and] = [
@@ -45,12 +48,48 @@ controller.obtenerEvaluacionMensual = async (req, res) => {
     });
     const dataParse = JSON.parse(JSON.stringify(response));
 
-    // const agruparEmpleados = agruparArr(dataParse)
+    const agruparEmpleados = agruparArr(
+      dataParse,
+      (e) => e.idempleado
+    ).values();
 
-    /* res
-      .status(200)
-      .json({ success: true, response: dfd.toJSON(groupByEmpleado) }); */
-    res.status(200).json({ success: true, response: dataParse });
+    for (const element of agruparEmpleados) {
+      const quincena1 = element.filter((e) => new Date(e.fecha).getDate() < 15);
+      const quincena2 = element.filter((e) => new Date(e.fecha).getDate() > 15);
+
+      const q1 = calcularTotal(
+        quincena1.map((el) =>
+          el.evaluacion ? { cantidad: 1 } : { cantidad: 0 }
+        ),
+        "cantidad"
+      );
+      const q2 = calcularTotal(
+        quincena2.map((el) =>
+          el.evaluacion ? { cantidad: 1 } : { cantidad: 0 }
+        ),
+        "cantidad"
+      );
+      const resultados = {
+        q1:
+          q1 === 0 ? 0 : new Decimal(q1 * 10).div(quincena1.length).toFixed(2),
+        q2:
+          q2 === 0 ? 0 : new Decimal(q2 * 10).div(quincena2.length).toFixed(2),
+      };
+
+      promedios.push({
+        promedio: quincena
+          ? quincena === "1"
+            ? resultados.q1
+            : resultados.q2
+          : new Decimal(new Decimal(resultados.q1).add(resultados.q2))
+              .div(2)
+              .toFixed(2),
+        nombre: element[0].empleado.nombre_completo,
+        idempleado: element[0].empleado.idempleado,
+      });
+    }
+
+    res.status(200).json({ success: true, response: promedios });
   } catch (err) {
     console.log(err);
     if (!err.code) {
