@@ -13,9 +13,11 @@ const {
   editarPedidos,
   antesEigualDe,
   editarPronostico,
+  obtenerReportesPedidos,
 } = controlador;
 const route = router();
 
+route.get("/reportesPedidos", obtenerReportesPedidos);
 route.get("/registrosXcombustible", obtenerPronosticosXcombustible);
 route.get("/registrosXES", obtenerPronosticosXES);
 route.get("/pedidos/obtener", obtenerPedidos);

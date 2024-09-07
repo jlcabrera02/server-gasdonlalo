@@ -13,6 +13,44 @@ import calcularTotal from "../../assets/sumarAlgo";
 
 const { Pronosticos, ES, Gas, Pedidos } = models;
 
+async function obtenerReportesPedidos(req, res) {
+  try {
+    const { fechaI, fechaF, month, year, idEs } = req.query;
+    const filtros = {};
+
+    if (fechaI && fechaF) {
+      filtros.fecha = { [Op.between]: [fechaI, fechaF] };
+    }
+
+    if (idEs) {
+      filtros.idestacion_servicio = idEs;
+    }
+
+    filtros.compra_litros = { [Op.not]: null };
+
+    if (month && year) {
+      filtros[Op.and] = [
+        sequelize.where(sequelize.fn("MONTH", sequelize.col("fecha")), month),
+        sequelize.where(sequelize.fn("year", sequelize.col("fecha")), year),
+      ];
+    }
+
+    const response = await Pronosticos.findAll({
+      where: filtros,
+    });
+
+    res.status(200).json({
+      success: true,
+      response,
+    });
+  } catch (err) {
+    console.log(err);
+    res
+      .status(400)
+      .json({ success: false, err, msg: "Error al obtener la información" });
+  }
+}
+
 async function obtenerPronosticosXcombustible(req, res) {
   try {
     const { idEstacion, fechaI, fechaF } = req.query;
@@ -754,4 +792,5 @@ export default {
   eliminarPedidos,
   editarPedidos,
   antesEigualDe,
+  obtenerReportesPedidos,
 };
