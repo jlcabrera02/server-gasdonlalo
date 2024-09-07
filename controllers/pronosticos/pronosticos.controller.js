@@ -8,6 +8,8 @@ import {
 } from "../../services/configuracionesPersonalizables";
 import prediccionCombustible from "../../services/ModeloPredictivoPronostico";
 import formatTiempo from "../../assets/formatTiempo";
+import agruparArr from "../../assets/agruparArr";
+import calcularTotal from "../../assets/sumarAlgo";
 
 const { Pronosticos, ES, Gas, Pedidos } = models;
 
@@ -47,6 +49,7 @@ async function obtenerPronosticosXcombustible(req, res) {
 
 async function obtenerPronosticosXES(req, res) {
   try {
+    const now = new Date();
     const configPronostico = obtenerConfiguraciones().configPronosticos;
     const { fechaI, fechaF, limit, order, pronostico, evitarC } = req.query;
     const filtros = {};
@@ -72,6 +75,47 @@ async function obtenerPronosticosXES(req, res) {
       where: { registro: "Real" },
       order: [["fecha", "DESC"]],
     });
+
+    const monthCurrent = await Pronosticos.findAll({
+      where: {
+        [Op.and]: [
+          sequelize.where(
+            sequelize.fn("MONTH", sequelize.col("fecha")),
+            now.getMonth() === 0 ? 12 : now.getMonth()
+          ),
+          sequelize.where(
+            sequelize.fn("YEAR", sequelize.col("fecha")),
+            now.getMonth() === 0
+              ? Number(now.getFullYear()) - 1
+              : now.getFullYear()
+          ),
+        ],
+      },
+    });
+
+    const promedioVentas = {};
+    const groupCombustible = agruparArr(
+      JSON.parse(JSON.stringify(monthCurrent)),
+      (el) => el.combustible
+    ).values();
+
+    for (const el of groupCombustible) {
+      const es1 = el.filter((es) => es.idestacion_servicio === 1);
+      const es2 = el.filter((es) => es.idestacion_servicio === 2);
+
+      const suma1 = calcularTotal(
+        es1.map((d) => (!d.ventas_litros ? 0 : d.ventas_litros))
+      );
+      const suma2 = calcularTotal(
+        es2.map((d) => (!d.ventas_litros ? 0 : d.ventas_litros))
+      );
+
+      const prom1 = new Decimal(suma1).div(es1.length).toNumber();
+      const prom2 = new Decimal(suma2).div(es2.length).toNumber();
+
+      promedioVentas[`${el[0].combustible}-1`] = Math.round(prom1);
+      promedioVentas[`${el[0].combustible}-2`] = Math.round(prom2);
+    }
 
     const pedidos = JSON.parse(
       JSON.stringify(
@@ -226,6 +270,7 @@ async function obtenerPronosticosXES(req, res) {
       response,
       configuraciones,
       ultimaFechaReal: lastDate.dataValues.fecha,
+      promedioVentas,
     });
   } catch (err) {
     console.log(err);
