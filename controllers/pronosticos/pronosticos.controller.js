@@ -10,6 +10,7 @@ import prediccionCombustible from "../../services/ModeloPredictivoPronostico";
 import formatTiempo from "../../assets/formatTiempo";
 import agruparArr from "../../assets/agruparArr";
 import calcularTotal from "../../assets/sumarAlgo";
+import * as dfn from "danfojs";
 
 const { Pronosticos, ES, Gas, Pedidos } = models;
 
@@ -39,9 +40,32 @@ async function obtenerReportesPedidos(req, res) {
       where: filtros,
     });
 
+    const dataDf = () => {
+      if (response.length > 0) {
+        const df = new dfn.DataFrame(JSON.parse(JSON.stringify(response)))
+          .replace("M", "Magna", {
+            columns: ["combustible"],
+          })
+          .replace("D", "Diesel", {
+            columns: ["combustible"],
+          })
+          .replace("P", "Premium", {
+            columns: ["combustible"],
+          })
+          .asType("compra_litros", "float32");
+
+        const grpDescargas = df.groupby(["combustible", "idestacion_servicio"]);
+        const count = grpDescargas.agg({ compra_litros: ["sum", "count"] });
+
+        const formater = dfn.toJSON(count);
+        return formater;
+      }
+      return [];
+    };
+
     res.status(200).json({
       success: true,
-      response,
+      response: dataDf(),
     });
   } catch (err) {
     console.log(err);
