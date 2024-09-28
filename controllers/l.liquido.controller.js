@@ -3,7 +3,6 @@ import auth from "../models/auth.model";
 import modelos from "../models/";
 import sequelize from "../config/configdb";
 import { insertarMf } from "./d.montoFaltante.controller";
-import sncaM from "../models/s.acumular.model";
 import { Op, literal } from "sequelize";
 import { attributesPersonal } from "../models/recursosHumanos/empleados.model";
 import calcularTotal from "../assets/sumarAlgo";
