@@ -102,6 +102,7 @@ controller.buscarPreliquidacion = async (req, res) => {
         fechaturno: fechaTurno,
         idestacion_servicio: idEstacionServicio,
       },
+      order: [["idpreliquidacion", "DESC"]],
     });
     res.status(200).json({ success: true, response });
   } catch (err) {
