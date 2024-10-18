@@ -220,6 +220,7 @@ ChecklistRegistros.belongsTo(Islas, { foreignKey: "idisla" });
 
 PanicBtn.belongsTo(empleados, { foreignKey: "idempleado" });
 PanicBtn.belongsTo(Islas, { foreignKey: "idisla" });
+PanicBtn.hasMany(ES, { foreignKey: "idestacion_servicio" });
 
 Preliquidaciones.belongsTo(empleados, { foreignKey: "idempleado" });
 Preliquidaciones.belongsTo(Turnos, { foreignKey: "idturno" });
