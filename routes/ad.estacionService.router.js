@@ -4,6 +4,7 @@ import estacionService from "../controllers/ad.estacionService.controller";
 const route = router();
 
 route.get("/", estacionService.find);
+route.get("/estaciones", estacionService.findAllES);
 route.get("/turnos", estacionService.findAllTurnos);
 route.get("/turnos/:idEstacion", estacionService.findTurnos);
 route.post("/", estacionService.insert);

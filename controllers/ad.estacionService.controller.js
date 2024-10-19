@@ -1,5 +1,7 @@
 import estacionServiceM from "../models/ad.estacionService.model";
 import mayusxPalabra from "./formatearText.controller";
+import models from "../models";
+const { ES, Islas } = models;
 
 const controller = {};
 
@@ -33,6 +35,20 @@ controller.findAllTurnos = async (req, res) => {
 controller.find = async (req, res) => {
   try {
     let response = await estacionServiceM.find();
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    if (!err.code) {
+      res.status(400).json({ msg: "datos no enviados correctamente" });
+    } else {
+      res.status(err.code).json(err);
+    }
+  }
+};
+
+controller.findAllES = async (req, res) => {
+  //Obtiene todas las estaciones e islas
+  try {
+    let response = await ES.findAll({ include: [{ model: Islas }] });
     res.status(200).json({ success: true, response });
   } catch (err) {
     if (!err.code) {
