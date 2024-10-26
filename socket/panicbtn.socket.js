@@ -1,6 +1,6 @@
 import { clients, eventTypes } from ".";
 import model from "../models/index";
-const { PanicBtn, ES } = model;
+const { PanicBtn, Islas } = model;
 
 //Esta funcion manda una alerta de panico a los demas clientes y crea un registro.
 export const btnPanicOn = async (data, userIdTransmitting) => {
@@ -85,7 +85,7 @@ export const getPanicInfo = async (data, userIdTransmitting) => {
   try {
     const consultaIslas = await PanicBtn.findAll({
       where: { activo: true },
-      include: [{ model: ES }],
+      include: [{ model: Islas }],
     });
 
     clients[userIdTransmitting].send(
