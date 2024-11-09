@@ -205,6 +205,22 @@ async function obtenerPronosticosXES(req, res) {
           order: [["fecha", order ? order : "ASC"]],
           limit: Number(limit) || null,
         });
+        //Fragmento de codigo para ver pedidos antes de la fecha de pronostico
+        res.forEach((el) => {
+          el.dataValues.isPedido = false;
+          const existPedido = pedidos.find(
+            (p) =>
+              p.fecha === el.dataValues.fecha &&
+              p.combustible === el.dataValues.combustible &&
+              p.idestacion_servicio === el.dataValues.idestacion_servicio
+          );
+          if (existPedido) {
+            if (!existPedido.fecha_descarga) {
+              el.dataValues.isPedido = true;
+              el.dataValues.compra_litros = existPedido.cantidad;
+            }
+          }
+        });
         dataC.push(res);
       }
 
@@ -284,9 +300,12 @@ async function obtenerPronosticosXES(req, res) {
           ].findIndex((el) => el.fecha === p.fecha);
 
           if (index >= 0) {
-            response[Number(p.idestacion_servicio) - 1][combustible][
-              index
-            ].compra_litros = p.cantidad;
+            let elemento =
+              response[Number(p.idestacion_servicio) - 1][combustible][index];
+            elemento.compra_litros = p.cantidad;
+            if (!p.fecha_descarga) {
+              elemento.isPedido = true;
+            }
           }
         }
 
@@ -790,13 +809,38 @@ async function obtenerConfigPronostico(req, res) {
 
 async function escribirConfigPronostico(req, res) {
   try {
-    const { propiedad, estacion, combustible, valor } = req.body;
-    const config = obtenerConfiguraciones().configPronosticos;
-    config[propiedad][estacion][combustible] = Number(valor);
-    const response = escribirConfiguraciones({ configPronosticos: config });
+    for (const element of req.body) {
+      const { propiedad, estacion, combustible, valor } = element;
+      const config = obtenerConfiguraciones().configPronosticos;
+      config[propiedad][estacion][combustible] = Number(valor);
+      escribirConfiguraciones({ configPronosticos: config });
+      if (propiedad === "limite") {
+        await sequelize.transaction(async (t) => {
+          const idpronostico = await Pronosticos.findOne({
+            where: {
+              combustible,
+              idestacion_servicio: Number(estacion.replace("gdl", "")),
+            },
+            order: [["idpronostico", "DESC"]],
+            transaction: t,
+          });
 
-    res.status(200).json({ success: true, response });
+          const update = await Pronosticos.update(
+            { limite: valor },
+            {
+              where: { idpronostico: idpronostico.dataValues.idpronostico },
+              transaction: t,
+            }
+          );
+          return update;
+        });
+      }
+    }
+
+    res.status(200).json({ success: true, response: true });
   } catch (err) {
+    console.log(err);
+
     res
       .status(400)
       .json({ success: false, err, msg: "Error al obtener la información" });

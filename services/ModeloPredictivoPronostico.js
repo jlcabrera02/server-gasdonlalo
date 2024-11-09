@@ -1,7 +1,7 @@
 import Decimal from "decimal.js-light";
 import formatTiempo from "../assets/formatTiempo";
 
-async function prediccionCombustible(data, dias = 7) {
+async function prediccionCombustible(data, dias = 7, pedidos) {
   const arrayPronostico = [];
   if (data.length < 1) return arrayPronostico;
   const convertData = JSON.parse(JSON.stringify(data));
@@ -22,6 +22,7 @@ async function prediccionCombustible(data, dias = 7) {
       compra_litros: null,
       gas: dataLast.gas,
       fecha_pedido: null,
+      isPedido: false,
       idestacion_servicio: dataLast.idestacion_servicio,
       fecha: formatTiempo.tiempoDB(new Date(fechaInit)),
       ventas_litros: ventaPromedio,
