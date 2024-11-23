@@ -312,8 +312,8 @@ async function obtenerPronosticosXES(req, res) {
         //Ordenamos de mayor a menor los combustibles
         const orderAsc = pilaC
           .filter((el) => el.peso > 0)
-          .sort((a, b) => (b.peso > b.peso ? 0 : 1))
-          .slice(0, 2);
+          .sort((a, b) => (b.peso > b.peso ? 0 : 1));
+        // .slice(0, 2);
 
         for (let i = 0; i < orderAsc.length; i++) {
           const el = orderAsc[i];
