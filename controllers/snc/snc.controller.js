@@ -64,11 +64,17 @@ export async function obtenerRegistros(req, res) {
       folio,
       isReport,
       monthBack,
+      idDepartamento,
       etapa, //1 es por capturar, 2 es por corregir, 3 es finalizada
     } = req.query;
 
     const querys = {};
     const queryIncumplimientos = {};
+    const queryEmpleados = {};
+
+    if (idDepartamento) {
+      queryEmpleados.iddepartamento = idDepartamento;
+    }
 
     if (idIncumplimiento) {
       querys.idincumplimiento = Number(idIncumplimiento);
@@ -126,11 +132,11 @@ export async function obtenerRegistros(req, res) {
       include: [
         {
           model: empleados,
-          attributes: attributesPersonal,
           as: "empleado_autoriza",
         },
         {
           model: empleados,
+          where: queryEmpleados,
           attributes: attributesPersonal,
         },
         {
