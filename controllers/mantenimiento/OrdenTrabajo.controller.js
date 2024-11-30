@@ -11,6 +11,7 @@ import Utencilios from "../../models/mantenimiento/Utencilios";
 import { Op } from "sequelize";
 import { attributesPersonal } from "../../models/recursosHumanos/empleados.model";
 import { FechasActividades } from "../../models/mantenimiento/ProgramaMantenimiento";
+import moment from "moment";
 const { verificar } = auth;
 const { OT, PanicBtn, empleados, AT, SncNotification } = modelos;
 
@@ -531,6 +532,18 @@ controller.liberarOT = async (req, res) => {
         );
 
         const createOT = await OT.create(cuerpo, { transaction: t });
+
+        await SncNotification.create(
+          {
+            idincumplimiento: 31,
+            idempleado: cuerpo.idpersonal,
+            descripcion:
+              descripcion ||
+              "El empleado no ejecuto correctamente una orden de trabajo",
+            fecha: moment().format("YYYY-MM-DD"),
+          },
+          { transaction: t }
+        );
 
         if (fechaProgMant) {
           fechaProgMant.update({
