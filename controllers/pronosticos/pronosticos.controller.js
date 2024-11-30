@@ -325,7 +325,7 @@ async function obtenerPronosticosXES(req, res) {
             break;
           }
 
-          if (orderAsc.length > 1) {
+          if (orderAsc.length >= 1) {
             response[Number(el.estacion) - 1][el.combustible][
               index
             ].compra_litros = 20000;
