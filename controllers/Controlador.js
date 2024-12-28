@@ -1,6 +1,7 @@
 //Controlador General pensado para la reutilización y evitar lineas de codigós similares
 import { Op } from "sequelize";
 import models from "../models";
+import sequelize from "../config/configdb";
 
 class Controlador {
   notAllowedFields;
@@ -40,6 +41,13 @@ class Controlador {
             options.where[f] = {
               [Op.substring]: filter.split(":")[1],
             };
+          } else if (filter.startsWith("year:")) {
+            options.where[Op.and] = [
+              sequelize.where(
+                sequelize.fn("year", sequelize.col(f)),
+                filter.split(":")[1]
+              ),
+            ];
           } else {
             options.where[f] = filter;
           }
