@@ -11,6 +11,7 @@ const {
   notificarPedidos,
   eliminarPedidos,
   editarPedidos,
+  editarInformacionPedidos,
   antesEigualDe,
   editarPronostico,
   obtenerReportesPedidos,
@@ -30,6 +31,7 @@ route.post("/pedidos/guardar", guardarPedidos);
 route.put("/escribir/configuracion", escribirConfigPronostico);
 route.put("/pedidos/notificar/:idpedidos", notificarPedidos);
 route.put("/pedidos/editar/:idpedidos", editarPedidos);
+route.put("/pedidos/editarinfo/:idpedidos", editarInformacionPedidos);
 route.put("/editar", editarPronostico);
 
 route.delete("/pedidos/eliminar/:idpedidos", eliminarPedidos);

@@ -723,6 +723,27 @@ async function editarPedidos(req, res) {
   }
 }
 
+async function editarInformacionPedidos(req, res) {
+  try {
+    const { idpedidos } = req.params;
+    const { fecha, cantidad, combustible, idestacion_servicio } = req.body;
+
+    const response = await Pedidos.update(
+      { fecha, cantidad, idestacion_servicio, combustible },
+      { where: { idpedidos } }
+    );
+
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      success: false,
+      err,
+      msg: err.msg || "Error al ingresar la información",
+    });
+  }
+}
+
 async function obtenerPedidos(req, res) {
   try {
     const { month, year, fecha } = req.query;
@@ -856,6 +877,7 @@ export default {
   editarPronostico,
   guardarPedidos,
   obtenerPedidos,
+  editarInformacionPedidos,
   notificarPedidos,
   eliminarPedidos,
   editarPedidos,
