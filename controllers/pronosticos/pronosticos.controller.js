@@ -868,6 +868,21 @@ async function escribirConfigPronostico(req, res) {
   }
 }
 
+async function consultar(req, res) {
+  try {
+    const response = await Pronosticos.findAll({
+      where: { combustible: "M", idestacion_servicio: 1 },
+    });
+    res.status(200).json({ success: true, response });
+  } catch (err) {
+    console.log(err);
+
+    res
+      .status(400)
+      .json({ success: false, err, msg: "Error al obtener la información" });
+  }
+}
+
 export default {
   obtenerPronosticosXcombustible,
   obtenerPronosticosXES,
@@ -883,4 +898,5 @@ export default {
   editarPedidos,
   antesEigualDe,
   obtenerReportesPedidos,
+  consultar,
 };

@@ -15,6 +15,7 @@ const {
   antesEigualDe,
   editarPronostico,
   obtenerReportesPedidos,
+  consultar,
 } = controlador;
 const route = router();
 
@@ -24,6 +25,7 @@ route.get("/registrosXES", obtenerPronosticosXES);
 route.get("/pedidos/obtener", obtenerPedidos);
 route.get("/antesEigualDe/", antesEigualDe);
 route.get("/configuraciones", obtenerConfigPronostico);
+route.get("/consultar", consultar);
 
 route.post("/guardar", guardarPronostico);
 route.post("/pedidos/guardar", guardarPedidos);
