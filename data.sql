@@ -330,3 +330,49 @@ INSERT INTO mangueras (idisla, idgas, tiene, direccion, idmanguera) VALUES
 (6, "P", 1, 2, "P12"),
 (6, "D", 1, 1, "D11"),
 (6, "D", 1, 2, "D12");
+
+INSERT INTO epp_cumplimientos (cumplimiento) VALUES 
+("Camisa polo verde"),
+("Cinturón negro"),
+("Botas negras antiderrapantes"),
+("Reflejantes en el pantalón sin roturas o descosturas"),
+("Lentes de seguridad"),
+("Mascarilla"),
+("Guantes de látex"),
+("Guantes de carnaza"),
+("Arnéz"),
+("Casco");
+
+INSERT INTO lo_cumplimientos (cumplimiento) VALUES 
+("Paredes (Sin telarañas, sin suciedad)"),
+("Inodoro (Sin manchas de suciedad, sin manchas de salpicaduras)"),
+("Lava manos (Sin rastros de jabón, sin manchas de suciiedad)"),
+("Piso (Sin rastros de lodo, sin basura alrededor)"),
+("Bote de basura (Basura al no más del 50% de su capacidad)"),
+("Espejo (Sin rastros de jabón, sin suciedad)"),
+("Jabón ( Con disponibilidad)"),
+("Servil (Con disponibilidad)"),
+("Papel Higiénico (Con disponibilidad)"),
+("Escritorio (Sin rastros de basura)"),
+("Ventanas (Sin suciedad, sin rastros de polvo, telaraña)"),
+("Electrodomésticos (Sin rastros de suciedad)"),
+("Paredes (Sin suciedad, sin telaraña)"),
+("Piso (Sin lodo, sin basura alrededor)"),
+("Botes de basura (Basura al no más del 50% de su capacidad)");
+
+
+INSERT INTO lb_cumplimientos (cumplimiento) VALUES 
+("Mingitorios (Sin manchas de suciedad, sin salpicaduras)"),
+("Inodoros ( Sin manchas de suciedad, sin salpicaduras)"),
+("Lava manos (Sin rastros de jabón, sin manchas de suciedad)"),
+("Piso (sin lodo, sin basura a su alrededor)"),
+("Bote de Basura (Basura a no más del 50% de su capacidad)"),
+("Porta bebé (Sin suciedad en el interior, sin basura en el interior)"),
+("Espejo (Sin rastros de jabón, sin suciedad, sin empañaduras)"),
+("Pared (Sin telarañas, sin suciedad)"),
+("Contenedor de basura (Basura a no más del 50% de su capacidad)"),
+("Jabón de manos ( jabón liquido en el dispensador)"),
+("Servitoallas (Con disponibilidad)"),
+("Papel higiénico (Con disponibilidad)"),
+("Llave de agua (Sin fugas)"),
+("Manguera del lava manos (Sin fugas)");
